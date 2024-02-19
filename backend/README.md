@@ -1,4 +1,4 @@
-# Server of the application
+# Server (Backend)
 
 The server is running at http://localhost:8000
 
@@ -34,7 +34,7 @@ npm run dev
 }
 
 2. Login route:
-`http://localhos:8000/api/login`
+`http://localhost:8000/api/login`
 
 **Method**: Post
 
