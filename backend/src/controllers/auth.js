@@ -5,18 +5,22 @@ const { SECRET } = require('../constants');
 
 exports.getUsers = async (req, res) => {
     try {
-        const { rows } = await db.query('SELECT id, username, email FROM users');
+        const users = await db.query('SELECT id, username, email FROM users');
         return res.status(200).json({
             success: true,
-            users: rows
-        })
+            users: users.rows || [] // Return an empty array if users.rows is falsy
+        });
     } catch (error) {
-        console.log(error.messsage);
+        console.error("Could not get users:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
     }
-}
+};
 
 exports.register = async (req, res) => {
-    const { username, email, password , blood_type } = req.body;
+    const { username, email, password, blood_type } = req.body;
     try {
         const hashedPassword = await hash(password, 10);
         await db.query('INSERT INTO users (username, email, password, blood_type) VALUES ($1, $2, $3, $4) RETURNING *', [username, email, hashedPassword, blood_type]);
@@ -25,9 +29,9 @@ exports.register = async (req, res) => {
             message: 'User created successfully'
         })
     } catch (error) {
-        console.log(error.messsage);
+        console.log("Could not create new user:", error.message);
         return res.status(500).json({
-            error: error.messsage,
+            error: error.message,
         })
     }
 }
@@ -36,7 +40,6 @@ exports.login = async (req, res) => {
     const user = req.user;
     const payload = {
         id: user.id,
-        username: user.username,
         email: user.email
     }
     try {
@@ -45,11 +48,10 @@ exports.login = async (req, res) => {
             success: true,
             message: 'Logged in successfully',
         })
-        
     } catch (error) {
-        console.log(error.messsage);
+        console.log(error.message);
         return res.status(500).json({
-            error: error.messsage,
+            error: error.message,
         })
     }
 }
@@ -60,7 +62,7 @@ exports.protected = async (req, res) => {
             info: 'protected info',
         })
     } catch (error) {
-        console.log(error.messsage);
+        console.log(error.message);
     }
 }
 
@@ -71,9 +73,9 @@ exports.logout = async (req, res) => {
             message: 'Logged out successfully'
         })
     } catch (error) {
-        console.log(error.messsage);
+        console.log(error.message);
         return res.status(500).json({
-            error: error.messsage,
+            error: error.message,
         })
     }
 }
