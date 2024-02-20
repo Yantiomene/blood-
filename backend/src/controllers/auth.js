@@ -5,15 +5,19 @@ const { SECRET } = require('../constants');
 
 exports.getUsers = async (req, res) => {
     try {
-        const { rows } = await db.query('SELECT id, username, email FROM users');
+        const users = await db.query('SELECT id, username, email FROM users');
         return res.status(200).json({
             success: true,
-            users: rows
-        })
+            users: users.rows || [] // Return an empty array if users.rows is falsy
+        });
     } catch (error) {
-        console.log(error.messsage);
+        console.error(error.message);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
     }
-}
+};
 
 exports.register = async (req, res) => {
     const { username, email, password , blood_type } = req.body;
