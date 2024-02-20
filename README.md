@@ -25,7 +25,7 @@ Provide notifications to eligible donors when a matching request is posted in th
 Implement a secure messaging system to facilitate communication between donors and recipients.
 Maintain privacy by allowing users to choose whether to share contact details.
 
-**Blood Donation History:**📜
+**Blood Donation History:** 📜
 
 Keep track of users' donation history to recognize and appreciate regular donors.
 Allow users to view their contribution to the community's blood supply.
