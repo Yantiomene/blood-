@@ -34,3 +34,9 @@ Allow users to view their contribution to the community's blood supply.
 
 Implement a verification system to ensure the credibility of donors and recipients.
 Allow users to rate and provide feedback based on their experience with donors and donation requests.
+
+Solution Developed by:
+
+Yaninthé Tiomene - 
+Esmond Adjei - 
+Gregory Slippi-Mensah - (@Greg_Pro77, LinkedIn - GHMatrix)
