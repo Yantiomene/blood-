@@ -11,7 +11,7 @@ exports.seed = function (knex) {
           username: 'john_doe',
           email: 'john@example.com',
           password: bcrypt.hashSync('password', 10),
-          bloodType: 'A',
+          bloodType: 'A+',
           location: null,
           contactNumber: '123456789',
           isDonor: true,

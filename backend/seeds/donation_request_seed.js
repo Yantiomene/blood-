@@ -7,7 +7,7 @@ exports.seed = function (knex) {
           {
             id: 1,
             userId: 1, // User ID from the users table
-            bloodType: 'B',
+            bloodType: 'B-',
             quantity: 2,
             location: knex.raw('POINT(0,0)'),
             isFulfilled: false,
