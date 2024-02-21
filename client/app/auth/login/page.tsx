@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 
 const LoginPage: React.FC = () => {
     const [username, setUsername] = useState('');
@@ -16,7 +17,7 @@ const LoginPage: React.FC = () => {
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        // yet to implement login details
+        // yet to implement login details...
     };
 
 
@@ -24,7 +25,7 @@ const LoginPage: React.FC = () => {
 
     return (
         <>
-            <h1 className="text-4xl text-red-500 font-bold">Blood+</h1>
+            <h1 className="text-4xl text-red-500 font-bold"><Link href='/'>Blood+</Link></h1>
             <p className="text-2xl text-gray-700 font-bold mb-4">Login</p>
             <form onSubmit={handleSubmit} className="w-[90vw] md:w-[40vw] bg-white shadow-md rounded px-8 py-8 mb-4">
                 <div className="mb-4">

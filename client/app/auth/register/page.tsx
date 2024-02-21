@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 
 const RegisterPage: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -12,21 +13,19 @@ const RegisterPage: React.FC = () => {
     const [contact, setContact] = useState('');
 
     const handleRegister = () => {
-        // Perform registration logic here
         if (password !== confirmPassword) {
             alert('Passwords do not match');
             return;
         }
 
-        // Continue with registration process
-        // ...
+        // to be continued...
     };
 
     const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
 
     return (
         <>
-            <h1 className="text-4xl text-red-500 font-bold">Blood+</h1>
+            <h1 className="text-4xl text-red-500 font-bold"><Link href='/'>Blood+</Link></h1>
             <p className="text-2xl text-gray-700 font-bold mb-4">Register</p>
             <form className="w-[90vw] md:w-[40vw] bg-white shadow-md rounded px-8 py-8 mb-4">
                 <div className="mb-4">
