@@ -8,7 +8,7 @@ exports.up = function(knex) {
         table.string('username').unique().notNullable();
         table.string('email').unique().notNullable();
         table.string('password').notNullable();
-        table.enu('bloodType', ['A', 'B', 'AB', 'O']).notNullable();
+        table.enu('bloodType', ['A-', 'A+', 'B-', 'B+', 'AB-', 'AB+', 'O-', 'O+']).notNullable();
         table.specificType('location', 'POINT');
         table.string('contactNumber');
         table.boolean('isDonor').defaultTo(false);
