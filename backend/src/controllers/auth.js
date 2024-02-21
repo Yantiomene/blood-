@@ -94,3 +94,30 @@ exports.logout = async (req, res) => {
         })
     }
 }
+
+exports.getUserProfile = async (req, res) => {
+    const userId = req.user.id;
+
+    try {
+        const userProfile = await db.query('SELECT id, username, email, "bloodType", location FROM users WHERE id = $1', [userId]);
+
+        if (!userProfile.rows.length) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+        req.logger.info("Fetched user profile successfully");
+        return res.status(200).json({
+            success: true,
+            user: userProfile.rows[0]
+        });
+    } catch (error) {
+        req.logger.error("Error fetching user profile:", error.message);
+        console.error("Could not get user profile:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+};
