@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { getCurrentUser } from '../api/user';
 
+const dropdownItemStyles = "px-4 py-2 hover:bg-gray-100 rounded cursor-pointer";
+
 const UserProfileIcon: React.FC = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [userData, setUserData] = useState<any>(null);
@@ -10,7 +12,6 @@ const UserProfileIcon: React.FC = () => {
         const fetchUserData = async () => {
             try {
                 const user = await getCurrentUser();
-                console.log('>> User data:', user.props.data); // xx
                 setUserData(user.props.data);
             } catch (error) {
                 console.error('Error fetching user data:', error);
@@ -34,12 +35,12 @@ const UserProfileIcon: React.FC = () => {
                 alt="Profile Icon"
             />
             {isDropdownOpen && (
-                <div className="absolute top-10 right-0 bg-white border border-gray-300 rounded shadow">
+                <div className="absolute top-10 right-0 z-50 bg-white rounded shadow">
                     {userData && (
-                        <ul className="py-2">
-                            <li className="p-2">{userData.username}</li>
-                            <li className="px-4 py-2">Settings</li>
-                            <li className="px-4 py-2">Logout</li>
+                        <ul className="p-2">
+                            <li className={dropdownItemStyles}>{userData.username}</li>
+                            <li className={dropdownItemStyles}>Settings</li>
+                            <li className={dropdownItemStyles}>Logout</li>
                             {/* will add more menu items */}
                         </ul>
                     )}

@@ -13,12 +13,18 @@ const Header: React.FC = () => {
                 <Link href="/" className="text-white text-2xl font-bold">
                     BloodPlus
                 </Link>
-                <nav className="flex items-center gap-10">
+
+                <ul className="flex space-x-4">
+                    <NavItem href="/blog" isActive={pathname === '/blog'}>Blog</NavItem>
+                    <NavItem href="/about" isActive={pathname === '/about'}>About</NavItem>
+                    <NavItem href="/faq" isActive={pathname === '/faq'}>FAQ</NavItem>
+                </ul>
+                
+                <nav className="flex items-center gap-6">
                     <ul className="flex space-x-4">
-                        <NavItem href="/" isActive={pathname === '/'}>Home</NavItem>
+                        <NavItem href="/dashboard" isActive={pathname === '/dashboard'}>Dashboard</NavItem>
                         <NavItem href="/auth/login" isActive={pathname === '/auth/login'}>Login</NavItem>
                         <NavItem href="/auth/register" isActive={pathname === '/auth/register'}>Register</NavItem>
-                        <NavItem href="/blog" isActive={pathname === '/blog'}>Blog</NavItem>
                     </ul>
                     <UserProfileIcon />
                 </nav>
