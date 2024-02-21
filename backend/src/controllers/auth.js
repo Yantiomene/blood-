@@ -20,14 +20,18 @@ exports.getUsers = async (req, res) => {
 };
 
 exports.register = async (req, res) => {
-    const { username, email, password, blood_type } = req.body;
+    const { username, email, password, bloodType } = req.body;
+
     try {
         const hashedPassword = await hash(password, 10);
-        await db.query('INSERT INTO users (username, email, password, blood_type) VALUES ($1, $2, $3, $4) RETURNING *', [username, email, hashedPassword, blood_type]);
+        await db.query(
+            'INSERT INTO users (username, email, password, "bloodType") VALUES ($1, $2, $3, $4) RETURNING *',
+            [username, email, hashedPassword, bloodType]
+        );
         return res.status(201).json({
             success: true,
             message: 'User created successfully'
-        })
+        });
     } catch (error) {
         console.log("Could not create new user:", error.message);
         return res.status(500).json({
