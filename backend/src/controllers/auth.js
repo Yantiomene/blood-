@@ -121,3 +121,32 @@ exports.getUserProfile = async (req, res) => {
         });
     }
 };
+
+
+exports.updateUserProfile = async (req, res) => {
+    const userId = req.user.id;
+    const { username, email, bloodType, location } = req.body;
+
+    try {
+        console.log(location[0], location[1]);
+        // Convert coordinates to POINT format
+        const locationPoint = await db.query('SELECT ST_SetSRID(ST_MakePoint($1, $2), 4326) AS location', [location[0], location[1]]);
+        console.log(locationPoint.rows[0].location, typeof(locationPoint));
+        await db.query(
+            'UPDATE users SET username = $1, email = $2, "bloodType" = $3, location = $4 WHERE id = $5 RETURNING *',
+            [username, email, bloodType, locationPoint.rows[0].location, userId]
+        );
+        req.logger.info("Updated user profile successfully");
+        return res.status(200).json({
+            success: true,
+            message: 'User profile updated successfully'
+        });
+    } catch (error) {
+        req.logger.error("Error updating user profile:", error.message);
+        console.error("Could not update user profile:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+};
