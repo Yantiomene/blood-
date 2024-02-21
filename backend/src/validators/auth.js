@@ -16,6 +16,14 @@ const emailExist = check('email').custom(async (email) => {
     }
 })
 
+// check if username exists
+const usernameExist = check('username').custom(async (username) => {
+    const { rows } = await db.query('SELECT * FROM users WHERE username = $1', [username]);
+    if (rows.length > 0) {
+        throw new Error('A User with this username already exists');
+    }
+})
+
 // Login validation
 const loginFieldsCheck = check('email').custom(async (value, { req }) => {
     const { rows } = await db.query('SELECT * FROM users WHERE email = $1', [value]);
@@ -32,6 +40,6 @@ const loginFieldsCheck = check('email').custom(async (value, { req }) => {
 })
 
 module.exports = {
-    registerValidation: [email, password, emailExist],
+    registerValidation: [email, password, emailExist, usernameExist],
     loginValidation: [loginFieldsCheck],
 }
