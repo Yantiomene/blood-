@@ -109,7 +109,7 @@ The server is running at [http://localhost:8000](http://localhost:8000)
   ```json
   {
       "success": true,
-      "users": [List of users]
+      "users": ["List of users"]
   }
   ```
 
@@ -137,11 +137,11 @@ The server is running at [http://localhost:8000](http://localhost:8000)
   {
       "success": true,
       "user": {
-        id,
-        username,
-        email,
-        bloodType,
-        location
+      "id": "user_id",
+      "username": "user_username",
+      "email": "user_email",
+      "bloodType": "user_bloodType",
+      "location": "user_location"
       }
   }
   ```
