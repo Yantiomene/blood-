@@ -3,6 +3,7 @@ const { PORT, CLIENT_URL } = require('./constants');
 const cookieParser = require('cookie-parser');
 const passport = require('passport');
 const cors = require('cors');
+const helmet = require('helmet');
 const app = express();
 
 
@@ -19,6 +20,7 @@ app.use(cors({
     origin: CLIENT_URL,
     credentials: true
 }))
+app.use(helmet());
 app.use(passport.initialize());
 
 // initialize routes
