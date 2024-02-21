@@ -31,7 +31,8 @@ exports.register = async (req, res) => {
     } catch (error) {
         console.log("Could not create new user:", error.message);
         return res.status(500).json({
-            error: error.message,
+            success: false,
+            error: 'Internal server error',
         })
     }
 }
@@ -51,7 +52,8 @@ exports.login = async (req, res) => {
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({
-            error: error.message,
+            success: false,
+            error: 'Internal server error',
         })
     }
 }
@@ -75,7 +77,8 @@ exports.logout = async (req, res) => {
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({
-            error: error.message,
+            success: false,
+            error: 'Internal server error',
         })
     }
 }

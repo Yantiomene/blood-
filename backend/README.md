@@ -30,7 +30,8 @@ npm run dev
 - Status: 500
 - JSON:
 {
-    error: error message
+    success: false,
+    error: 'Internal server error',
 }
 
 2. Login route:
@@ -50,7 +51,8 @@ npm run dev
 - Status: 500
 - JSON:
 {
-    error: error message
+    success: false,
+    error: 'Internal server error',
 }
 
 3. Logout route (require userAuth):
@@ -70,5 +72,27 @@ npm run dev
 - Status: 500
 - JSON:
 {
-    error: error message
+    success: false,
+    error: 'Internal server error',
+}
+
+4. Get Users route (require userAuth):
+`http://localhost:8000/api/users`
+
+**Method**: Get
+
+**Response**: On success
+- Status: 200
+- JSON:
+{
+    success: true,
+    users: [List of users]
+}
+
+**Response**: On error
+- Status: 500
+- JSON:
+{
+    success: false,
+    error: 'Internal server error',
 }
