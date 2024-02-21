@@ -19,18 +19,23 @@ const LoginPage: React.FC = () => {
         // yet to implement login details
     };
 
+
+    const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
+
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-            <h1 className="text-2xl font-bold mb-4">Login Page</h1>
-            <form onSubmit={handleSubmit} className="md:min-w-[400px] bg-white shadow-md rounded px-8 py-8 mb-4">
+        <>
+            <h1 className="text-4xl text-red-500 font-bold">Blood+</h1>
+            <p className="text-2xl text-gray-700 font-bold mb-4">Login</p>
+            <form onSubmit={handleSubmit} className="w-[90vw] md:w-[40vw] bg-white shadow-md rounded px-8 py-8 mb-4">
                 <div className="mb-4">
                     <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
                         Username:
                     </label>
                     <input
-                        className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        className={inputStyles}
                         id="username"
                         type="text"
+                        placeholder="Enter your username"
                         value={username}
                         onChange={handleUsernameChange}
                     />
@@ -40,9 +45,10 @@ const LoginPage: React.FC = () => {
                         Password:
                     </label>
                     <input
-                        className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        className={inputStyles}
                         id="password"
                         type="password"
+                        placeholder="Enter your password"
                         value={password}
                         onChange={handlePasswordChange}
                     />
@@ -59,11 +65,11 @@ const LoginPage: React.FC = () => {
                         Login
                     </button>
                     <p className="text-gray-500 text-center mt-4 text-sm">
-                        Already have an account? <a className='text-red-500 hover:text-red-400' href="/auth/register">Register</a>
+                        Don't have an account? <a className='text-red-500 hover:text-red-400' href="/auth/register">Register</a>
                     </p>
                 </div>
             </form>
-        </div>
+        </>
     );
 };
 
