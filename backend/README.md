@@ -274,7 +274,7 @@ curl -X PUT \
     "username": "updated_username",
     "email": "updated_email@example.com",
     "bloodType": "B+",
-    "location": [longitude latitude]
+    "location": [longitude, latitude]
 }'
 ```
 
