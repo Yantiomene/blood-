@@ -109,7 +109,7 @@ The server is running at [http://localhost:8000](http://localhost:8000)
   ```json
   {
       "success": true,
-      "users": [List of users]
+      "users": ["List of users"]
   }
   ```
 
@@ -137,11 +137,11 @@ The server is running at [http://localhost:8000](http://localhost:8000)
   {
       "success": true,
       "user": {
-        id,
-        username,
-        email,
-        bloodType,
-        location
+      "id": "user_id",
+      "username": "user_username",
+      "email": "user_email",
+      "bloodType": "user_bloodType",
+      "location": "user_location"
       }
   }
   ```
@@ -194,6 +194,43 @@ The server is running at [http://localhost:8000](http://localhost:8000)
       "error": "Internal server error"
   }
   ```
+
+### 7. Email Verification Route
+
+- **Endpoint**: [http://localhost:8000/api/verifyEmail/:code](http://localhost:8000/api/verifyEmail/:code)
+- **Method**: GET
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "message": "Email verified successfully"
+  }
+
+#### Error Response
+
+- **Status**: 404
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Invalid verification code"
+  }
+  ```
+#### Error Response
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
 
 ## Additional Information
 
@@ -278,4 +315,11 @@ curl -X PUT \
 }'
 ```
 
-Make sure to replace "your_username", "your_email@example.com", "your_password", "your_access_token", "updated_username", "updated_email@example.com", and [longitude latitude] with actual values.
+### 7. Email Verification Route Test
+
+```bash
+curl -X GET \
+  http://localhost:8000/api/verifyEmail/your_verification_code
+```
+
+Make sure to replace "your_username", "your_email@example.com", "your_password", "your_access_token", "updated_username", "updated_email@example.com", "your_verification_code", and [longitude latitude] with actual values.
