@@ -28,7 +28,7 @@ const UserProfileIcon: React.FC = () => {
     return (
         <div className="relative" onMouseEnter={handleDropdownToggle} onMouseLeave={handleDropdownToggle}>
             <Image
-                className="w-10 h-10 rounded-full cursor-pointer"
+                className="shrink-0 w-10 h-10 rounded-full cursor-pointer"
                 src="/profilepic.jpg"
                 width={40}
                 height={40}
