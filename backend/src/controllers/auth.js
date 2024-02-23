@@ -2,6 +2,8 @@ const db = require('../db');
 const { hash } = require('bcryptjs');
 const { sign } = require('jsonwebtoken');
 const { SECRET } = require('../constants');
+const redisClient = require('../utils/redis');
+const sendVerificationEmail = require('../utils/email');
 
 exports.getUsers = async (req, res) => {
     try {
@@ -26,10 +28,32 @@ exports.register = async (req, res) => {
 
     try {
         const hashedPassword = await hash(password, 10);
+        const verificationCode = generateShortCode();
+
+        // Store verification code in Redis
+        if (!redisClient.isAlive()) {
+            throw new Error('Redis client not connected');
+        }
+
+        // Check if there's an existing verification code for the email
+        const existingCode = await redisClient.get(email);
+
+        // If there's an existing code, delete it
+        if (existingCode) {
+            await redisClient.del(existingCode);
+        }
+
+        // Store the new verification code in Redis
+        await redisClient.set(verificationCode, email, 60 * 60); // Expire in 1h (3600 seconds)
+
         await db.query(
             'INSERT INTO users (username, email, password, "bloodType") VALUES ($1, $2, $3, $4) RETURNING *',
             [username, email, hashedPassword, bloodType]
         );
+
+        // Send verification email with the short code
+        sendVerificationEmail(email, verificationCode);
+
         req.logger.info('Created user successfully');
         return res.status(201).json({
             success: true,
@@ -99,7 +123,7 @@ exports.getUserProfile = async (req, res) => {
     const userId = req.user.id;
 
     try {
-        const userProfile = await db.query('SELECT id, username, email, "bloodType", location FROM users WHERE id = $1', [userId]);
+        const userProfile = await db.query('SELECT id, username, email, "bloodType", location, "isVerified" FROM users WHERE id = $1', [userId]);
 
         if (!userProfile.rows.length) {
             return res.status(404).json({
@@ -149,4 +173,45 @@ exports.updateUserProfile = async (req, res) => {
             message: 'Internal server error'
         });
     }
+};
+
+exports.verifyEmail = async (req, res) => {
+    const verificationCode = req.params.code;
+
+    try {
+        // Retrieve verification code from Redis
+        const email = await redisClient.get(verificationCode);
+
+        if (!email) {
+            return res.status(404).json({
+                success: false,
+                error: 'Invalid verification code.',
+            });
+        }
+
+        // Update the user's status to verified
+        await db.query('UPDATE users SET "isVerified" = true WHERE email = $1', [email]);
+
+        req.logger.info('Email verified successfully');
+        return res.status(200).json({
+            success: true,
+            message: 'Email verified successfully',
+        });
+    } catch (error) {
+        req.logger.error('Error verifying email:', error.message);
+        console.log('Error verifying email:', error.message);
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+        });
+    }
+};
+
+
+
+// Function to generate a random short code (5 digits)
+const generateShortCode = () => {
+    const min = 10000; // Minimum 5-digit number
+    const max = 99999; // Maximum 5-digit number
+    return Math.floor(min + Math.random() * (max - min + 1)).toString();
 };
