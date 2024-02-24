@@ -9,7 +9,11 @@ const {
     getUserProfile, 
     updateUserProfile 
 } = require('../controllers/auth');
-const { createDonationRequest, getDonationRequests } = require('../controllers/donationRequest');
+const { 
+    createDonationRequest, 
+    getDonationRequests, 
+    updateDonationRequest 
+} = require('../controllers/donationRequest');
 const { registerValidation, loginValidation } = require('../validators/auth');
 const { validationMiddleware } = require('../middlewares/validations-middleware');
 const { userAuth } = require('../middlewares/auth-middleware');
@@ -25,6 +29,7 @@ router.put('/profile', userAuth, updateUserProfile);
 router.get('/verifyEmail/:code', verifyEmail);
 router.post('/donationRequest', userAuth, createDonationRequest);
 router.get('/donationRequest', userAuth, getDonationRequests);
+router.put('/donationRequest/:requestId', userAuth, updateDonationRequest);
 
 
 module.exports = router;

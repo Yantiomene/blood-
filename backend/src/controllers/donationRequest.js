@@ -68,7 +68,75 @@ const getDonationRequests = async (req, res) => {
     }
 };
 
+
+const updateDonationRequest = async (req, res) => {
+    const { requestId } = req.params;
+    const { quantity, bloodType, location, isFulfilled } = req.body;
+
+    try {
+        // Check if the donation request exists
+        const existingRequest = await db.query('SELECT * FROM donation_requests WHERE id = $1', [requestId]);
+
+        if (existingRequest.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'Donation request not found',
+            });
+        }
+
+        // Update donation request
+        const updateFields = [];
+        const updateValues = [];
+
+        if (quantity !== undefined) {
+            updateFields.push('"quantity"');
+            updateValues.push(quantity);
+        }
+
+        if (bloodType !== undefined) {
+            updateFields.push('"bloodType"');
+            updateValues.push(bloodType);
+        }
+
+        if (location !== undefined) {
+            updateFields.push('"location"');
+            validateLocationFormat(location);
+            const locationPoint = await db.query('SELECT ST_SetSRID(ST_MakePoint($1, $2), 4326) AS location', [location[0], location[1]]);
+            updateValues.push(locationPoint.rows[0].location);
+        }
+
+        if (isFulfilled !== undefined) {
+            updateFields.push('"isFulfilled"');
+            updateValues.push(isFulfilled);
+        }
+
+        updateFields.push('"updated_at"');
+        updateValues.push(new Date());
+
+        const updateQuery =
+            `UPDATE donation_requests SET (${updateFields.join(', ')}) = (${updateValues.map((_, i) => `$${i + 1}`).join(', ')}) WHERE id = $${updateValues.length + 1} RETURNING *`;
+
+        const result = await db.query(updateQuery, [...updateValues, requestId]);
+        const updatedRequest = result.rows[0];
+        
+        req.logger.info('Donation request updated successfully');
+        res.status(200).json({
+            success: true,
+            message: 'Donation request updated successfully',
+            updatedRequest,
+        });
+    } catch (error) {
+        req.logger.error('Error updating donation request:', error.message);
+        console.error('Error updating donation request:', error.message);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+        });
+    }
+};
+
 module.exports = {
     getDonationRequests,
     createDonationRequest,
+    updateDonationRequest,
 };
