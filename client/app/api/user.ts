@@ -1,3 +1,7 @@
+import axios from 'axios';
+
+axios.defaults.withCredentials = true;
+
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 interface User {
@@ -8,18 +12,52 @@ interface User {
 }
 
 export async function getUsers() {
-    const response = await fetch(`${apiUrl}/users`);
-    const data = await response.json();
-    return { props: { data } }
+    try {
+        const response = await axios.get(`${apiUrl}/users`);
+        return { props: { data: response.data } };
+    } catch (error) {
+        console.error('Failed to get users:', error);
+        throw error;
+    }
 }
 
 export async function getCurrentUser() {
-    // const response = await fetch(`${apiUrl}/user`);
-    // const data = await response.json();
-    const data: User = { 
-      username: 'testuser',
-      email: 'test@bloodplus.com',
-      bloodType: 'A+',
-    };
-    return { props: { data } }
+    try {
+        const response = await axios.get(`${apiUrl}/profile`, {
+            withCredentials: true,
+        });
+        console.log('>> User data:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting user info:', error);
+        throw error;
+    }
+}
+
+export async function login(credentials: { email: string; password: string }): Promise<any> {
+    try {
+        const response = await axios.post(`${apiUrl}/login`, credentials, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Login error:', error);
+        throw error;
+    }
+}
+
+export async function register(user: User): Promise<any> {
+    try {
+        const response = await axios.post(`${apiUrl}/register`, user, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Registration error:', error);
+        throw error;
+    }
 }

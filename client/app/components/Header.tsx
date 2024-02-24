@@ -10,9 +10,9 @@ const Header: React.FC = () => {
     return (
         <header className="bg-red-500 p-4">
             <div className="container mx-auto flex justify-between items-center">
-                <div className="flex items-center gap-6">                                    
+                <div className="flex items-center gap-6">
                     <Link href="/" className="text-white text-2xl font-bold">
-                        BloodPlus
+                        Blood+
                     </Link>
 
                     <ul className="md:flex space-x-4 hidden">

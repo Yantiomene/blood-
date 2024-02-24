@@ -76,18 +76,19 @@ exports.login = async (req, res) => {
         email: user.email
     }
     try {
-        const token = await sign(payload, SECRET);
-        req.logger.info('User loged in successfully');
+        const token = sign(payload, SECRET, { expiresIn: '1h' });
+        req.logger.info(`${user.email} logged in successfully`);
         return res.status(200).cookie('token', token, { httpOnly: true }).json({
             success: true,
             message: 'Logged in successfully',
+            token: token
         })
     } catch (error) {
         req.logger.error(`Error loging in user: ${error.message}`);
         console.error(error.message);
         return res.status(500).json({
             success: false,
-            error: 'Internal server error',
+            error: 'Error loging in user',
         })
     }
 }
@@ -104,7 +105,7 @@ exports.protected = async (req, res) => {
 
 exports.logout = async (req, res) => {
     try {
-        req.logger.info('User Loged out successfully');
+        req.logger.info('User Logged out successfully');
         return res.status(200).clearCookie('token', { httpOnly: true }).json({
             success: true,
             message: 'Logged out successfully'
@@ -122,7 +123,9 @@ exports.logout = async (req, res) => {
 exports.getUserProfile = async (req, res) => {
     const userId = req.user.id;
 
+    
     try {
+           console.log(">> get User Profile", req.headers.authorization, req.headers.cookie, req.headers['x-access-token'])
         const userProfile = await db.query('SELECT id, username, email, "bloodType", location, "isVerified" FROM users WHERE id = $1', [userId]);
 
         if (!userProfile.rows.length) {
@@ -155,7 +158,7 @@ exports.updateUserProfile = async (req, res) => {
         console.log(location[0], location[1]);
         // Convert coordinates to POINT format
         const locationPoint = await db.query('SELECT ST_SetSRID(ST_MakePoint($1, $2), 4326) AS location', [location[0], location[1]]);
-        console.log(locationPoint.rows[0].location, typeof(locationPoint));
+        console.log(locationPoint.rows[0].location, typeof (locationPoint));
         await db.query(
             'UPDATE users SET username = $1, email = $2, "bloodType" = $3, location = $4 WHERE id = $5 RETURNING *',
             [username, email, bloodType, locationPoint.rows[0].location, userId]

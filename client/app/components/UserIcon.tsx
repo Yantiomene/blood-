@@ -11,8 +11,8 @@ const UserProfileIcon: React.FC = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const user = await getCurrentUser();
-                setUserData(user.props.data);
+                const data = await getCurrentUser();
+                setUserData(data.user);
             } catch (error) {
                 console.error('Error fetching user data:', error);
             }
