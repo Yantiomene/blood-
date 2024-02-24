@@ -37,9 +37,20 @@ const createDonationRequest = async (req, res) => {
 
 
 const getDonationRequests = async (req, res) => {
+    const { isFulfilled } = req.query;
+
     try {
+
+        let query = 'SELECT * FROM donation_requests';
+        const params = [];
+
+        if (isFulfilled) {
+            query += ' WHERE "isFulfilled" = $1';
+            params.push(isFulfilled);
+        }
+
         // Retrieve all donation requests from the database
-        const result = await db.query('SELECT * FROM donation_requests');
+        const result = await db.query(query, params);
         const donationRequests = result.rows;
 
         req.logger.info('Fetched donation requests successfully');
