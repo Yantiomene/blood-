@@ -278,7 +278,100 @@ The server is running at [http://localhost:8000](http://localhost:8000)
       "error": "Internal server error"
   }
   ```
+### 8. Create DonationRequest Route (requires userAuth)
 
+- **Endpoint**: `http://localhost:8000/api/donationRequest`
+- **Method**: POST
+
+#### Success Response
+
+- **Status**: 201
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "message": "Donation request created successfully",
+      "donationRequest": createdDonationRequest,
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
+### 9. Get DonationRequest Route (requires userAuth)
+
+- **Endpoints**: `http://localhost:8000/api/donationRequests` (fetch all donation requests)
+              `http://localhost:8000/api/donationRequests?isFulFilled=true` (fetch those which are fulfilled)
+              `http://localhost:8000/api/donationRequests?isFulfilled=false` (fetch those which are not yet fulfilled)
+- **Method**: GET
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "donationRequests": donationRequests
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
+### 10. Update Donation request Route (requires userAuth)
+
+- **Endpoint**: `http://localhost:8000/api/donationRequest/:requestID`
+- **Method**: PUT
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "message": "'Donation request updated successfully",
+      "updatedRequest": updatedRequest,
+  }
+  ```
+
+### Donation request not found Response
+
+- **Status**: 404
+- **JSON**:
+```json
+  {
+      "success": false,
+      "error": "Donation request not found"
+  }
+```
+#### Error Response
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
 
 ## Additional Information
 
@@ -370,4 +463,62 @@ curl -X GET \
   http://localhost:8000/api/verifyEmail/your_verification_code
 ```
 
-Make sure to replace "your_username", "your_email@example.com", "your_password", "your_access_token", "updated_username", "updated_email@example.com", "your_verification_code", and [longitude latitude] with actual values.
+### 8. Create Donation Request Route
+
+```bash
+curl -X POST \
+  http://localhost:8000/api/donationRequests \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer your_access_token' \
+  -d '{
+    "bloodType": "A+",
+    "quantity": 2,
+    "location": [longitude, latitude],
+    "requestingEntity": "User"
+  }'
+```
+
+### 9. Get Donation Requests Route
+
+#### Get all donation requests (no isFulfilled parameter):
+
+```bash
+curl -X GET \
+  http://localhost:8000/api/donationRequests \
+  -H 'Authorization: Bearer your_access_token'
+```
+
+#### Get only fulfilled donation requests:
+
+```bash
+curl -X GET \
+  http://localhost:8000/api/donationRequests?isFulfilled=true \
+  -H 'Authorization: Bearer your_access_token'
+```
+
+#### Get only unfulfilled donation requests:
+
+```bash
+curl -X GET \
+  http://localhost:8000/api/donationRequests?isFulfilled=false \
+  -H 'Authorization: Bearer your_access_token'
+```
+
+
+### 19. Update Donation Request Route
+
+```bash
+curl -X PUT \
+  http://localhost:8000/api/donationRequests/:requestId \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer your_access_token' \
+  -d '{
+    "quantity": 3,
+    "bloodType": "A+",
+    "location": [updated_longitude, updated_latitude],
+    "isFulfilled": true
+  }'
+```
+
+
+Make sure to replace `your_username`, `your_email@example.com`, `your_password`, `your_access_token`, `updated_username`, `updated_email@example.com`, `your_verification_code`, `longitude`, `latitude`, `updated_longitude`, `updated_latitude`, and `:requestId` with actual values.
