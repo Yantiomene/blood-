@@ -1,0 +1,24 @@
+# REGISTER
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -d '{
+        "username": "curller",
+        "email": "curller@example.com",
+        "password": "password123",
+        "blood_type": "O+"
+      }' \
+  http://localhost:2000/api/register
+
+
+# USER LOGIN
+curl -X POST \
+    -H "Content-Type: application/json" \
+    -d '{
+          "email": "curller@example.com",
+          "password": "password123"
+        }' \
+    http://localhost:2000/api/login
+
+
+# GET USERS
+curl -X GET http://localhost:2000/api/users
