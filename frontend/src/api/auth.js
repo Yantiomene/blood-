@@ -26,7 +26,7 @@ export async function onLogout() {
 
 export async function fetchProtectedInfo() {
     const response = await axios.get(
-        'http://localhost:8000/api/protected'
+        'http://localhost:8000/api/profile'
     );
     return response;
 }

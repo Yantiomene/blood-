@@ -22,7 +22,9 @@ const Dashboard = () => {
     const protectedInfo = async () => {
         try {
             const { data } = await fetchProtectedInfo()
-            setProtectedData(data.info)
+            const userInfo = `user_id: ${data.user.id} \n\
+            usernname: ${data.user.username} \n`
+            setProtectedData(userInfo)
             setLoading(false)
         } catch (error) {
             //logout()
