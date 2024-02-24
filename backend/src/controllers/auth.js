@@ -77,6 +77,7 @@ exports.login = async (req, res) => {
     }
     try {
         const token = sign(payload, SECRET, { expiresIn: '1h' });
+        req.user = user;
         req.logger.info(`${user.email} logged in successfully`);
         return res.status(200).cookie('token', token, { httpOnly: true }).json({
             success: true,
@@ -123,7 +124,7 @@ exports.getUserProfile = async (req, res) => {
     const userId = req.user.id;
     
     try {
-        const userProfile = await db.query('SELECT id, username, email, "bloodType", location, "isVerified" FROM users WHERE id = $1', [userId]);
+        const userProfile = await db.query('SELECT id, username, email, "bloodType", "isDonor", location, "isVerified" FROM users WHERE id = $1', [userId]);
 
         if (!userProfile.rows.length) {
             return res.status(404).json({
@@ -149,7 +150,7 @@ exports.getUserProfile = async (req, res) => {
 
 exports.updateUserProfile = async (req, res) => {
     const userId = req.user.id;
-    const { username, email, bloodType, location } = req.body;
+    const { username, email, bloodType, isDonor, location } = req.body;
 
     try {
         console.log(location[0], location[1]);
@@ -157,8 +158,8 @@ exports.updateUserProfile = async (req, res) => {
         const locationPoint = await db.query('SELECT ST_SetSRID(ST_MakePoint($1, $2), 4326) AS location', [location[0], location[1]]);
         console.log(locationPoint.rows[0].location, typeof (locationPoint));
         await db.query(
-            'UPDATE users SET username = $1, email = $2, "bloodType" = $3, location = $4 WHERE id = $5 RETURNING *',
-            [username, email, bloodType, locationPoint.rows[0].location, userId]
+            'UPDATE users SET username = $1, email = $2, "bloodType" = $3, "isDonor" = $4, location = $5 WHERE id = $6 RETURNING *',
+            [username, email, bloodType, isDoner, locationPoint.rows[0].location, userId]
         );
         req.logger.info("Updated user profile successfully");
         return res.status(200).json({
