@@ -81,7 +81,6 @@ exports.login = async (req, res) => {
         return res.status(200).cookie('token', token, { httpOnly: true }).json({
             success: true,
             message: 'Logged in successfully',
-            token: token
         })
     } catch (error) {
         req.logger.error(`Error loging in user: ${error.message}`);
@@ -122,10 +121,8 @@ exports.logout = async (req, res) => {
 
 exports.getUserProfile = async (req, res) => {
     const userId = req.user.id;
-
     
     try {
-           console.log(">> get User Profile", req.headers.authorization, req.headers.cookie, req.headers['x-access-token'])
         const userProfile = await db.query('SELECT id, username, email, "bloodType", location, "isVerified" FROM users WHERE id = $1', [userId]);
 
         if (!userProfile.rows.length) {

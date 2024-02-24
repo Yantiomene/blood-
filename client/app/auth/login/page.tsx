@@ -21,9 +21,11 @@ const LoginPage: React.FC = () => {
         event.preventDefault();
 
         try {
-            const data = await login({ email, password });
-            localStorage.setItem('token', data.token);
-            window.location.href = '/dashboard';
+            const response = await login({ email, password });
+            if (response.success) {
+                localStorage.setItem('isAuth', 'true');
+                window.location.href = '/dashboard';
+            }
         } catch (error) {
             setLoginError('Invalid email or password');
         }

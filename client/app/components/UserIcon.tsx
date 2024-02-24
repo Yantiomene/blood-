@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { getCurrentUser } from '../api/user';
+import { getCurrentUser, logout } from '../api/user';
 
 const dropdownItemStyles = "px-4 py-2 hover:bg-gray-100 rounded cursor-pointer";
 
@@ -25,8 +25,25 @@ const UserProfileIcon: React.FC = () => {
         setIsDropdownOpen(!isDropdownOpen);
     };
 
+    const handleLogout = async () => {
+        try {
+            const status = await logout();
+            console.log('>> Logout status:', status);
+            if (status.success) {
+                localStorage.removeItem('isAuth');
+                window.location.href = '/';
+            }
+        } catch (error) {
+            console.error('Error logging out:', error);
+        }
+    };
+
     return (
-        <div className="relative" onMouseEnter={handleDropdownToggle} onMouseLeave={handleDropdownToggle}>
+        <div className="relative"
+            onMouseEnter={handleDropdownToggle}
+            onMouseLeave={handleDropdownToggle}
+            onClick={handleDropdownToggle}
+        >
             <Image
                 className="shrink-0 w-10 h-10 rounded-full cursor-pointer"
                 src="/profilepic.jpg"
@@ -38,10 +55,16 @@ const UserProfileIcon: React.FC = () => {
                 <div className="absolute top-10 right-0 z-50 bg-white rounded shadow">
                     {userData && (
                         <ul className="p-2">
-                            <li className={dropdownItemStyles}>{userData.username}</li>
+                            <li className={dropdownItemStyles + ' text-nowrap'}>
+                                {userData.username}
+                                <span className='mx-2 rounded-full text-white bg-red-500 p-1 text-center text-xs'>
+                                    {userData.bloodType}
+                                </span>
+                            </li>
                             <li className={dropdownItemStyles}>Settings</li>
-                            <li className={dropdownItemStyles}>Logout</li>
-                            {/* will add more menu items */}
+                            <li className={dropdownItemStyles + ' hover:bg-red-100'} onClick={handleLogout}>
+                                Logout
+                            </li>
                         </ul>
                     )}
                 </div>

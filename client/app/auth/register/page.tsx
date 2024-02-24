@@ -14,7 +14,7 @@ const RegisterPage: React.FC = () => {
     const [contact, setContact] = useState('');
     const [registerError, setRegisterError] = useState('');
 
-    const handleRegister = () => {
+    const handleRegister = async () => {
         if (password !== confirmPassword) {
             alert('Passwords do not match');
             return;
@@ -30,7 +30,7 @@ const RegisterPage: React.FC = () => {
         };
 
         try {
-            register(user);
+            await register(user);
             window.location.href = '/auth/login';
             setRegisterError('');
         }
