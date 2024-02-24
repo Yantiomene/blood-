@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { getCurrentUser, logout } from '../api/user';
 
 const dropdownItemStyles = "px-4 py-2 hover:bg-gray-100 rounded cursor-pointer";
@@ -56,10 +57,12 @@ const UserProfileIcon: React.FC = () => {
                     {userData && (
                         <ul className="p-2">
                             <li className={dropdownItemStyles + ' text-nowrap'}>
-                                {userData.username}
-                                <span className='mx-2 rounded-full text-white bg-red-500 p-1 text-center text-xs'>
-                                    {userData.bloodType}
-                                </span>
+                                <Link href="/user">
+                                    {userData.username}
+                                    <span className='ml-2 px-1 rounded-full text-white bg-red-500 text-center text-xs'>
+                                        {userData.bloodType}
+                                    </span>
+                                </Link>
                             </li>
                             <li className={dropdownItemStyles}>Settings</li>
                             <li className={dropdownItemStyles + ' hover:bg-red-100'} onClick={handleLogout}>

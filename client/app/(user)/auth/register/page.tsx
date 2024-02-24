@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { register } from '../../api/user';
+import { register } from '../../../api/user';
 
 const RegisterPage: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -10,8 +10,6 @@ const RegisterPage: React.FC = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [bloodType, setBloodType] = useState('');
-    const [location, setLocation] = useState('');
-    const [contact, setContact] = useState('');
     const [registerError, setRegisterError] = useState('');
 
     const handleRegister = async () => {
@@ -25,8 +23,6 @@ const RegisterPage: React.FC = () => {
             username,
             password,
             bloodType,
-            location,
-            contact,
         };
 
         try {
@@ -37,8 +33,8 @@ const RegisterPage: React.FC = () => {
         catch (error) {
             setRegisterError('Registration failed');
             console.error('Register error:', error);
-        }      
-        
+        }
+
     };
 
     const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
@@ -49,7 +45,7 @@ const RegisterPage: React.FC = () => {
             <p className="text-2xl text-gray-700 font-bold mb-4">Register</p>
             <form className="w-[90vw] md:w-[40vw] bg-white shadow-md rounded px-8 py-8 mb-4">
                 {registerError && <p className="text-red-500 mb-4">{registerError}</p>}
-                
+
                 <div className="mb-4">
                     <label htmlFor="email">Email</label>
                     <input
@@ -128,34 +124,6 @@ const RegisterPage: React.FC = () => {
                     <small id="bloodTypeHelpText" className="text-gray-500">Select your blood type.</small>
                 </div>
 
-                <div className="mb-4">
-                    <label htmlFor="location">Location</label>
-                    <input
-                        type="text"
-                        id="location"
-                        placeholder="Location"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
-                        className={inputStyles}
-                        aria-describedby="locationHelpText"
-                    />
-                    <small id="locationHelpText" className="text-gray-500">Enter your current location.</small>
-                </div>
-
-                <div className="mb-4">
-                    <label htmlFor="contact">Contact</label>
-                    <input
-                        type="text"
-                        id="contact"
-                        placeholder="Contact"
-                        value={contact}
-                        onChange={(e) => setContact(e.target.value)}
-                        className={inputStyles}
-                        aria-describedby="contactHelpText"
-                    />
-                    <small id="contactHelpText" className="text-gray-500">Enter your contact information.</small>
-                </div>
-
                 <button
                     onClick={handleRegister}
                     className="bg-red-500 inline-block w-full hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
@@ -163,7 +131,7 @@ const RegisterPage: React.FC = () => {
                     Register
                 </button>
                 <p className="text-gray-500 text-center mt-4 text-sm">
-                    Already have an account? <a className='text-red-500 hover:text-red-400' href="/auth/register">Login</a>
+                    Already have an account? <a className='text-red-500 hover:text-red-400' href="/auth/login">Login</a>
                 </p>
             </form>
         </>

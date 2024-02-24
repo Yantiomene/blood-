@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { login } from '../../api/user';
+import { login } from '../../../api/user';
 
 const LoginPage: React.FC = () => {
     const [email, setemail] = useState('');
