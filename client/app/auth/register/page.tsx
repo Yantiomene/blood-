@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { register } from '../../api/user';
 
 const RegisterPage: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -11,14 +12,33 @@ const RegisterPage: React.FC = () => {
     const [bloodType, setBloodType] = useState('');
     const [location, setLocation] = useState('');
     const [contact, setContact] = useState('');
+    const [registerError, setRegisterError] = useState('');
 
-    const handleRegister = () => {
+    const handleRegister = async () => {
         if (password !== confirmPassword) {
             alert('Passwords do not match');
             return;
         }
 
-        // to be continued...
+        const user = {
+            email,
+            username,
+            password,
+            bloodType,
+            location,
+            contact,
+        };
+
+        try {
+            await register(user);
+            window.location.href = '/auth/login';
+            setRegisterError('');
+        }
+        catch (error) {
+            setRegisterError('Registration failed');
+            console.error('Register error:', error);
+        }      
+        
     };
 
     const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
@@ -28,6 +48,8 @@ const RegisterPage: React.FC = () => {
             <h1 className="text-4xl text-red-500 font-bold"><Link href='/'>Blood+</Link></h1>
             <p className="text-2xl text-gray-700 font-bold mb-4">Register</p>
             <form className="w-[90vw] md:w-[40vw] bg-white shadow-md rounded px-8 py-8 mb-4">
+                {registerError && <p className="text-red-500 mb-4">{registerError}</p>}
+                
                 <div className="mb-4">
                     <label htmlFor="email">Email</label>
                     <input

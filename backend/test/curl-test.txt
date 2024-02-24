@@ -5,7 +5,7 @@ curl -X POST \
         "username": "curller",
         "email": "curller@example.com",
         "password": "password123",
-        "blood_type": "O+"
+        "bloodType": "O+"
       }' \
   http://localhost:2000/api/register
 
