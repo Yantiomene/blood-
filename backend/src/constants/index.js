@@ -10,6 +10,8 @@ module.exports = {
     EMAIL: process.env.EMAIL,
     PASSWORD: process.env.PASSWORD,
 
+    GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
+
     // database configuration
     DB_USER: process.env.DB_USER,
     DB_PASSWORD: process.env.DB_PASSWORD,
