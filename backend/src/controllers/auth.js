@@ -4,6 +4,7 @@ const { sign } = require('jsonwebtoken');
 const { SECRET } = require('../constants');
 const redisClient = require('../utils/redis');
 const sendVerificationEmail = require('../utils/email');
+const { validateLocationFormat } = require('../utils/geoUtils');
 
 exports.getUsers = async (req, res) => {
     try {
@@ -208,6 +209,32 @@ exports.verifyEmail = async (req, res) => {
     }
 };
 
+// Controller
+exports.updateUserLocation = async (req, res) => {
+    const { latitude, longitude } = req.body;
+    const userId = req.user.id; // Assuming you have user information in req.user
+
+    try {
+
+        validateLocationFormat([longitude, latitude]);
+
+        // Update user's location in the database
+        await db.query('UPDATE users SET location = ST_GeomFromText($1, 4326) WHERE id = $2', [`POINT(${longitude} ${latitude})`, userId]);
+
+        req.logger.info('User location updated successfully');
+        return res.status(200).json({
+            success: true,
+            message: 'User location updated successfully',
+        });
+    } catch (error) {
+        req.logger.error('Error updating user location:', error.message);
+        console.error('Error updating user location:', error.message);
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+        });
+    }
+};
 
 
 // Function to generate a random short code (5 digits)

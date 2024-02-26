@@ -373,6 +373,34 @@ The server is running at [http://localhost:8000](http://localhost:8000)
   }
   ```
 
+### 11. Update user location Route (requires userAuth)
+
+- **Endpoint**: `http://localhost:8000/api/user/location`
+- **Method**: PUT
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "message": "User location updated successfully"
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
+
 ## Additional Information
 
 - **User Authentication**: Some routes require user authentication (`userAuth`).
@@ -505,7 +533,7 @@ curl -X GET \
 ```
 
 
-### 19. Update Donation Request Route
+### 10. Update Donation Request Route
 
 ```bash
 curl -X PUT \
@@ -520,5 +548,17 @@ curl -X PUT \
   }'
 ```
 
+### 11. Update User location Route (requires userAuth)
+
+```bash
+curl -X PUT \
+  http://localhost:8000/api/user/location \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer your_access_token' \
+  -d '{
+    "longitude": float
+    "latitude": float
+  }'
+```
 
 Make sure to replace `your_username`, `your_email@example.com`, `your_password`, `your_access_token`, `updated_username`, `updated_email@example.com`, `your_verification_code`, `longitude`, `latitude`, `updated_longitude`, `updated_latitude`, and `:requestId` with actual values.

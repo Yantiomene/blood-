@@ -7,7 +7,8 @@ const {
     protected,
     logout, 
     getUserProfile, 
-    updateUserProfile 
+    updateUserProfile, 
+    updateUserLocation
 } = require('../controllers/auth');
 const { 
     createDonationRequest, 
@@ -30,6 +31,7 @@ router.get('/verifyEmail/:code', verifyEmail);
 router.post('/donationRequest', userAuth, createDonationRequest);
 router.get('/donationRequest', userAuth, getDonationRequests);
 router.put('/donationRequest/:requestId', userAuth, updateDonationRequest);
+router.put('/user/location', userAuth, updateUserLocation);
 
 
 module.exports = router;
