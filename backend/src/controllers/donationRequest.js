@@ -360,7 +360,8 @@ const findNearbyDonors = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            donors: result.rows,
+            donors: result.rows || [],
+            hospitals: hospitals || [],
         });
     } catch (error) {
         console.error('Error finding nearby donors:', error.message);

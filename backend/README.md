@@ -218,7 +218,7 @@ The server is running at [http://localhost:8000](http://localhost:8000)
 
 ### 6. Update user profile Route (requires userAuth)
 
-- **Endpoint**: `http://localhost:8000/api/users`
+- **Endpoint**: `http://localhost:8000/api/profile`
 - **Method**: PUT
 
 #### Success Response
@@ -400,6 +400,33 @@ The server is running at [http://localhost:8000](http://localhost:8000)
   }
   ```
 
+### 12. Find Nearby donors (requires userAuth)
+
+- **Endpoint**: `http://localhost:8000/api/donors/find`
+- **Method**: POST
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "donors": ListofDonors || [],
+      "hospitals": ListofHospitals || []
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
 
 ## Additional Information
 
@@ -481,6 +508,8 @@ curl -X PUT \
     "email": "updated_email@example.com",
     "bloodType": "B+",
     "location": [longitude, latitude]
+    "isDonor": bool,
+    "contactNumber": "updated_contact_number"
 }'
 ```
 
@@ -561,4 +590,16 @@ curl -X PUT \
   }'
 ```
 
-Make sure to replace `your_username`, `your_email@example.com`, `your_password`, `your_access_token`, `updated_username`, `updated_email@example.com`, `your_verification_code`, `longitude`, `latitude`, `updated_longitude`, `updated_latitude`, and `:requestId` with actual values.
+### 6. Find Nearby donors (requires userAuth)
+
+```bash
+curl -X POST \
+  http://localhost:8000/api/donors/find \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer your_access_token' \
+  -d '{
+    "bloodType": requesting_blood_type
+}'
+```
+
+Make sure to replace `your_username`, `your_email@example.com`, `your_password`, `your_access_token`, `updated_username`, `updated_email@example.com`, `your_verification_code`, `longitude`, `latitude`, `updated_longitude`, `updated_latitude`, `:requestId` and `requesting_blood_type` with actual values.
