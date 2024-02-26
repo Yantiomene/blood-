@@ -1,6 +1,18 @@
 const nodemailer = require('nodemailer');
 const { EMAIL, PASSWORD } = require('../constants');
 
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+      user: EMAIL, // Replace with your email
+      pass: PASSWORD, // Replace with your email app password
+  },
+  // For Gmail, use the following settings:
+  secure: true, 
+  requireTLS: true,
+  port: 587, // or 465 for SSL
+});
+
 const sendVerificationEmail = (email, verificationCode) => {
 
     const emailContent = `<!DOCTYPE html>
@@ -63,18 +75,6 @@ const sendVerificationEmail = (email, verificationCode) => {
     </html>
     `;    
 
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: EMAIL, // Replace with your email
-            pass: PASSWORD, // Replace with your email app password
-        },
-        // For Gmail, use the following settings:
-        secure: true, 
-        requireTLS: true,
-        port: 587, // or 465 for SSL
-    });
-
     const mailOptions = {
         from: EMAIL,
         to: email,
@@ -91,4 +91,24 @@ const sendVerificationEmail = (email, verificationCode) => {
     });
 };
 
-module.exports = sendVerificationEmail;
+
+const sendNotificationEmail = async (to, subject, text, html) => {
+  const mailOptions = {
+      from: EMAIL,
+      to,
+      subject,
+      text,
+      html,
+  };
+
+  // Send email
+  await transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+        console.log('Error sending email:', error.message);
+    } else {
+        console.log('Email sent:', info.response);
+    }
+  });
+};
+
+module.exports = { sendNotificationEmail, sendVerificationEmail }; 
