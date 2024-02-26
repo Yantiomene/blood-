@@ -25,6 +25,8 @@ const LoginPage: React.FC = () => {
             if (response.success) {
                 localStorage.setItem('isAuth', 'true');
                 window.location.href = '/dashboard';
+            } else {
+                localStorage.setItem('isAuth', 'false');
             }
         } catch (error) {
             setLoginError('Invalid email or password');
