@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import styles from '../styles/globals.css';
+import bloodplus from '../Blood+Logo.png';
 
 export default function Home() {
   return (
