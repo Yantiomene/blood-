@@ -3,7 +3,8 @@ const { hash } = require('bcryptjs');
 const { sign } = require('jsonwebtoken');
 const { SECRET } = require('../constants');
 const redisClient = require('../utils/redis');
-const sendVerificationEmail = require('../utils/email');
+const { sendVerificationEmail } = require('../utils/email');
+const { validateLocationFormat } = require('../utils/geoUtils');
 
 exports.getUsers = async (req, res) => {
     try {
@@ -77,6 +78,8 @@ exports.login = async (req, res) => {
     }
     try {
         const token = sign(payload, SECRET, { expiresIn: '1h' });
+        req.user = user;
+        console.log(user);
         req.logger.info(`${user.email} logged in successfully`);
         return res.status(200).cookie('token', token, { httpOnly: true }).json({
             success: true,
@@ -123,7 +126,7 @@ exports.getUserProfile = async (req, res) => {
     const userId = req.user.id;
     
     try {
-        const userProfile = await db.query('SELECT id, username, email, "bloodType", location, "isVerified" FROM users WHERE id = $1', [userId]);
+        const userProfile = await db.query('SELECT id, username, email, "bloodType", "isDonor", location, "isVerified" FROM users WHERE id = $1', [userId]);
 
         if (!userProfile.rows.length) {
             return res.status(404).json({
@@ -149,17 +152,54 @@ exports.getUserProfile = async (req, res) => {
 
 exports.updateUserProfile = async (req, res) => {
     const userId = req.user.id;
-    const { username, email, bloodType, location } = req.body;
+    const { username, email, bloodType, isDonor, location, contactNumber } = req.body;
 
     try {
-        console.log(location[0], location[1]);
-        // Convert coordinates to POINT format
-        const locationPoint = await db.query('SELECT ST_SetSRID(ST_MakePoint($1, $2), 4326) AS location', [location[0], location[1]]);
-        console.log(locationPoint.rows[0].location, typeof (locationPoint));
-        await db.query(
-            'UPDATE users SET username = $1, email = $2, "bloodType" = $3, location = $4 WHERE id = $5 RETURNING *',
-            [username, email, bloodType, locationPoint.rows[0].location, userId]
-        );
+
+        // Update donation request
+        const updateFields = [];
+        const updateValues = [];
+
+        if (username !== undefined) {
+            updateFields.push('"username"');
+            updateValues.push(username);
+        }
+
+        if (email !== undefined) {
+            updateFields.push('"email"');
+            updateValues.push(email);
+        }
+
+        if (bloodType !== undefined) {
+            updateFields.push('"bloodType"');
+            updateValues.push(bloodType);
+        }
+
+        if (isDonor !== undefined) {
+            updateFields.push('"isDonor"');
+            updateValues.push(isDonor);
+        }
+
+        if (location !== undefined) {
+            validateLocationFormat(location);
+            updateFields.push('"location"');
+            const locationPoint = await db.query('SELECT ST_SetSRID(ST_MakePoint($1, $2), 4326) AS location', [location[0], location[1]]);
+            updateValues.push(locationPoint.rows[0].location);
+        }
+
+        if (contactNumber !== undefined) {
+            updateFields.push('"contactNumber"');
+            updateValues.push(contactNumber);
+        }
+
+        updateFields.push('"updated_at"');
+        updateValues.push(new Date());
+
+        const updateQuery = `UPDATE users SET (${updateFields.join(', ')}) = (${updateValues.map((_, i) => `$${i + 1}`).join(', ')}) WHERE id = $${updateValues.length + 1} RETURNING *`;
+        const result = await db.query(updateQuery, [...updateValues, userId]);
+
+        req.user = result.rows[0];
+
         req.logger.info("Updated user profile successfully");
         return res.status(200).json({
             success: true,
@@ -207,6 +247,32 @@ exports.verifyEmail = async (req, res) => {
     }
 };
 
+
+exports.updateUserLocation = async (req, res) => {
+    const { latitude, longitude } = req.body;
+    const userId = req.user.id; // Assuming you have user information in req.user
+
+    try {
+
+        validateLocationFormat([longitude, latitude]);
+
+        // Update user's location in the database
+        await db.query('UPDATE users SET location = ST_GeomFromText($1, 4326) WHERE id = $2', [`POINT(${longitude} ${latitude})`, userId]);
+
+        req.logger.info('User location updated successfully');
+        return res.status(200).json({
+            success: true,
+            message: 'User location updated successfully',
+        });
+    } catch (error) {
+        req.logger.error('Error updating user location:', error.message);
+        console.error('Error updating user location:', error.message);
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+        });
+    }
+};
 
 
 // Function to generate a random short code (5 digits)

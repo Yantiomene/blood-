@@ -1,9 +1,11 @@
 "use client";
 
-import Link from "next/link"
+import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from 'next/navigation';
 import NavItem from './NavItem';
 import UserProfileIcon from "./UserIcon";
+import logo from "@/public/logo.png";
 
 const Header: React.FC = () => {
     const pathname = usePathname();
@@ -14,7 +16,7 @@ const Header: React.FC = () => {
         <header className="bg-red-500 p-4">
             <div className="container mx-auto flex justify-between items-center">
                 <Link href="/" className="text-white text-2xl font-bold">
-                    Blood+
+                    <Image src={logo} width={100} alt="blood+" />
                 </Link>
                 <div className="flex items-center gap-6">
                 </div>

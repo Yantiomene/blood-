@@ -25,7 +25,13 @@ passport.use(
             if (!rows.length) {
                 throw new Error('401 not authorized');
             }
-            const user = { id: rows[0].id, username: rows[0].username, email: rows[0].email };
+            const user = { 
+                id: rows[0].id, 
+                username: rows[0].username, 
+                email: rows[0].email, 
+                location: rows[0].location,
+                contactNumber: rows[0].contactNumber
+            };
             return await done(null, user);
         } catch (error) {
             console.log(error.message);
