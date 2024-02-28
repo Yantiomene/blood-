@@ -4,7 +4,6 @@ const {
     getUsers, 
     register, 
     login, 
-    protected,
     logout, 
     getUserProfile, 
     updateUserProfile, 
@@ -22,7 +21,6 @@ const { userAuth } = require('../middlewares/auth-middleware');
 const router = Router();
 
 router.get('/users', getUsers);
-router.get('/protected', userAuth, protected);
 router.post('/register', registerValidation, validationMiddleware, register);
 router.post('/login', loginValidation, validationMiddleware, login);
 router.get('/logout', userAuth, logout);

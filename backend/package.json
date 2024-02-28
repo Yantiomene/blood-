@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
@@ -28,7 +29,9 @@
     "passport-jwt": "^4.0.1",
     "pg": "^8.11.3",
     "redis": "^2.8.0",
+    "supertest": "^6.3.4",
     "winston": "^3.11.0",
-    "wkx": "^0.5.0"
+    "wkx": "^0.5.0",
+    "jest": "^29.7.0"
   }
 }
