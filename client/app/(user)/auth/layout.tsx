@@ -1,6 +1,5 @@
 import React from 'react';
 import type { Metadata } from "next";
-import Head from 'next/head';
 
 type AuthLayoutProps = {
     title: string;
@@ -13,12 +12,9 @@ export const metadata: Metadata = {
   };
   
 
-const AuthLayout: React.FC<AuthLayoutProps> = ({ title, children }) => {
+const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
     return (
         <>
-            <Head>
-                <title>{title}</title>
-            </Head>
             <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
                 <div>{children}</div>
             </div>

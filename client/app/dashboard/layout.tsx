@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Metadata } from "next";
-import Head from 'next/head';
 import Header from '../components/Header';
+import { GetToken } from '../api/util';
 
 type DashboardLayoutProps = {
     title: string;
@@ -14,13 +14,11 @@ export const metadata: Metadata = {
 };
 
 
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, children }) => {
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+    const isLoggedin: boolean = GetToken();
     return (
         <>
-            <Head>
-                <title>{title}</title>
-            </Head>
-            <Header />
+            <Header isLoggedin={isLoggedin} />
             <main className="bg-gray-100 min-h-screen">
                 {children}
             </main>

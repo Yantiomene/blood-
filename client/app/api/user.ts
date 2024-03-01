@@ -1,4 +1,6 @@
-import axios from 'axios';
+"use server";
+
+import axios, { all } from 'axios';
 
 axios.defaults.withCredentials = true;
 

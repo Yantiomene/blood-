@@ -7,10 +7,10 @@ import NavItem from './NavItem';
 import UserProfileIcon from "./UserIcon";
 import logo from "@/public/logo.png";
 
-const Header: React.FC = () => {
+const Header: React.FC<{ isLoggedin: boolean }> = ({ isLoggedin }) => {
     const pathname = usePathname();
-
-    const isLoggedin = localStorage.getItem('isAuth') || false;
+  
+    // console.log("isLoggedin: ", isLoggedin, typeof isLoggedin);
 
     return (
         <header className="bg-red-500 p-4">
@@ -26,7 +26,6 @@ const Header: React.FC = () => {
                     <ul className="md:flex space-x-4 hidden mr-10">
                         <NavItem href="/blog" isActive={pathname === '/blog'}>Blog</NavItem>
                         <NavItem href="/about" isActive={pathname === '/about'}>About</NavItem>
-                        <NavItem href="/faq" isActive={pathname === '/faq'}>FAQ</NavItem>
                     </ul>
                     <ul className="flex space-x-4">
                         {isLoggedin && <NavItem href="/dashboard" isActive={pathname === '/dashboard'}>Dashboard</NavItem>}

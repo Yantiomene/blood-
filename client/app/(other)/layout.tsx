@@ -1,6 +1,5 @@
 import React from 'react';
 import type { Metadata } from "next";
-import Head from 'next/head';
 import Header from '../components/Header';
 
 type OtherLayoutProps = {
@@ -13,13 +12,9 @@ export const metadata: Metadata = {
     description: "Learn more about who we are and what we do",
 };
 
-
-const OtherLayout: React.FC<OtherLayoutProps> = ({ title, children }) => {
+const OtherLayout: React.FC<OtherLayoutProps> = ({ children }) => {
     return (
         <>
-            <Head>
-                <title>{title}</title>
-            </Head>
             <Header />
             <main className="container mx-auto py-8 min-h-screen">
                 {children}
