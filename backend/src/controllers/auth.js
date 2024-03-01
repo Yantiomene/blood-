@@ -95,16 +95,6 @@ exports.login = async (req, res) => {
     }
 }
 
-exports.protected = async (req, res) => {
-    try {
-        return res.status(200).json({
-            info: 'protected info',
-        })
-    } catch (error) {
-        console.log(error.message);
-    }
-}
-
 exports.logout = async (req, res) => {
     try {
         req.logger.info('User Logged out successfully');

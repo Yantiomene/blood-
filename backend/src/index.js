@@ -44,14 +44,32 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something went wrong!');
 });
 
+// Export the app object
+//module.exports = app;
+
 const appStart = () => {
     try {
-        app.listen(PORT, () => {
+        const server = app.listen(PORT, () => {
             console.log(`Server is running at http://localhost:${PORT}`);
         });
+
+        app.server = server;
     } catch (error) {
         console.log(`Error: ${error.message}`);
     }
 }
 
 appStart();
+
+// Start the server only if this file is the main module
+/*if (require.main === module) {
+    try {
+        const server = app.listen(PORT, () => {
+            console.log(`Server is running at http://localhost:${PORT}`);
+        });
+
+        app.server = server;
+    } catch (error) {
+        console.log(`Error: ${error.message}`);
+    }
+  }*/

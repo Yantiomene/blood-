@@ -70,3 +70,14 @@ export async function logout(): Promise<any> {
         throw error;
     }
 }
+
+export async function verifyEmail(token: string): Promise<any> {
+    try {
+      const response = await axios.get(`${apiUrl}/verifyEmail/${token}`);
+      return response.data;
+    } catch (error) {
+      console.error('Email verification error:', error);
+      throw error;
+    }
+  }
+  
