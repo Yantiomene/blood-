@@ -8,7 +8,7 @@ import UserProfileIcon from "./UserIcon";
 const Header: React.FC = () => {
     const pathname = usePathname();
 
-    const isLoggedin = localStorage.getItem('isAuth');
+    const isLoggedin = typeof localStorage !== 'undefined' && localStorage.getItem('isAuth');
 
     return (
         <header className="bg-red-500 p-4">
