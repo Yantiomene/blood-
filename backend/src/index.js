@@ -23,6 +23,7 @@ require('./middlewares/passport-middleware');
 
 // impoort routes
 const authRoutes = require('./routes/auth');
+const blogRoutes = require('./routes/blogsRoute');
 
 //initialize middlewares
 app.use(express.json());
@@ -36,6 +37,7 @@ app.use(passport.initialize());
 
 // initialize routes
 app.use('/api', authRoutes);
+app.use('/blogs', blogRoutes);
 
 
 // Log errors
@@ -44,8 +46,11 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something went wrong!');
 });
 
-// Export the app object
-//module.exports = app;
+
+// Handle not found routes
+app.use((req, res) => {
+    res.status(404).send('Route not found');
+});
 
 const appStart = () => {
     try {
@@ -60,16 +65,3 @@ const appStart = () => {
 }
 
 appStart();
-
-// Start the server only if this file is the main module
-/*if (require.main === module) {
-    try {
-        const server = app.listen(PORT, () => {
-            console.log(`Server is running at http://localhost:${PORT}`);
-        });
-
-        app.server = server;
-    } catch (error) {
-        console.log(`Error: ${error.message}`);
-    }
-  }*/
