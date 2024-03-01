@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { register } from '../../api/user';
 
 const RegisterPage: React.FC = () => {
@@ -13,6 +14,8 @@ const RegisterPage: React.FC = () => {
     const [location, setLocation] = useState('');
     const [contact, setContact] = useState('');
     const [registerError, setRegisterError] = useState('');
+
+    const router = useRouter();
 
     const handleRegister = async () => {
         if (password !== confirmPassword) {
@@ -30,9 +33,21 @@ const RegisterPage: React.FC = () => {
         };
 
         try {
-            await register(user);
-            window.location.href = '/auth/login';
-            setRegisterError('');
+            console.log('Before registration 1');
+            const response = await register(user);
+            console.log('After registration', response);
+            if (response.success) {
+                console.log('Registration successful');
+                setRegisterError('');
+    
+                // Wait for a moment (optional)
+                await new Promise(resolve => setTimeout(resolve, 1000));
+    
+                // Redirect after registration
+                router.push('/auth/verifyEmail');
+            } else {
+                setRegisterError('Registration failed');
+            }
         }
         catch (error) {
             setRegisterError('Registration failed');
@@ -45,7 +60,7 @@ const RegisterPage: React.FC = () => {
 
     return (
         <>
-            <h1 className="text-4xl text-red-500 font-bold"><Link href='/'>Blood+</Link></h1>
+            <h1 className="text-4xl text-red-500 font-bold"><Link href='/'>Blood+</Link></h1><br/>
             <p className="text-2xl text-gray-700 font-bold mb-4">Register</p>
             <form className="w-[90vw] md:w-[40vw] bg-white shadow-md rounded px-8 py-8 mb-4">
                 {registerError && <p className="text-red-500 mb-4">{registerError}</p>}
@@ -163,7 +178,7 @@ const RegisterPage: React.FC = () => {
                     Register
                 </button>
                 <p className="text-gray-500 text-center mt-4 text-sm">
-                    Already have an account? <a className='text-red-500 hover:text-red-400' href="/auth/register">Login</a>
+                    Already have an account? <a className='text-red-500 hover:text-red-400' href="/auth/login">Login</a>
                 </p>
             </form>
         </>
