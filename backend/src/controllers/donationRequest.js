@@ -148,7 +148,41 @@ const findNearbyDonors = async (req, res) => {
     const userContact = req.user.contactNumber;
 
     try {
-        // Find nearby donors with matching blood type
+        let compatibleBloodTypes;
+
+        switch (bloodType) {
+            case 'AB+':
+                compatibleBloodTypes = ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'];
+                break;
+            case 'AB-':
+                compatibleBloodTypes = ['O-', 'A-', 'B-', 'AB-'];
+                break;
+            case 'B+':
+                compatibleBloodTypes = ['O+', 'O-', 'B+', 'B-'];
+                break;
+            case 'B-':
+                compatibleBloodTypes = ['O-', 'B-'];
+                break;
+            case 'A+':
+                compatibleBloodTypes = ['O+', 'O-', 'A+', 'A-'];
+                break;
+            case 'A-':
+                compatibleBloodTypes = ['O-', 'A-'];
+                break;
+            case 'O+':
+                compatibleBloodTypes = ['O+', 'O-'];
+                break;
+            case 'O-':
+                compatibleBloodTypes = ['O-'];
+                break;
+            default:
+                return res.status(400).json({
+                    success: false,
+                    error: 'Invalid blood type',
+                });
+        }
+
+        // Find nearby donors with compatible blood types
         const result = await db.query(`
             SELECT 
                 id,
@@ -161,11 +195,11 @@ const findNearbyDonors = async (req, res) => {
             FROM 
                 users
             WHERE 
-                "bloodType" = $2 AND id != $3
+                "bloodType" IN (${compatibleBloodTypes.map((_, index) => `$${index + 2}`).join(', ')}) AND id != $${compatibleBloodTypes.length + 2}
             ORDER BY 
                 distance
             LIMIT 5;
-        `, [userLocation, bloodType, userId]);
+        `, [userLocation, ...compatibleBloodTypes, userId]);
 
         const point = wkx.Geometry.parse(Buffer.from(userLocation, 'hex'));
 
@@ -288,6 +322,10 @@ const findNearbyDonors = async (req, res) => {
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Blood Donors Nearby</title>
+            <!-- Add Leaflet CSS and JS files -->
+            <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+            <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
             <style>
                 body {
                     font-family: 'Arial', sans-serif;
