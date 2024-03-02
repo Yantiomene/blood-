@@ -1,24 +1,24 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-// import { getCurrentUser } from '../api/user';
+import { getCurrentUser } from '../api/user';
 
 const UserDashboard: React.FC = () => {
 
     const [userData, setUserData] = useState<any>(null);
 
-    // useEffect(() => {
-    //     const fetchUserData = async () => {
-    //         try {
-    //             const data = await getCurrentUser();
-    //             setUserData(data.user);
-    //         } catch (error) {
-    //             console.error('Error fetching user data:', error);
-    //         }
-    //     };
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const data = await getCurrentUser();
+                setUserData(data.user);
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        };
 
-    //     fetchUserData();
-    // }, []);
+        fetchUserData();
+    }, []);
 
     return (
         <>

@@ -2,12 +2,17 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { login } from '../../../api/user';
+// import { useDispatch } from 'react-redux';
+// import { authenticateUser } from "../../../redux/authSlice";
 
 const LoginPage: React.FC = () => {
     const [email, setemail] = useState('');
     const [password, setPassword] = useState('');
     const [loginError, setLoginError] = useState('');
+    const router = useRouter();
+    // const dispatch = useDispatch();
 
     const handleemailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setemail(event.target.value);
@@ -22,17 +27,14 @@ const LoginPage: React.FC = () => {
 
         try {
             const response = await login({ email, password });
-            console.log('response: ', response);
+            // dispatch(authenticateUser());
             if (response.success) {
-                localStorage.setItem('isAuth', 'true');
-                localStorage.setItem('token', response.token);
-                window.location.href = '/dashboard';
+                router.push('/dashboard');
             }
         } catch (error) {
             setLoginError('Invalid email or password');
         }
     };
-
 
     const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
 

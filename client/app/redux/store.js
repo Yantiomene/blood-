@@ -1,11 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
-import userReducer from './userSlice';
+import authSlice from './authSlice';
+
 
 export const store = configureStore({
-    reducer: {
-        user: userReducer,
-    },
+  reducer: {
+    auth: authSlice,
+  },
 });
-
-
-// learn more: https://redux.js.org/usage/nextjs#initial-setup

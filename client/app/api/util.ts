@@ -11,10 +11,10 @@ import { cookies } from 'next/headers'
 
 export function GetToken() {
     const cookieStore = cookies()
-    const token = cookieStore.get('token') ?? '';
+    const token: any = cookieStore.get('token') ?? '';
     
     const isTokenValid = isValidCookie(token?.value);
-    console.log("all cookies: ", token?.value, isTokenValid); // xx
+    // console.log("all cookies: ", token, isTokenValid); // xx
     return isTokenValid;
 }
 
@@ -22,8 +22,8 @@ function isValidCookie(cookie: string): boolean {
     try {
         jwt.verify(cookie, 'secret');
         return true;
-    } catch (error) {
-        console.log("error: ", error.message);
+    } catch (error: any) {
+        // console.log("error: ", error.message);
         return false;
     }
 }
