@@ -1,16 +1,20 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from 'next/navigation';
 import NavItem from './NavItem';
 import UserProfileIcon from "./UserIcon";
+import Image from "next/image";
 import logo from "@/public/logo.png";
 
 const Header: React.FC<{ isLoggedin: boolean }> = ({ isLoggedin }) => {
     const pathname = usePathname();
   
     // console.log("isLoggedin: ", isLoggedin, typeof isLoggedin);
+    useEffect(() => {
+        localStorage.setItem('isAuth', `${isLoggedin}`);
+    }, []);
 
     return (
         <header className="bg-red-500 p-4">

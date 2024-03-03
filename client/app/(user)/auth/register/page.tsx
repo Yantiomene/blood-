@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { register } from '../../../api/user';
+import { useRouter } from 'next/navigation';
 
 const RegisterPage: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -11,23 +12,28 @@ const RegisterPage: React.FC = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [bloodType, setBloodType] = useState('');
     const [registerError, setRegisterError] = useState('');
+    const router = useRouter()
 
-    const handleRegister = async () => {
+    const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+    
         if (password !== confirmPassword) {
-            alert('Passwords do not match');
+            setRegisterError('Passwords do not match');
             return;
         }
-
-        const user = {
-            email,
-            username,
-            password,
-            bloodType,
-        };
-
-        try {
-            await register(user);
-            window.location.href = '/auth/login';
+        
+        try {    
+            const user = {
+                email,
+                username,
+                password,
+                bloodType,
+            };
+            const response = await register(user);
+            if (response.success){
+                router.push('/auth/login');
+                return;
+            }
             setRegisterError('');
         }
         catch (error) {
@@ -43,7 +49,7 @@ const RegisterPage: React.FC = () => {
         <>
             <h1 className="text-4xl text-red-500 font-bold"><Link href='/'>Blood+</Link></h1>
             <p className="text-2xl text-gray-700 font-bold mb-4">Register</p>
-            <form className="w-[90vw] md:w-[40vw] bg-white shadow-md rounded px-8 py-8 mb-4">
+            <form onSubmit={handleRegister} className="w-[90vw] md:w-[40vw] bg-white shadow-md rounded px-8 py-8 mb-4">
                 {registerError && <p className="text-red-500 mb-4">{registerError}</p>}
 
                 <div className="mb-4">
@@ -125,8 +131,8 @@ const RegisterPage: React.FC = () => {
                 </div>
 
                 <button
-                    onClick={handleRegister}
                     className="bg-red-500 inline-block w-full hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    type="submit"
                 >
                     Register
                 </button>
