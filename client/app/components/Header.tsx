@@ -10,8 +10,7 @@ import logo from "@/public/logo.png";
 
 const Header: React.FC<{ isLoggedin: boolean }> = ({ isLoggedin }) => {
     const pathname = usePathname();
-  
-    // console.log("isLoggedin: ", isLoggedin, typeof isLoggedin);
+
     useEffect(() => {
         localStorage.setItem('isAuth', `${isLoggedin}`);
     }, []);
@@ -33,8 +32,8 @@ const Header: React.FC<{ isLoggedin: boolean }> = ({ isLoggedin }) => {
                     </ul>
                     <ul className="flex space-x-4">
                         {isLoggedin && <NavItem href="/dashboard" isActive={pathname === '/dashboard'}>Dashboard</NavItem>}
-                        {!isLoggedin && <NavItem href="/auth/login" isActive={pathname === '/auth/login'}>Login</NavItem>}
-                        {!isLoggedin && <NavItem href="/auth/register" isActive={pathname === '/auth/register'}>Register</NavItem>}
+                        {!isLoggedin && <NavItem href="/login" isActive={pathname === '/login'}>Login</NavItem>}
+                        {!isLoggedin && <NavItem href="/register" isActive={pathname === '/register'}>Register</NavItem>}
                     </ul>
                     {isLoggedin && <UserProfileIcon />}
                 </nav>

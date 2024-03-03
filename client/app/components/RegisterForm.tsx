@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useState } from 'react';
-import Link from 'next/link';
-import { register } from '../../../api/user';
+import { register } from '@/app/api/user';
 import { useRouter } from 'next/navigation';
 
-const RegisterPage: React.FC = () => {
+const RegisterForm: React.FC = () => {
     const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -31,7 +30,7 @@ const RegisterPage: React.FC = () => {
             };
             const response = await register(user);
             if (response.success){
-                router.push('/auth/login');
+                router.push('/login');
                 return;
             }
             setRegisterError('');
@@ -47,8 +46,6 @@ const RegisterPage: React.FC = () => {
 
     return (
         <>
-            <h1 className="text-4xl text-red-500 font-bold"><Link href='/'>Blood+</Link></h1>
-            <p className="text-2xl text-gray-700 font-bold mb-4">Register</p>
             <form onSubmit={handleRegister} className="w-[90vw] md:w-[40vw] bg-white shadow-md rounded px-8 py-8 mb-4">
                 {registerError && <p className="text-red-500 mb-4">{registerError}</p>}
 
@@ -137,11 +134,11 @@ const RegisterPage: React.FC = () => {
                     Register
                 </button>
                 <p className="text-gray-500 text-center mt-4 text-sm">
-                    Already have an account? <a className='text-red-500 hover:text-red-400' href="/auth/login">Login</a>
+                    Already have an account? <a className='text-red-500 hover:text-red-400' href="/login">Login</a>
                 </p>
             </form>
         </>
     );
 };
 
-export default RegisterPage;
+export default RegisterForm;
