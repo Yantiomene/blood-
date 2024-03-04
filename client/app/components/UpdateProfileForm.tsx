@@ -5,6 +5,8 @@ import withAuth from '../components/authHOC';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCurrentUser, updateUserProfile as updateProfile } from '../redux/userSlice';
 import { useRouter } from 'next/navigation';
+var wkx = require('wkx');
+
 
 interface UserData {
     username: string;
@@ -35,11 +37,28 @@ const UpdateUserProfile: React.FC = () => {
     });
 
     const router = useRouter();
+
     const dispatch = useDispatch();
     useEffect(() => {
         dispatch(fetchCurrentUser() as any);
         setFormData(user);
     }, [dispatch]);
+
+    useEffect(() => {
+        if (user && user.location) {
+            try {
+                const locationBuffer = Buffer.from(user.location, 'hex');
+                const point = wkx.Geometry.parse(locationBuffer);
+                const latitude = point.y;
+                const longitude = point.x;
+                console.log('Latitude:', latitude);
+                console.log('Longitude:', longitude);
+                setFormData({...formData, location: [longitude, latitude]})
+            } catch (error) {
+                console.error('Error parsing location data:', error);
+            }
+        }
+    }, [user]);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -165,7 +184,18 @@ const UpdateUserProfile: React.FC = () => {
                             onChange={handleLocationChange}
                             placeholder='latitude, longitude'
                             className={inputStyles}
+                            value={`${formData.location[0]}, ${formData.location[1]}`}
+                            disabled={!editableFields.location}
                         />
+                    {!editableFields.contactNumber && (
+                        <button
+                            type="button"
+                            onClick={() => handleEditField('contactNumber')}
+                            className={editStyles}
+                        >
+                            Edit
+                        </button>
+                    )}
                     </div>
 
                 </div>
