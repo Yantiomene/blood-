@@ -70,7 +70,7 @@ const Dashboard: React.FC = () => {
                 <nav className="container mx-auto px-4 py-2 flex items-center justify-between">
                     <h1 className="text-xl font-bold">Welcome, {userData?.username}!</h1>
                     {
-                        user.isDonor &&
+                        user?.isDonor &&
                         <button
                             onClick={handleDisplayOverlay}
                             className="bg-red-500 hover:bg-red-800 text-white px-4 py-2 rounded">
