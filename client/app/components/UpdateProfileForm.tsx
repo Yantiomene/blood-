@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import withAuth from '../components/authHOC';
-import { getCurrentUser, updateProfile } from '../api/user';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCurrentUser, updateUserProfile as updateProfile } from '../redux/userSlice';
+import { useRouter } from 'next/navigation';
 
 interface UserData {
     username: string;
@@ -17,18 +19,12 @@ const inputStyles = "grow-0 appearance-none border rounded w-full py-2 px-3 text
 const editStyles = "bg-blue-500 text-white rounded-md px-2 py-1 mt-2 focus:outline-none focus:bg-blue-600"
 const fieldStyles = "mb-4 flex items-center gap-4"
 const labelStyles = "block mb-1"
-let messageStyles = "text-center mt-4 text-gray-600 italic"
+const messageStyles = "text-center mt-4 text-gray-600 italic"
 
 const UpdateUserProfile: React.FC = () => {
-    const [formData, setFormData] = useState<UserData>({
-        username: '',
-        email: '',
-        bloodType: '',
-        isDonor: false,
-        location: [0, 0],
-        contactNumber: ''
-    });
     const [Message, setMessage] = useState<string>('');
+    const user = useSelector((state: any) => state.user.data);
+    const [formData, setFormData] = useState<UserData>(user);
     const [editableFields, setEditableFields] = useState<Record<string, boolean>>({
         username: false,
         email: false,
@@ -38,23 +34,16 @@ const UpdateUserProfile: React.FC = () => {
         contactNumber: false
     });
 
+    const router = useRouter();
+    const dispatch = useDispatch();
     useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const data = await getCurrentUser();
-                if (data.success) {
-                    setFormData(data.user);
-                    console.log(">> formdata: ", data.user)
-                }
-            } catch (error: any) {
-                console.error('Error fetching user data:', error.message);
-            }
-        };
-        fetchUserData();
-    }, []);
+        dispatch(fetchCurrentUser() as any);
+        setFormData(user);
+    }, [dispatch]);
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
+        console.log("name, value:", name, value);
         setFormData({ ...formData, [name]: value });
     };
 
@@ -76,17 +65,17 @@ const UpdateUserProfile: React.FC = () => {
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         try {
-            const response = await updateProfile(formData);
-            setMessage(response.message);
+            dispatch(updateProfile(formData) as any);
+            router.push('/dashboard');
+            setMessage('successfully updated info');
         } catch (error: any) {
-            setMessage(error.message);
+            setMessage('an error occurred');
         }
     };
     return (
         <>
-            <h2 className="text-2xl font-bold mb-4">User Profile</h2>
-            {Message && <p className={messageStyles}>{Message}</p>}
-            <form onSubmit={handleSubmit} className="w-[90vw] md:w-[40vw] bg-white shadow-md rounded px-8 py-8 mb-4">
+            <form onSubmit={handleSubmit} className="w-[90vw] md:w-[40vw] bg-white rounded px-8 py-8 mb-4">
+                {Message && <p className={messageStyles}>{Message}</p>}
                 <div className={fieldStyles}>
                     <label className={labelStyles}>Username</label>
                     <input
@@ -129,14 +118,24 @@ const UpdateUserProfile: React.FC = () => {
                 </div>
                 <div className={fieldStyles}>
                     <label className={labelStyles}>Blood Type</label>
-                    <input
-                        type="text"
+                    <select
+                        id="bloodType"
                         name="bloodType"
                         value={formData.bloodType}
                         onChange={handleChange}
                         className={inputStyles}
+                        aria-describedby="bloodTypeHelpText"
                         disabled={!editableFields.bloodType}
-                    />
+                    >
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                    </select>
                     {!editableFields.bloodType && (
                         <button
                             type="button"

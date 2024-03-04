@@ -61,7 +61,7 @@ const UserProfileIcon: React.FC = () => {
                     {userData && (
                         <ul className="p-2">
                             <li className={dropdownItemStyles + ' text-nowrap'}>
-                                <Link href="/user">
+                                <Link href="/profile">
                                     {userData.username}
                                     <span className='ml-2 px-1 rounded-full text-white bg-red-500 text-center text-xs'>
                                         {userData.bloodType}
