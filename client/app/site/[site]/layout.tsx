@@ -1,6 +1,5 @@
 import React from 'react';
 import type { Metadata } from "next";
-import Header from '../components/Header';
 
 type OtherLayoutProps = {
     title: string;
@@ -15,10 +14,7 @@ export const metadata: Metadata = {
 const OtherLayout: React.FC<OtherLayoutProps> = ({ children }) => {
     return (
         <>
-            <Header />
-            <main className="container mx-auto py-8 min-h-screen">
-                {children}
-            </main>
+            {children}
             <footer className="bg-red-800 py-4">
                 <div className="container mx-auto text-center text-white">
                     &copy; 2024 My Blog. All rights reserved.

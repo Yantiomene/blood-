@@ -123,8 +123,7 @@ exports.logout = async (req, res) => {
 
 exports.getUserProfile = async (req, res) => {
     const userId = req.user.id;
-    
-    req.logger.info(">> get user profile: ", userId);
+
     try {
         const userProfile = await db.query('SELECT id, username, email, "bloodType", "isDonor", location, "isVerified" FROM users WHERE id = $1', [userId]);
 

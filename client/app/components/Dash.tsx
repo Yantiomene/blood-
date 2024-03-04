@@ -4,18 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { getCurrentUser } from '../api/user';
 import { useSelector } from 'react-redux';
 import Header from './Header';
-import { useRouter } from 'next/navigation';
+import withAuth from './authHOC';
 
 const Dashboard: React.FC = () => {
 
     const [userData, setUserData] = useState<any>(null);
-    const router = useRouter();
-    const auth = useSelector((state: any) => state.auth);
+    const auth = useSelector((state: any) => state.auth.isAuth);
 
-    if (!auth.isAuth()) {
-        router.push('/auth/login');
-        return
-    }
     useEffect(() => {
         const fetchUserData = async () => {
             try {
@@ -31,7 +26,7 @@ const Dashboard: React.FC = () => {
 
     return (
         <>
-            <Header isLoggedin={auth.isAuth()} />
+            <Header isLoggedin={auth} />
             <header className="bg-white sticky top-0 z-40 shadow">
                 <nav className="container mx-auto px-4 py-2 flex items-center justify-between">
                     <h1 className="text-xl font-bold">User Dashboard</h1>
@@ -71,4 +66,4 @@ const Dashboard: React.FC = () => {
     );
 };
 
-export default Dashboard;
+export default withAuth(Dashboard);

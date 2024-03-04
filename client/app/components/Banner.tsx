@@ -4,11 +4,11 @@ import { useSelector } from 'react-redux';
 import Header from '../components/Header';
 
 const Banner: React.FC = () => {
-    const auth = useSelector((state: any) => state.auth);
-
+    const auth = useSelector((state: any) => state.auth.isAuth);
+    console.log(">> auth: ", auth)
     return (
         <>
-            <Header isLoggedin={auth.isAuth()} />
+            <Header isLoggedin={auth} />
             <div className="pt-10">
                 <h1 className="text-center">Welcome To Blood+, a digital resource for blood access and donations</h1>
                 <section >

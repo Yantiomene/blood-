@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useDispatch } from 'react-redux';
 import { getCurrentUser, logout } from '../api/user';
 import { useRouter } from 'next/navigation';
+import { unAuthenticateUser } from '../redux/authSlice';
 
 const dropdownItemStyles = "px-4 py-2 hover:bg-gray-100 rounded cursor-pointer";
 
@@ -10,6 +12,7 @@ const UserProfileIcon: React.FC = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [userData, setUserData] = useState<any>(null);
     const router = useRouter();
+    const dispatch = useDispatch();
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -32,7 +35,7 @@ const UserProfileIcon: React.FC = () => {
         try {
             const status = await logout();
             if (status.success) {
-                localStorage.removeItem('isAuth');
+                dispatch(unAuthenticateUser());
                 router.push('/');
             }
         } catch (error) {

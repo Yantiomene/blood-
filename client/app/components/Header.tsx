@@ -27,8 +27,8 @@ const Header: React.FC<{ isLoggedin: boolean }> = ({ isLoggedin }) => {
 
                 <nav className="flex items-center gap-6">
                     <ul className="md:flex space-x-4 hidden mr-10">
-                        <NavItem href="/blog" isActive={pathname === '/blog'}>Blog</NavItem>
-                        <NavItem href="/about" isActive={pathname === '/about'}>About</NavItem>
+                        <NavItem href="/site/blog" isActive={pathname === '/site/blog'}>Blog</NavItem>
+                        <NavItem href="/site/about" isActive={pathname === '/site/about'}>About</NavItem>
                     </ul>
                     <ul className="flex space-x-4">
                         {isLoggedin && <NavItem href="/dashboard" isActive={pathname === '/dashboard'}>Dashboard</NavItem>}
