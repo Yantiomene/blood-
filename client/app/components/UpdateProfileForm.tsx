@@ -15,7 +15,7 @@ interface UserData {
     contactNumber: string;
 }
 
-const inputStyles = "grow-0 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
+const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
 const editStyles = "bg-blue-500 text-white rounded-md px-2 py-1 mt-2 focus:outline-none focus:bg-blue-600"
 const fieldStyles = "mb-4 flex items-center gap-4"
 const labelStyles = "block mb-1"
@@ -43,7 +43,6 @@ const UpdateUserProfile: React.FC = () => {
 
     const handleChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
-        console.log("name, value:", name, value);
         setFormData({ ...formData, [name]: value });
     };
 
@@ -164,6 +163,7 @@ const UpdateUserProfile: React.FC = () => {
                             type="text"
                             name="location"
                             onChange={handleLocationChange}
+                            placeholder='latitude, longitude'
                             className={inputStyles}
                         />
                     </div>

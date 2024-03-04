@@ -1,28 +1,38 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { getCurrentUser } from '../api/user';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCurrentUser } from '../redux/userSlice';
 import Header from './Header';
 import withAuth from './authHOC';
+import Overlay from './overlayContainer';
+
 
 const Dashboard: React.FC = () => {
 
-    const [userData, setUserData] = useState<any>(null);
     const auth = useSelector((state: any) => state.auth.isAuth);
+    const user = useSelector((state: any) => state.user.data);
+    const [userData, setUserData] = useState<any>(user);
+    const [showOverlay, setShowOverlay] = useState(false);
+    const dispatch = useDispatch();
 
     useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const data = await getCurrentUser();
-                setUserData(data.user);
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-            }
-        };
+        dispatch(fetchCurrentUser() as any);
+        setUserData(userData);
+    }, [dispatch, userData]);
 
-        fetchUserData();
-    }, []);
+    const handleDisplayOverlay = () => {
+        setShowOverlay(!showOverlay);
+        const bodyElem = document.querySelector('body');
+        console.log("body element", bodyElem);
+        if (showOverlay) {
+            console.log("body element is showing", showOverlay);
+            bodyElem?.classList.add('overflow-hidden');
+        } else {
+            console.log("body element is closed", showOverlay);
+            bodyElem?.classList.remove('overflow-hidden');
+        }
+    }
 
     return (
         <>
@@ -30,11 +40,14 @@ const Dashboard: React.FC = () => {
             <header className="bg-white sticky top-0 z-40 shadow">
                 <nav className="container mx-auto px-4 py-2 flex items-center justify-between">
                     <h1 className="text-xl font-bold">User Dashboard</h1>
-                    <button className="bg-red-500 hover:bg-red-800 text-white px-4 py-2 rounded">
+                    <button
+                        onClick={handleDisplayOverlay}
+                        className="bg-red-500 hover:bg-red-800 text-white px-4 py-2 rounded">
                         + action
                     </button>
                 </nav>
             </header>
+            {showOverlay && <Overlay closeOverlay={setShowOverlay} />}
             <div className="container mx-auto px-4 py-8">
                 <h2 className="text-2xl font-bold mb-4">Welcome, {userData?.username}!</h2>
 

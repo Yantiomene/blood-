@@ -5,6 +5,7 @@ export const fetchCurrentUser = createAsyncThunk(
   'user/fetchCurrentUser',
   async () => {
     const response = await getCurrentUser();
+    console.log("fetching current user from store...")
     return response.user;
   }
 );

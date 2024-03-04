@@ -1,31 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useDispatch } from 'react-redux';
-import { getCurrentUser, logout } from '../api/user';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../api/user';
 import { useRouter } from 'next/navigation';
 import { unAuthenticateUser } from '../redux/authSlice';
+import { fetchCurrentUser } from '../redux/userSlice';
 
 const dropdownItemStyles = "px-4 py-2 hover:bg-gray-100 rounded cursor-pointer";
 
 const UserProfileIcon: React.FC = () => {
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [userData, setUserData] = useState<any>(null);
     const router = useRouter();
     const dispatch = useDispatch();
+    const user = useSelector((state: any) => state.user.data);
+    const [userData, setUserData] = useState<any>(user);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-    useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const data = await getCurrentUser();
-                setUserData(data.user);
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-            }
-        };
-
-        fetchUserData();
-    }, []);
+    // useEffect(() => {
+    //     dispatch(fetchCurrentUser() as any);
+    //     setUserData(userData);
+    // }, [dispatch, userData]);
 
     const handleDropdownToggle = () => {
         setIsDropdownOpen(!isDropdownOpen);
