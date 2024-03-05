@@ -8,7 +8,8 @@ const {
     getUserProfile, 
     updateUserProfile, 
     updateUserLocation,
-    passwordResetRequest
+    passwordResetRequest,
+    resetPassword
 } = require('../controllers/auth');
 const { 
     createDonationRequest, 
@@ -16,7 +17,7 @@ const {
     updateDonationRequest,
     findNearbyDonors 
 } = require('../controllers/donationRequest');
-const { registerValidation, loginValidation } = require('../validators/auth');
+const { registerValidation, loginValidation, resetPasswordValidation } = require('../validators/auth');
 const { validationMiddleware } = require('../middlewares/validations-middleware');
 const { userAuth } = require('../middlewares/auth-middleware');
 const router = Router();
@@ -33,7 +34,8 @@ router.get('/donationRequest', userAuth, getDonationRequests);
 router.put('/donationRequest/:requestId', userAuth, updateDonationRequest);
 router.put('/user/location', userAuth, updateUserLocation);
 router.post('/donors/find', userAuth, findNearbyDonors);
-router.post('/passwordResetRequest', passwordResetRequest)
+router.post('/passwordResetRequest', passwordResetRequest);
+router.post('/passwordReset', resetPasswordValidation, validationMiddleware,resetPassword);
 
 
 module.exports = router;
