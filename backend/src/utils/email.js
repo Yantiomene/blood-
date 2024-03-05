@@ -111,4 +111,82 @@ const sendNotificationEmail = async (to, subject, text, html) => {
   });
 };
 
-module.exports = { sendNotificationEmail, sendVerificationEmail }; 
+
+const sendPasswordResetEmail = (email, resetToken) => {
+  const emailContent = `<!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: auto;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+  
+      h1 {
+        color: #d9534f;
+      }
+  
+      p {
+        color: #333;
+      }
+  
+      .reset-code {
+        font-size: 24px;
+        font-weight: bold;
+        color: #5bc0de;
+      }
+  
+      .expire-info {
+        color: #777;
+      }
+  
+      .thank-you {
+        margin-top: 20px;
+        text-align: center;
+        color: #5cb85c;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Password Reset</h1>
+      <p>Your password reset code is: <span class="reset-code">${resetToken}</span></p>
+      <p>Or click the following link to reset your password: <a href="http://localhost:8000/api/resetPassword/${resetToken}" target="_blank">Reset Password</a></p>
+      <p class="expire-info">Note: This code will expire in 1 hour.</p>
+      <div class="thank-you">Thank you, the Blood+ team</div>
+    </div>
+  </body>
+  </html>
+  `;    
+
+  const mailOptions = {
+      from: EMAIL,
+      to: email,
+      subject: 'Password Reset',
+      html: emailContent,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+          console.log('Error sending email:', error.message);
+      } else {
+          console.log('Email sent:', info.response);
+      }
+  });
+};
+
+module.exports = { sendNotificationEmail, sendVerificationEmail, sendPasswordResetEmail }; 

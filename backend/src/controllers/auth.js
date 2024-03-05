@@ -3,7 +3,7 @@ const { hash } = require('bcryptjs');
 const { sign } = require('jsonwebtoken');
 const { SECRET } = require('../constants');
 const redisClient = require('../utils/redis');
-const { sendVerificationEmail } = require('../utils/email');
+const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/email');
 const { validateLocationFormat } = require('../utils/geoUtils');
 
 exports.getUsers = async (req, res) => {
@@ -264,6 +264,90 @@ exports.updateUserLocation = async (req, res) => {
     }
 };
 
+exports.passwordResetRequest = async (req, res) => {
+    const { email } = req.body;
+    
+    try {
+        // check if email exists in database
+        const user = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+        if (!user.rows[0]) {
+            return res.status(404).json({
+                success: false,
+                error: 'Email not found',
+            })
+        }
+
+        // Generate and store a reset token in Redis
+        const resetToken = generateShortCode();
+
+        // Store verification code in Redis
+        if (!redisClient.isAlive()) {
+            throw new Error('Redis client not connected');
+        }
+
+        // Check if there's an existing token for the email
+        const existingCode = await redisClient.get(email);
+
+        // If there's an existing code, delete it
+        if (existingCode) {
+            await redisClient.del(existingCode);
+        }
+
+        // Store the new reset token in Redis
+        await redisClient.set(resetToken, email, 60 * 60); // Expire in 1h (3600 seconds)
+
+        // Send password reset email with the short code
+        sendPasswordResetEmail(email, resetToken);
+
+        req.logger.info('Password reset email sent successfully');
+        return res.status(200).json({
+            success: true,
+            message: 'Password reset email sent successfully',
+        });
+    } catch (error) {
+        req.logger.error('Error sending password reset email:', error.message);
+        console.error('Error sending password reset email:', error.message);
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+        });
+    }
+}
+
+
+exports.resetPassword = async (req, res) => {
+    const { code, password } = req.body;
+
+    try {
+        // Retrieve verification code from Redis
+        const email = await redisClient.get(code);
+        if (!email) {
+            return res.status(404).json({
+                success: false,
+                error: 'Invalid verification code.',
+            });
+        }
+
+        // hash the password
+        const hashedPassword = await hash(password, 10);
+
+        // Update the user's password in the database
+        await db.query('UPDATE users SET password = $1 WHERE email = $2', [hashedPassword, email]);
+
+        req.logger.info('Password reset successfully');
+        return res.status(200).json({
+            success: true,
+            message: 'Password reset successfully',
+        });
+    } catch (error) {
+        req.logger.error('Error resetting password:', error.message);
+        console.error('Error resetting password:', error.message);
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+        });
+    }
+}
 
 // Function to generate a random short code (5 digits)
 const generateShortCode = () => {
