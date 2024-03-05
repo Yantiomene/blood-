@@ -7,7 +7,8 @@ const {
     logout, 
     getUserProfile, 
     updateUserProfile, 
-    updateUserLocation
+    updateUserLocation,
+    passwordResetRequest
 } = require('../controllers/auth');
 const { 
     createDonationRequest, 
@@ -32,6 +33,7 @@ router.get('/donationRequest', userAuth, getDonationRequests);
 router.put('/donationRequest/:requestId', userAuth, updateDonationRequest);
 router.put('/user/location', userAuth, updateUserLocation);
 router.post('/donors/find', userAuth, findNearbyDonors);
+router.post('/passwordResetRequest', passwordResetRequest)
 
 
 module.exports = router;
