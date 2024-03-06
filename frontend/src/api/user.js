@@ -15,9 +15,11 @@ export async function getUsers() {
 
 export async function getCurrentUser() {
     try {
+        console.log(">> getting current user...");
         const response = await axios.get(`${apiUrl}/profile`, {
             withCredentials: true,
         });
+        console.log(">> recieved current user: ", response.data);
         return response.data;
     } catch (error) {
         console.error('Error getting user profile:', error.message);
@@ -57,7 +59,7 @@ export async function logout() {
 
 export async function updateProfile(user) {
     try {
-        console.log(">> profile: ", user);
+        console.log(">> profile update: ", user);
         const response = await axios.put(`${apiUrl}/profile`, user)
         return response.data;
     } catch (error) {

@@ -9,7 +9,7 @@ const buttonStyles = "inline-block w-full text-white font-bold py-2 px-4 rounded
 
 const DonationRequestForm = () => {
     const [formData, setFormData] = useState({
-        bloodType: '',
+        bloodType: 'A+',
         quantity: 0.0,
         location: [0, 0]
     })
@@ -32,7 +32,6 @@ const DonationRequestForm = () => {
         event.preventDefault();
         try {
             const response = await makeDonationRequest(formData);
-            console.log(response);
             setRequestError('');
             setRequestSuccess(response.message)
         } catch (error) {
@@ -57,6 +56,7 @@ const DonationRequestForm = () => {
                         onChange={handleChange}
                         className={inputStyles}
                         aria-describedby="bloodTypeHelpText"
+                        required={true}
                     >
                         <option value="A+">A+</option>
                         <option value="A-">A-</option>
@@ -81,6 +81,7 @@ const DonationRequestForm = () => {
                         value={formData.quantity}
                         placeholder="Enter your quantity in ml"
                         onChange={handleChange}
+                        required={true}
                     />
                 </div>
 
@@ -93,6 +94,7 @@ const DonationRequestForm = () => {
                         onChange={handleLocationChange}
                         className={inputStyles}
                         placeholder='latitude, longitude'
+                        required={true}
                     />
                 </div>
 

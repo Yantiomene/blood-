@@ -5,8 +5,9 @@ const WithHeader = ({ children }) => {
     return (
         <>
             <Header />
-            {children}
-
+            <main className='bg-gray-100'>
+                {children}
+            </main>
             <footer>
                 <p>Footer</p>
             </footer>

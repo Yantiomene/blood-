@@ -1,28 +1,24 @@
 import React, { useState, useEffect } from 'react';
 // redux
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchCurrentUser } from '../redux/userSlice';
+import { useSelector } from 'react-redux';
+import { selectUser } from '../redux/userSlice';
 import { getDonationRequest } from '../api/donation';
+// layouts
+import withCurrentUser from './withCurrentUser';
 // components
 import Overlay from './overlayContainer';
 import DonationCard from '../components/DonorCard';
 
 const Dashboard = () => {
 
-    const userData = useSelector((state) => state.user.data);
+    const userData = useSelector(selectUser);
     const [requestList, setRequestList] = useState([]);
     const [showOverlay, setShowOverlay] = useState(false);
-    const dispatch = useDispatch();
 
     useEffect(() => {
-    }, [userData]);
-    
-    useEffect(() => {
-        dispatch(fetchCurrentUser());
         const fetchDonationReqeusts = async () => {
             try {
                 const data = await getDonationRequest();
-                console.log(data);
                 setRequestList(data.donationRequests);
             } catch (error) {
                 console.log("Error occurred while fetching donation requests: ", error.message)
@@ -34,7 +30,7 @@ const Dashboard = () => {
     const handleDisplayOverlay = () => {
         setShowOverlay(!showOverlay);
         const bodyElem = document.querySelector('body');
-        console.log("body element", bodyElem);
+        // console.log("body element", bodyElem);
         if (showOverlay) {
             console.log("body element is showing", showOverlay);
             bodyElem?.classList.add('overflow-hidden');
@@ -50,7 +46,7 @@ const Dashboard = () => {
                 <nav className="container mx-auto px-4 py-2 flex items-center justify-between">
                     <h1 className="text-xl font-bold">Welcome, {userData?.username}!</h1>
                     {
-                        userData.isDonor &&
+                        userData?.isDonor &&
                         <button
                             onClick={handleDisplayOverlay}
                             className="bg-red-500 hover:bg-red-800 text-white px-4 py-2 rounded">
@@ -78,23 +74,6 @@ const Dashboard = () => {
                             />
                         )
                     }
-                    {/* <div className="bg-white p-4 shadow rounded">
-                        <h3 className="text-lg font-bold mb-2">Profile</h3>
-                        <p>Email: {userData?.email}</p>
-                        <p>Username: {userData?.username}</p>
-                    </div>
-
-                    <div className="bg-white p-4 shadow rounded">
-                        <h3 className="text-lg font-bold mb-2">Blood Requests</h3>
-                        <p>Total Orders: 10</p>
-                        <p>Pending Orders: 2</p>
-                    </div>
-
-                    <div className="bg-white p-4 shadow rounded">
-                        <h3 className="text-lg font-bold mb-2">Settings</h3>
-                        <p>Notifications: On</p>
-                        <p>Language: English</p>
-                    </div> */}
                 </div>
 
                 <div className="bg-gray-200 h-[600px] my-10 p-4 rounded">
@@ -105,4 +84,5 @@ const Dashboard = () => {
     );
 };
 
-export default Dashboard;
+// export default Dashboard;
+export default withCurrentUser(Dashboard);

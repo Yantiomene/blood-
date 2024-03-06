@@ -1,25 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchCurrentUser, updateUserProfile as updateProfile } from '../redux/userSlice';
+import { updateUserProfile as updateProfile, selectUser } from '../redux/userSlice';
 import { useNavigate } from 'react-router-dom';
 import { DASHBOARDROUTE } from '../api';
-// var wkx = require('wkx');
-// const Buffer = require('buffer').Buffer;
-// window.Buffer = Buffer;
-// import wkx from 'wkx';
-// import { Buffer } from 'buffer';
-// window.Buffer = Buffer;
+// layouts
+import withCurrentUser from '../layouts/withCurrentUser';
 
 
 const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
-const editStyles = "bg-blue-500 text-white rounded-md px-2 py-1 mt-2 focus:outline-none focus:bg-blue-600"
+const editStyles = "bg-blue-500 text-white rounded-md px-2 py-1 focus:outline-none focus:bg-blue-600"
 const fieldStyles = "mb-4 flex items-center gap-4"
 const labelStyles = "block mb-1"
 const messageStyles = "text-center mt-4 text-gray-600 italic"
 
 const UpdateUserProfile = () => {
     const [Message, setMessage] = useState('');
-    const user = useSelector((state) => state.user.data);
+    const user = useSelector(selectUser);
     const [formData, setFormData] = useState(user);
     const [editableFields, setEditableFields] = useState({
         username: false,
@@ -29,29 +25,9 @@ const UpdateUserProfile = () => {
         location: false,
         contactNumber: false
     });
-
+    
     const router = useNavigate();
     const dispatch = useDispatch();
-    useEffect(() => {
-        dispatch(fetchCurrentUser());
-        setFormData(user);
-    }, [dispatch, user]);
-
-    useEffect(() => {
-        if (user && user.location) {
-            try {
-                // const locationBuffer = Buffer.from(user.location, 'hex');
-                const point = {x: 1, y: 2} //wkx.Geometry.parse(locationBuffer);
-                const latitude = point.y;
-                const longitude = point.x;
-                console.log('Latitude:', latitude);
-                console.log('Longitude:', longitude);
-                setFormData({ ...formData, location: `${longitude}, ${latitude}` })
-            } catch (error) {
-                console.error('Error parsing location data:', error);
-            }
-        }
-    }, [user, formData]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -63,11 +39,16 @@ const UpdateUserProfile = () => {
         setFormData({ ...formData, [name]: checked });
     };
 
-    // const handleLocationChange = (e) => {
-    //     const { value } = e.target;
-    //     const [longitude, latitude] = value.split(',').map(parseFloat);
-    //     setFormData({ ...formData, location: [longitude, latitude] });
-    // };
+    const handleLocationChange = (e) => {
+        const { name, value } = e.target;
+        if (name === 'longitude') {
+            console.log("longitude, value", name, value);
+            setFormData({ ...formData, location: [value, formData.location[1]] });
+        } else if (name === 'latitude') {
+            console.log("latitude, value", name, value);
+            setFormData({ ...formData, location: [formData.location[0], value] });
+        }
+    };
 
     const handleEditField = (fieldName) => {
         setEditableFields({ ...editableFields, [fieldName]: true });
@@ -76,8 +57,6 @@ const UpdateUserProfile = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            const [longitude, latitude] = formData.location.split(',').map(parseFloat);
-            setFormData({ ...formData, location: [longitude, latitude] });
             dispatch(updateProfile(formData));
             router(DASHBOARDROUTE);
             setMessage('successfully updated info');
@@ -160,40 +139,51 @@ const UpdateUserProfile = () => {
                         </button>
                     )}
                 </div>
-                <div className="mb-4 flex items-center justify-between">
-                    <div>
-                        <label className="select-none">Are you a donor?</label>
-                        <input
-                            type="checkbox"
-                            name="isDonor"
-                            checked={formData.isDonor}
-                            onChange={handleCheckboxChange}
-                            className="m-2"
-                        />
-                    </div>
 
-                    <div className={fieldStyles}>
-                        <label className={labelStyles}>Location</label>
+                <div className='mb-4'>
+                    <label className="select-none">Are you a donor?</label>
+                    <input
+                        type="checkbox"
+                        name="isDonor"
+                        checked={formData.isDonor}
+                        onChange={handleCheckboxChange}
+                        className="m-2"
+                    />
+                </div>
+
+                <div className={fieldStyles}>
+                    <label className={labelStyles}>Location <p className='text-xs'>(longitude, latitude)</p></label>
+                    <div className="flex gap-2 items-center justify-between">
+                        {/* <label className={labelStyles}>Longitude</label> */}
                         <input
-                            type="text"
-                            name="location"
-                            onChange={handleChange}
-                            placeholder='latitude, longitude'
+                            type="number"
+                            name="longitude"
+                            onChange={handleLocationChange}
+                            placeholder='longitude'
                             className={inputStyles}
-                            value={`${formData.location}`}
+                            value={`${formData.location[0]}`}
                             disabled={!editableFields.location}
                         />
-                        {!editableFields.location && (
-                            <button
-                                type="button"
-                                onClick={() => handleEditField('location')}
-                                className={editStyles}
-                            >
-                                Edit
-                            </button>
-                        )}
+                        {/* <label className={labelStyles}>Latitude</label> */}
+                        <input
+                            type="number"
+                            name="latitude"
+                            onChange={handleLocationChange}
+                            placeholder='latitude'
+                            className={inputStyles}
+                            value={`${formData.location[1]}`}
+                            disabled={!editableFields.location}
+                        />
                     </div>
-
+                    {!editableFields.location && (
+                        <button
+                            type="button"
+                            onClick={() => handleEditField('location')}
+                            className={editStyles}
+                        >
+                            Edit
+                        </button>
+                    )}
                 </div>
 
                 <div className={fieldStyles}>
@@ -228,4 +218,4 @@ const UpdateUserProfile = () => {
     );
 };
 
-export default UpdateUserProfile;
+export default withCurrentUser(UpdateUserProfile);

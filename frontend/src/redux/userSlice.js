@@ -1,11 +1,17 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getCurrentUser, updateProfile } from '../api/user';
+import { convertGeoToPoint } from '../util/geo';
 
 export const fetchCurrentUser = createAsyncThunk(
   'user/fetchCurrentUser',
   async () => {
+    console.log(">> fetching current user from store...");
     const response = await getCurrentUser();
-    console.log("fetching current user from store...")
+    console.log(">> after fetching currrent user", response.user);
+    if (response.user) {
+      response.user.location = convertGeoToPoint(response.user.location);
+    }
+    console.log(">> after process user", response.user);
     return response.user;
   }
 );
@@ -62,4 +68,5 @@ const userSlice = createSlice({
   },
 });
 
+export const selectUser = (state) => state.user.data;
 export default userSlice.reducer;

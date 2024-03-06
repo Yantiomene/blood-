@@ -7,9 +7,8 @@ const LinkClass = 'w-1/2 p-2 rounded-md text-center';
 
 export default function WithoutHeader({ children }) {
     const params = useLocation().pathname;
-    console.log(">> params from auth: ", params);
     return (
-        <div className="pt-[5%] flex flex-col items-center min-h-screen bg-gray-100">
+        <main className="pt-[5%] flex flex-col items-center min-h-screen bg-gray-100">
             <div>
                 {
                     (params === LOGINROUTE || params === REGISTERROUTE) && 
@@ -31,6 +30,6 @@ export default function WithoutHeader({ children }) {
                 }
                 {children}
             </div>
-        </div>
+        </main>
     );
 };

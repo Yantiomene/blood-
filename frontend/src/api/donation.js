@@ -27,10 +27,11 @@ export async function getDonationRequest() {
 
 export async function makeDonationRequest(requestData) {
     try {
+        console.log("making donation request: ", requestData);
         const response = await axios.post(`${apiUrl}/donationRequest`, requestData);
         return response.data;
     } catch (error) {
-        console.error('Login error:', error);
+        console.error('Donation request error:', error.message);
         throw error;
     }
 }
