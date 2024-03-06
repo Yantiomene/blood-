@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { store } from '@/app/redux/store';
+import store from '@/app/redux/store';
 import BlogLandingPage from '@/app/pages/blog';
 import AboutPage from '@/app/pages/about';
 import FourZeroFour from '@/app/pages/404';
