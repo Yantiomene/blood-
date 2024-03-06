@@ -1,24 +1,12 @@
-"use client";
-
 import React from 'react';
 
-interface DonationRequestData {
-    id: number;
-    bloodType: string;
-    quantity: number;
-    isFulfilled: boolean;
-    created_at: Date;
-    updated_at: Date;
-    location: string;
-}
-
-const convertDateTime = (dateStr: Date) => {
+const convertDateTime = (dateStr) => {
     const date = new Date(dateStr).toDateString();
     const time = new Date(dateStr).toLocaleTimeString();
     return `${date} at ${time}`;
 }
 
-const DonationCard = (props: DonationRequestData) => {
+const DonationCard = (props) => {
 
     const {
         id,
@@ -28,7 +16,7 @@ const DonationCard = (props: DonationRequestData) => {
         created_at,
         updated_at,
         location
-    }: DonationRequestData = props
+    } = props;
 
     return (
         <div

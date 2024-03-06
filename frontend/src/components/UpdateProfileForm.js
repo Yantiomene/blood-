@@ -1,21 +1,15 @@
-"use client";
-
-import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
-import withAuth from '../components/authHOC';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCurrentUser, updateUserProfile as updateProfile } from '../redux/userSlice';
-import { useRouter } from 'next/navigation';
-var wkx = require('wkx');
+import { useNavigate } from 'react-router-dom';
+import { DASHBOARDROUTE } from '../api';
+// var wkx = require('wkx');
+// const Buffer = require('buffer').Buffer;
+// window.Buffer = Buffer;
+// import wkx from 'wkx';
+// import { Buffer } from 'buffer';
+// window.Buffer = Buffer;
 
-
-interface UserData {
-    username: string;
-    email: string;
-    bloodType: string;
-    isDonor: boolean;
-    location: string | [number, number];
-    contactNumber: string;
-}
 
 const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
 const editStyles = "bg-blue-500 text-white rounded-md px-2 py-1 mt-2 focus:outline-none focus:bg-blue-600"
@@ -23,11 +17,11 @@ const fieldStyles = "mb-4 flex items-center gap-4"
 const labelStyles = "block mb-1"
 const messageStyles = "text-center mt-4 text-gray-600 italic"
 
-const UpdateUserProfile: React.FC = () => {
-    const [Message, setMessage] = useState<string>('');
-    const user = useSelector((state: any) => state.user.data);
-    const [formData, setFormData] = useState<UserData>(user);
-    const [editableFields, setEditableFields] = useState<Record<string, boolean>>({
+const UpdateUserProfile = () => {
+    const [Message, setMessage] = useState('');
+    const user = useSelector((state) => state.user.data);
+    const [formData, setFormData] = useState(user);
+    const [editableFields, setEditableFields] = useState({
         username: false,
         email: false,
         bloodType: false,
@@ -36,18 +30,18 @@ const UpdateUserProfile: React.FC = () => {
         contactNumber: false
     });
 
-    const router = useRouter();
+    const router = useNavigate();
     const dispatch = useDispatch();
     useEffect(() => {
-        dispatch(fetchCurrentUser() as any);
+        dispatch(fetchCurrentUser());
         setFormData(user);
-    }, [dispatch]);
+    }, [dispatch, user]);
 
     useEffect(() => {
         if (user && user.location) {
             try {
-                const locationBuffer = Buffer.from(user.location, 'hex');
-                const point = wkx.Geometry.parse(locationBuffer);
+                // const locationBuffer = Buffer.from(user.location, 'hex');
+                const point = {x: 1, y: 2} //wkx.Geometry.parse(locationBuffer);
                 const latitude = point.y;
                 const longitude = point.x;
                 console.log('Latitude:', latitude);
@@ -57,37 +51,37 @@ const UpdateUserProfile: React.FC = () => {
                 console.error('Error parsing location data:', error);
             }
         }
-    }, [user]);
+    }, [user, formData]);
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
+    const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
 
-    const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleCheckboxChange = (e) => {
         const { name, checked } = e.target;
         setFormData({ ...formData, [name]: checked });
     };
 
-    const handleLocationChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const { value } = e.target;
-        const [longitude, latitude] = value.split(',').map(parseFloat);
-        setFormData({ ...formData, location: [longitude, latitude] });
-    };
+    // const handleLocationChange = (e) => {
+    //     const { value } = e.target;
+    //     const [longitude, latitude] = value.split(',').map(parseFloat);
+    //     setFormData({ ...formData, location: [longitude, latitude] });
+    // };
 
-    const handleEditField = (fieldName: keyof UserData) => {
+    const handleEditField = (fieldName) => {
         setEditableFields({ ...editableFields, [fieldName]: true });
     };
 
-    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         try {
             const [longitude, latitude] = formData.location.split(',').map(parseFloat);
             setFormData({ ...formData, location: [longitude, latitude] });
-            dispatch(updateProfile(formData) as any);
-            router.push('/dashboard');
+            dispatch(updateProfile(formData));
+            router(DASHBOARDROUTE);
             setMessage('successfully updated info');
-        } catch (error: any) {
+        } catch (error) {
             setMessage('an error occurred');
         }
     };
@@ -234,4 +228,4 @@ const UpdateUserProfile: React.FC = () => {
     );
 };
 
-export default withAuth(UpdateUserProfile);
+export default UpdateUserProfile;

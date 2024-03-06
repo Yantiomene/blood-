@@ -1,22 +1,30 @@
 "use client";
 
 import React from 'react';
-import Link from 'next/link';
+// import Link from 'next/link';
 import { Provider } from 'react-redux';
 import { store } from '@/app/redux/store';
+// pages
+import DashboardPage from '@/app/pages/dashboard';
+import AuthPage from '@/app/pages/authPage';
+import BlogLandingPage from '@/app/pages/blog';
+import AboutPage from '@/app/pages/about';
+// components
 import LoginForm from '@/app/components/LoginForm';
 import RegisterForm from '@/app/components/RegisterForm';
 import UpdateProfileForm from '@/app/components/UpdateProfileForm';
 import FourZeroFour from '../pages/404';
+import Dashboard from '@/app/components/Dash';
 
+// const LinkClass = 'w-1/2 p-2 rounded-md text-center';
 
 const LoginPage = ({ params }: { params: { auth: string } }) => {
 
-    const LinkClass = 'w-1/2 p-2 rounded-md text-center';
+    console.log(">> params: ", params.auth)
 
     return (
         <Provider store={store}>
-            {
+            {/* {
                 (params.auth === 'register' || params.auth === 'login') &&
             (<>
             <h1 className="p-4 text-4xl text-center text-red-500 font-bold"><Link href='/'>Blood+</Link></h1>
@@ -34,11 +42,15 @@ const LoginPage = ({ params }: { params: { auth: string } }) => {
             </div>
             </>)
 
-            }
+            } */}
             {
-                (params.auth === 'register') ? <RegisterForm /> :
-                (params.auth === 'login') ? <LoginForm /> :
-                (params.auth === 'profile')? <UpdateProfileForm/>: <FourZeroFour/>
+                (params.auth === 'register')? <AuthPage><RegisterForm/></AuthPage>:
+                (params.auth === 'login')? <AuthPage><LoginForm/></AuthPage> :
+                (params.auth === 'profile')? <AuthPage><UpdateProfileForm/></AuthPage> : 
+                (params.auth === 'dashboard')? <DashboardPage><Dashboard/></DashboardPage> :
+                // (params.auth === 'blog')? <DashboardPage><Dashboard/></DashboardPage> :
+                
+                <FourZeroFour/>
             }
         </Provider>
     );

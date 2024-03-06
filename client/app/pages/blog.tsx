@@ -17,6 +17,11 @@ export default function BlogLandingPage() {
                 {/* Render blog posts here */}
             </div>
         </main>
+        <footer className="bg-red-800 py-4">
+            <div className="container mx-auto text-center text-white">
+                &copy; 2024 My Blog. All rights reserved.
+            </div>
+        </footer>
         </>
     );
 };

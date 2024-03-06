@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import authSlice from './authSlice';
+import authSlice, { initializeAuthStatus } from './authSlice';
 import userSlice from './userSlice';
 
 const store = configureStore({
@@ -9,4 +9,5 @@ const store = configureStore({
   },
 });
 
+store.dispatch(initializeAuthStatus());
 export default store;

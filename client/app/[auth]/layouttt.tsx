@@ -7,18 +7,16 @@ type AuthLayoutProps = {
 };
 
 export const metadata: Metadata = {
-    title: "Blood+ Login",
+    title: "Blood+",
     description: "Login to your account",
 };
 
 
 const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
     return (
-        <>
-            <div className="pt-[5%] flex flex-col items-center min-h-screen bg-gray-100">
-                <div>{children}</div>
-            </div>
-        </>
+        <div className="pt-[5%] flex flex-col items-center min-h-screen bg-gray-100">
+            <div>{children}</div>
+        </div>
     );
 };
 

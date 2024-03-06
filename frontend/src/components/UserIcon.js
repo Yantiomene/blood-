@@ -1,25 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+// redux
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../api/user';
-import { useRouter } from 'next/navigation';
-import { unAuthenticateUser } from '../../../frontend/src/redux/authSlice';
-import { fetchCurrentUser } from '../../../frontend/src/redux/userSlice';
+import { unAuthenticateUser } from '../redux/authSlice';
+import { HOMEROUTE, PROFILEROUTE } from '../api';
+// assets
+import { profilepic } from '../assets';
 
 const dropdownItemStyles = "px-4 py-2 hover:bg-gray-100 rounded cursor-pointer";
 
-const UserProfileIcon: React.FC = () => {
-    const router = useRouter();
+const UserProfileIcon = () => {
+    const router = useNavigate();
     const dispatch = useDispatch();
-    const user = useSelector((state: any) => state.user.data);
-    const [userData, setUserData] = useState<any>(user);
+    const userData = useSelector((state) => state.user.data);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-    // useEffect(() => {
-    //     dispatch(fetchCurrentUser() as any);
-    //     setUserData(userData);
-    // }, [dispatch, userData]);
 
     const handleDropdownToggle = () => {
         setIsDropdownOpen(!isDropdownOpen);
@@ -30,7 +25,7 @@ const UserProfileIcon: React.FC = () => {
             const status = await logout();
             if (status.success) {
                 dispatch(unAuthenticateUser());
-                router.push('/');
+                router(HOMEROUTE);
             }
         } catch (error) {
             console.error('Error logging out:', error);
@@ -43,9 +38,9 @@ const UserProfileIcon: React.FC = () => {
             onMouseLeave={handleDropdownToggle}
             onClick={handleDropdownToggle}
         >
-            <Image
+            <img
                 className="shrink-0 w-10 h-10 rounded-full cursor-pointer"
-                src="/profilepic.jpg"
+                src={profilepic}
                 width={40}
                 height={40}
                 alt="Profile Icon"
@@ -55,7 +50,7 @@ const UserProfileIcon: React.FC = () => {
                     {userData && (
                         <ul className="p-2">
                             <li className={dropdownItemStyles + ' text-nowrap'}>
-                                <Link href="/profile">
+                                <Link to={PROFILEROUTE}>
                                     {userData.username}
                                     <span className='ml-2 px-1 rounded-full text-white bg-red-500 text-center text-xs'>
                                         {userData.bloodType}

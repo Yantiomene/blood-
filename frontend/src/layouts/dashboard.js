@@ -1,50 +1,30 @@
-"use client";
-
 import React, { useState, useEffect } from 'react';
+// redux
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCurrentUser } from '../redux/userSlice';
-import { selectAuthStatus } from '../redux/authSlice';
-// import Header from './Header';
-import withAuth from './authHOC';
-import Overlay from './overlayContainer';
 import { getDonationRequest } from '../api/donation';
-import DonationCard from './donationCard';
+// components
+import Overlay from './overlayContainer';
+import DonationCard from '../components/DonorCard';
 
-interface DonationRequestData {
-    id: number;
-    bloodType: string;
-    quantity: number;
-    isFulfilled: boolean;
-    created_at: Date;
-    updated_at: Date;
-    location: string;
-}
+const Dashboard = () => {
 
-const Dashboard: React.FC = () => {
-
-    const auth = useSelector(selectAuthStatus);
-    const user = useSelector((state: any) => state.user.data);
-    const [requestList, setRequestList] = useState<any>([]);
-    const [loadingRequest, setLoadingRequest] = useState('loading');
-    const [userData, setUserData] = useState<any>(user);
+    const userData = useSelector((state) => state.user.data);
+    const [requestList, setRequestList] = useState([]);
     const [showOverlay, setShowOverlay] = useState(false);
     const dispatch = useDispatch();
 
     useEffect(() => {
-        dispatch(fetchCurrentUser() as any);
-        setUserData(userData);
-
-    }, [dispatch, userData]);
-
+    }, [userData]);
+    
     useEffect(() => {
+        dispatch(fetchCurrentUser());
         const fetchDonationReqeusts = async () => {
             try {
                 const data = await getDonationRequest();
                 console.log(data);
                 setRequestList(data.donationRequests);
-                setLoadingRequest('success');
-            } catch (error: any) {
-                setLoadingRequest('failed');
+            } catch (error) {
                 console.log("Error occurred while fetching donation requests: ", error.message)
             }
         }
@@ -66,12 +46,11 @@ const Dashboard: React.FC = () => {
 
     return (
         <>
-            {/* <Header isLoggedin={auth} /> */}
             <header className="bg-white sticky top-0 z-40 shadow">
                 <nav className="container mx-auto px-4 py-2 flex items-center justify-between">
                     <h1 className="text-xl font-bold">Welcome, {userData?.username}!</h1>
                     {
-                        user?.isDonor &&
+                        userData.isDonor &&
                         <button
                             onClick={handleDisplayOverlay}
                             className="bg-red-500 hover:bg-red-800 text-white px-4 py-2 rounded">
@@ -86,7 +65,7 @@ const Dashboard: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {
-                        requestList.map((data: DonationRequestData) =>
+                        requestList.map((data) =>
                             <DonationCard
                                 key={data.id}
                                 id={data.id}
@@ -126,4 +105,4 @@ const Dashboard: React.FC = () => {
     );
 };
 
-export default withAuth(Dashboard);
+export default Dashboard;
