@@ -1,20 +1,20 @@
 // layouts
 import WithHeader from "../layouts/withHeader";
 // assets
-import { bloodDonor } from "../assets";
+import { holdDonor } from "../assets";
 
-const Home = () => {
+const AboutPage = () => {
     return(
       <WithHeader>
         <section 
-          className="py-10 px-[10%] h-[100vh] bg-red-100 bg-cover bg-center bg-no-repeat bg-fixed relative flex items-center justify-center"
-          style={{ backgroundImage: `url(${bloodDonor})` }}
+          className="py-10 px-[10%] h-[80vh] bg-red-100 bg-cover bg-center bg-no-repeat bg-fixed relative flex items-center justify-center"
+          style={{ backgroundImage: `url(${holdDonor})` }}
           >
-            <h1 className="text-center text-7xl text-white font-bold">
-              A digital resource for blood access and donations
+            <h1 className="text-center text-4xl text-gray-800 font-bold">
+              Welcome To Blood+, a digital resource for blood access and donations
             </h1>
         </section>
-
+        
         <section className="py-10 px-[10%]">
           <h2 className="text-3xl font-bold mb-4">About Us</h2>
           <p className="text-lg">
@@ -49,9 +49,8 @@ const Home = () => {
             Our team is committed to ensuring that blood is available to those who need it. We are driven by the belief that no one should die because they cannot access blood. We are committed to ensuring that blood is available to those who need it. We are driven by the belief that no one should die because they cannot access blood.
           </p>
         </section>
-
       </WithHeader>
       );
 };
   
-export default Home;
+export default AboutPage;

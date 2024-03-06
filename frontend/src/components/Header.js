@@ -1,4 +1,13 @@
 import { useLocation, Link } from "react-router-dom";
+// routes
+import {
+    BLOGROUTE,
+    ABOUTROUTE,
+    DASHBOARDROUTE,
+    LOGINROUTE,
+    REGISTERROUTE,
+    HOMEROUTE,
+} from "../api";
 // redux
 import { useSelector } from "react-redux";
 import { selectAuthStatus } from "../redux/authSlice";
@@ -13,7 +22,7 @@ const Header = () => {
     return (
         <header className="bg-red-500 p-4">
             <div className="container mx-auto flex justify-between items-center">
-                <Link to="/" className="text-white text-2xl font-bold">
+                <Link to={HOMEROUTE} className="text-white text-2xl font-bold">
                     <div className="flex items-center gap-6">
                         Blood+
                     </div>
@@ -21,13 +30,13 @@ const Header = () => {
 
                 <nav className="flex items-center gap-6">
                     <ul className="md:flex space-x-4 hidden mr-10">
-                        <NavItem href="/site/blog" isActive={pathname === '/site/blog'}>Blog</NavItem>
-                        <NavItem href="/site/about" isActive={pathname === '/site/about'}>About</NavItem>
+                        <NavItem href={BLOGROUTE} isActive={pathname === BLOGROUTE}>Blog</NavItem>
+                        <NavItem href={ABOUTROUTE} isActive={pathname === ABOUTROUTE}>About</NavItem>
                     </ul>
                     <ul className="flex space-x-4">
-                        {isLoggedin && <NavItem href="/dashboard" isActive={pathname === '/dashboard'}>Dashboard</NavItem>}
-                        {!isLoggedin && <NavItem href="/login" isActive={pathname === '/login'}>Login</NavItem>}
-                        {!isLoggedin && <NavItem href="/register" isActive={pathname === '/register'}>Register</NavItem>}
+                        {isLoggedin && <NavItem href={DASHBOARDROUTE} isActive={pathname === DASHBOARDROUTE}>Dashboard</NavItem>}
+                        {!isLoggedin && <NavItem href={LOGINROUTE} isActive={pathname === LOGINROUTE}>Login</NavItem>}
+                        {!isLoggedin && <NavItem href={REGISTERROUTE} isActive={pathname === REGISTERROUTE}>Register</NavItem>}
                     </ul>
                     {isLoggedin && <UserProfileIcon />}
                 </nav>

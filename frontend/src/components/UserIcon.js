@@ -1,24 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 // redux
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../api/user';
 import { unAuthenticateUser } from '../redux/authSlice';
+import { fetchCurrentUser } from '../redux/userSlice';
 import { HOMEROUTE, PROFILEROUTE } from '../api';
 // assets
 import { profilepic } from '../assets';
+import { selectUser } from '../redux/userSlice';
 
 const dropdownItemStyles = "px-4 py-2 hover:bg-gray-100 rounded cursor-pointer";
 
 const UserProfileIcon = () => {
     const router = useNavigate();
     const dispatch = useDispatch();
-    const userData = useSelector((state) => state.user.data);
+    const userData = useSelector(selectUser);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const handleDropdownToggle = () => {
         setIsDropdownOpen(!isDropdownOpen);
     };
+
+    
+    useEffect(() => {
+        console.log(">> before fetching user from USERICON", userData);
+        if (!userData || userData.username === '') {
+            dispatch(fetchCurrentUser());
+            console.log(">> after fetching user from USERICON", userData);
+        }
+    }, [userData, dispatch]);
 
     const handleLogout = async () => {
         try {

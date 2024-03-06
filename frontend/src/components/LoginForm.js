@@ -9,6 +9,7 @@ const LoginForm = () => {
     const [email, setemail] = useState('');
     const [password, setPassword] = useState('');
     const [loginError, setLoginError] = useState('');
+    const [isLoading, setIsLoading] = useState(false); // New state variable
 
     const router = useNavigate();
     const dispatch = useDispatch();
@@ -24,6 +25,8 @@ const LoginForm = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
+        setIsLoading(true); // Set isLoading to true on submit
+
         try {
             const response = await login({ email, password });
             if (response.success) {
@@ -33,6 +36,8 @@ const LoginForm = () => {
         } catch (error) {
             setLoginError('Invalid email or password');
         }
+
+        setIsLoading(false); // Set isLoading back to false after login attempt
     };
 
     const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
@@ -75,7 +80,9 @@ const LoginForm = () => {
                     <button
                         className="bg-red-500 inline-block w-full hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                         type="submit"
-                    >Login
+                        disabled={isLoading} // Disable the button when isLoading is true
+                    >
+                        {isLoading ? 'Loading...' : 'Login'} {/* Show 'Loading...' when isLoading is true */}
                     </button>
                     <p className="text-gray-500 text-center mt-4 text-sm">
                         Don't have an account? <a className='text-red-500 hover:text-red-400' href={REGISTERROUTE}>Register</a>
