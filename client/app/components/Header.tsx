@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation';
 import NavItem from './NavItem';
 import UserProfileIcon from "./UserIcon";
 import Image from "next/image";
-import logo from "@/public/logo.png";
 
 const Header: React.FC<{ isLoggedin: boolean }> = ({ isLoggedin }) => {
     const pathname = usePathname();

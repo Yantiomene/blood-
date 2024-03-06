@@ -278,7 +278,82 @@ The server is running at [http://localhost:8000](http://localhost:8000)
       "error": "Internal server error"
   }
   ```
-### 8. Create DonationRequest Route (requires userAuth)
+
+### 8. Reset password request Route
+
+- **Endpoint**: [http://localhost:8000/api/passwordResetRequest](http://localhost:8000/api/passwordResetRequest)
+- **Method**: POST
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "message": "Password reset email sent successfully",
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 404
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Email not found"
+  }
+  ```
+#### Error Response
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
+### 9. Reset password Route
+
+- **Endpoint**: [http://localhost:8000/api/passwordReset](http://localhost:8000/api/passwordReset)
+- **Method**: POST
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "message": "Password reset successfully",
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 404
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Invalid verification code."
+  }
+  ```
+#### Error Response
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
+### 10. Create DonationRequest Route (requires userAuth)
 
 - **Endpoint**: `http://localhost:8000/api/donationRequest`
 - **Method**: POST
@@ -306,7 +381,7 @@ The server is running at [http://localhost:8000](http://localhost:8000)
   }
   ```
 
-### 9. Get DonationRequest Route (requires userAuth)
+### 11. Get DonationRequest Route (requires userAuth)
 
 - **Endpoints**: `http://localhost:8000/api/donationRequests` (fetch all donation requests)
               `http://localhost:8000/api/donationRequests?isFulFilled=true` (fetch those which are fulfilled)
@@ -335,7 +410,7 @@ The server is running at [http://localhost:8000](http://localhost:8000)
   }
   ```
 
-### 10. Update Donation request Route (requires userAuth)
+### 12. Update Donation request Route (requires userAuth)
 
 - **Endpoint**: `http://localhost:8000/api/donationRequest/:requestID`
 - **Method**: PUT
@@ -373,7 +448,7 @@ The server is running at [http://localhost:8000](http://localhost:8000)
   }
   ```
 
-### 11. Update user location Route (requires userAuth)
+### 13. Update user location Route (requires userAuth)
 
 - **Endpoint**: `http://localhost:8000/api/user/location`
 - **Method**: PUT
@@ -400,7 +475,7 @@ The server is running at [http://localhost:8000](http://localhost:8000)
   }
   ```
 
-### 12. Find Nearby donors (requires userAuth)
+### 14. Find Nearby donors (requires userAuth)
 
 - **Endpoint**: `http://localhost:8000/api/donors/find`
 - **Method**: POST
@@ -412,10 +487,166 @@ The server is running at [http://localhost:8000](http://localhost:8000)
   ```json
   {
       "success": true,
-      "donors": ListofDonors || [],
-      "hospitals": ListofHospitals || []
+      "donors": ["ListofDonors"] || [],
+      "hospitals": ["ListofHospitals"] || []
   }
   ```
+
+#### Error Response
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
+## Blogs routes
+
+### 1. Create a blog
+
+- **Endpoint**: `http://localhost:8000/blogs/createBlog`
+- **Method**: POST
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "blog": {
+        "id": ,
+        "title": ,
+        "content": ,
+        "image": ,
+        "created_at": ,
+        "updated_at": 
+      }
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 400
+- **JSON**:
+  ```json
+  {
+     "errors": ["errors"]
+  }
+  ```
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
+### 2. Get blogs
+
+- **Endpoint**: `http://localhost:8000/blogs/getBlogs`
+- **Method**: GET
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "blogs": ["List of blogs"]
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
+### 3. Get blog by id
+
+- **Endpoint**: `http://localhost:8000/blogs/getBlog/:id`
+- **Method**: GET
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "blog": {
+        "id": "blog_id",
+        "title": "blog_title",
+        "content": "blog_content",
+        "image": "blog_image_src"
+      }
+  }
+  ```
+
+### Blog not found Response
+
+- **Status**: 404
+- **JSON**:
+```json
+  {
+      "success": false,
+      "message": "Blog not found"
+  }
+```
+
+#### Error Response
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
+### 4. Update blog
+
+- **Endpoint**: `http://localhost:8000/blogs/updateBlog/:id`
+- **Method**: PUT
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "blog": {
+        "id": "blog_id",
+        "title": "blog_title",
+        "content": "blog_content",
+        "image": "blog_image_src"
+      }
+  }
+  ```
+
+### Blog not found Response
+
+- **Status**: 404
+- **JSON**:
+```json
+  {
+      "success": false,
+      "message": "Blog not found"
+  }
+```
 
 #### Error Response
 
@@ -431,7 +662,7 @@ The server is running at [http://localhost:8000](http://localhost:8000)
 ## Additional Information
 
 - **User Authentication**: Some routes require user authentication (`userAuth`).
-- **API Base URL**: The base URL for all API endpoints is [http://localhost:8000/api](http://localhost:8000/api).
+- **API Base URL**: The base URL for all API endpoints is [http://localhost:8000/api](http://localhost:8000/api) and [http://localhost:8000/blogs](http://localhost:8000/blogs).
 
 ## API Versioning
 
@@ -510,7 +741,7 @@ curl -X PUT \
     "location": [longitude, latitude]
     "isDonor": bool,
     "contactNumber": "updated_contact_number"
-}'
+  }'
 ```
 
 ### 7. Email Verification Route Test
@@ -520,7 +751,30 @@ curl -X GET \
   http://localhost:8000/api/verifyEmail/your_verification_code
 ```
 
-### 8. Create Donation Request Route
+### 8. Reset password request Route Test
+
+```bash
+curl -X POST \
+  http://localhost:8000/api/passwordResetRequest \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "email": "user_email@example.com",
+  }'
+```
+
+### 9. Reset password Route Test
+
+```bash
+curl -X POST \
+  http://localhost:8000/api/passwordReset \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "code": "reset_token",
+    "password": "reset_password",
+  }'
+```
+
+### 10. Create Donation Request Route
 
 ```bash
 curl -X POST \
@@ -535,7 +789,7 @@ curl -X POST \
   }'
 ```
 
-### 9. Get Donation Requests Route
+### 11. Get Donation Requests Route
 
 #### Get all donation requests (no isFulfilled parameter):
 
@@ -562,7 +816,7 @@ curl -X GET \
 ```
 
 
-### 10. Update Donation Request Route
+### 12. Update Donation Request Route
 
 ```bash
 curl -X PUT \
@@ -577,7 +831,7 @@ curl -X PUT \
   }'
 ```
 
-### 11. Update User location Route (requires userAuth)
+### 13. Update User location Route (requires userAuth)
 
 ```bash
 curl -X PUT \
@@ -590,7 +844,7 @@ curl -X PUT \
   }'
 ```
 
-### 6. Find Nearby donors (requires userAuth)
+### 14. Find Nearby donors (requires userAuth)
 
 ```bash
 curl -X POST \
@@ -600,6 +854,49 @@ curl -X POST \
   -d '{
     "bloodType": requesting_blood_type
 }'
+```
+
+
+## Blogs routes
+
+### 1. Create a blog
+
+```bash
+curl -X POST \
+  http://localhost:8000/blogs/createBlog \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "title": "What is blood donation",
+    "content": "Blood donation is all about...",
+    "image": "image_src"
+  }'
+```
+
+### 2. Get blogs
+
+```bash
+curl -X GET \
+  http://localhost:8000/blogs/getBlogs 
+```
+
+### 3. Get blog by id
+
+```bash
+curl -X GET \
+  http://localhost:8000/blogs/getBlog/:id
+```
+
+### 4. Update blog
+
+```bash
+curl -X PUT \
+  http://localhost:8000/blogs/updateBlog/:id \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "title": "updated_title",
+    "content": "updated_content",
+    "image": "updated_image_src"
+  }'
 ```
 
 Make sure to replace `your_username`, `your_email@example.com`, `your_password`, `your_access_token`, `updated_username`, `updated_email@example.com`, `your_verification_code`, `longitude`, `latitude`, `updated_longitude`, `updated_latitude`, `:requestId` and `requesting_blood_type` with actual values.
