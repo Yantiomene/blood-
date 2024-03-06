@@ -3,7 +3,8 @@ import Image from "next/image";
 export default function Home() {
   return (
     <div>
-      <h1 className="text-4xl font-bold">Welcome To Blood+, a digital resource for blood access and donations</h1>
+    	<br />
+      <h1 className="text-4xl font-bold text-center font-montserrat">Welcome To BLOOD+, a digital resource for blood access and donations</h1>
       <section >
         <Image
           src="/blood_donor.jpg"
