@@ -72,6 +72,30 @@ const getDonationRequests = async (req, res) => {
 };
 
 
+// get donation request by userid
+const getDonationRequestByUserId = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const result = await db.query('SELECT * FROM donation_requests WHERE "userId" = $1', [userId]);
+        const donationRequests = result.rows;
+
+        req.logger.info('Fetched donation requests successfully');
+        res.status(200).json({
+            success: true,
+            donationRequests,
+        });
+    } catch (error) {
+        req.logger.error('Error retrieving donation requests:', error.message);
+        console.error('Error retrieving donation requests:', error.message);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+        });
+    }
+};
+
+
 const updateDonationRequest = async (req, res) => {
     const { requestId } = req.params;
     const { quantity, bloodType, location, isFulfilled } = req.body;
@@ -416,5 +440,6 @@ module.exports = {
     getDonationRequests,
     createDonationRequest,
     updateDonationRequest,
-    findNearbyDonors
+    findNearbyDonors,
+    getDonationRequestByUserId,
 };
