@@ -64,6 +64,7 @@ const RegisterForm = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         className={inputStyles}
                         aria-describedby="emailHelpText"
+                        required={true}
                     />
                     <small id="emailHelpText" className="text-gray-500">We'll never share your email with anyone else.</small>
                 </div>
@@ -78,6 +79,7 @@ const RegisterForm = () => {
                         onChange={(e) => setUsername(e.target.value)}
                         className={inputStyles}
                         aria-describedby="usernameHelpText"
+                        required={true}
                     />
                     <small id="usernameHelpText" className="text-gray-500">Choose a unique username.</small>
                 </div>
@@ -92,6 +94,7 @@ const RegisterForm = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         className={inputStyles}
                         aria-describedby="passwordHelpText"
+                        required={true}
                     />
                     <small id="passwordHelpText" className="text-gray-500">Must be at least 8 characters long.</small>
                 </div>
@@ -106,6 +109,7 @@ const RegisterForm = () => {
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         className={inputStyles}
                         aria-describedby="confirmPasswordHelpText"
+                        required={true}
                     />
                     <small id="confirmPasswordHelpText" className="text-gray-500">Please re-enter your password.</small>
                 </div>
@@ -118,6 +122,7 @@ const RegisterForm = () => {
                         onChange={(e) => setBloodType(e.target.value)}
                         className={inputStyles}
                         aria-describedby="bloodTypeHelpText"
+                        required={true}
                     >
                         <option value="">Select Blood Type</option>
                         <option value="A+">A+</option>

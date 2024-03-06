@@ -81,6 +81,7 @@ const UpdateUserProfile = () => {
                         onChange={handleChange}
                         className={inputStyles}
                         disabled={!editableFields.username}
+                        required={true}
                     />
                     {!editableFields.username && (
                         <button
@@ -101,6 +102,7 @@ const UpdateUserProfile = () => {
                         onChange={handleChange}
                         className={inputStyles}
                         disabled={!editableFields.email}
+                        required={true}
                     />
                     {!editableFields.email && (
                         <button
@@ -122,6 +124,7 @@ const UpdateUserProfile = () => {
                         className={inputStyles}
                         aria-describedby="bloodTypeHelpText"
                         disabled={!editableFields.bloodType}
+                        required={true}
                     >
                         <option value="A+">A+</option>
                         <option value="A-">A-</option>
