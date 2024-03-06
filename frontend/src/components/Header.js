@@ -1,24 +1,19 @@
-"use client";
-
-import { useEffect } from "react";
-import Link from "next/link";
-import { usePathname } from 'next/navigation';
+import { useLocation, Link } from "react-router-dom";
+// redux
+import { useSelector } from "react-redux";
+import { selectAuthStatus } from "../redux/authSlice";
+// components
 import NavItem from './NavItem';
 import UserProfileIcon from "./UserIcon";
-import Image from "next/image";
 
-const Header: React.FC<{ isLoggedin: boolean }> = ({ isLoggedin }) => {
-    const pathname = usePathname();
-
-    useEffect(() => {
-        localStorage.setItem('isAuth', `${isLoggedin}`);
-    }, []);
+const Header = () => {
+    const pathname = useLocation().pathname;
+    const isLoggedin = useSelector(selectAuthStatus);
 
     return (
         <header className="bg-red-500 p-4">
             <div className="container mx-auto flex justify-between items-center">
-                <Link href="/" className="text-white text-2xl font-bold">
-                    {/* <Image src={logo} width={100} alt="blood+" /> */}
+                <Link to="/" className="text-white text-2xl font-bold">
                     <div className="flex items-center gap-6">
                         Blood+
                     </div>

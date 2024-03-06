@@ -79,7 +79,6 @@ exports.login = async (req, res) => {
     try {
         const token = sign(payload, SECRET, { expiresIn: '1h' });
         req.user = user;
-        console.log(user);
         req.logger.info(`${user.email} logged in successfully`);
         return res.status(200).cookie('token', token, { httpOnly: true }).json({
             success: true,
@@ -114,7 +113,7 @@ exports.logout = async (req, res) => {
 
 exports.getUserProfile = async (req, res) => {
     const userId = req.user.id;
-    
+
     try {
         const userProfile = await db.query('SELECT id, username, email, "bloodType", "isDonor", location, "isVerified" FROM users WHERE id = $1', [userId]);
 

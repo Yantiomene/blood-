@@ -1,25 +1,7 @@
 import axios from 'axios';
-
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+import { apiUrl } from './';
 
 axios.defaults.withCredentials = true;
-
-interface UserLogin {
-    username: string;
-    email: string;
-    bloodType: string;
-    // will add more properties as later
-}
-
-interface UserProfile {
-    username: string;
-    email: string;
-    bloodType: string;
-    isDonor: boolean;
-    location: [number, number];
-    contactNumber: string;
-}
-
 
 export async function getUsers() {
     try {
@@ -31,19 +13,21 @@ export async function getUsers() {
     }
 }
 
-export async function getCurrentUser(): Promise<any> {
+export async function getCurrentUser() {
     try {
+        console.log(">> getting current user...");
         const response = await axios.get(`${apiUrl}/profile`, {
             withCredentials: true,
         });
+        console.log(">> recieved current user: ", response.data);
         return response.data;
-    } catch (error: any) {
+    } catch (error) {
         console.error('Error getting user profile:', error.message);
         throw error;
     }
 }
 
-export async function login(credentials: { email: string; password: string }): Promise<any> {
+export async function login(credentials) {
     try {
         const response = await axios.post(`${apiUrl}/login`, credentials);
         return response.data;
@@ -53,7 +37,7 @@ export async function login(credentials: { email: string; password: string }): P
     }
 }
 
-export async function register(user: UserLogin): Promise<any> {
+export async function register(user) {
     try {
         const response = await axios.post(`${apiUrl}/register`, user);
         return response.data;
@@ -63,7 +47,7 @@ export async function register(user: UserLogin): Promise<any> {
     }
 }
 
-export async function logout(): Promise<any> {
+export async function logout() {
     try {
         const response = await axios.get(`${apiUrl}/logout`);
         return response.data;
@@ -73,10 +57,9 @@ export async function logout(): Promise<any> {
     }
 }
 
-
-export async function updateProfile(user: UserProfile): Promise<any> {
+export async function updateProfile(user) {
     try {
-        console.log(">> profile: ", user);
+        console.log(">> profile update: ", user);
         const response = await axios.put(`${apiUrl}/profile`, user)
         return response.data;
     } catch (error) {
@@ -84,13 +67,12 @@ export async function updateProfile(user: UserProfile): Promise<any> {
     }
 }
 
-export async function verifyEmail(token: string): Promise<any> {
+export async function checkProtected() {
     try {
-      const response = await axios.get(`${apiUrl}/verifyEmail/${token}`);
-      return response.data;
+        const response = await axios.get(`${apiUrl}/protected`);
+        return response.data;
     } catch (error) {
-      console.error('Email verification error:', error);
-      throw error;
+        console.error('Protected route error:', error);
+        throw error;
     }
-  }
-  
+}
