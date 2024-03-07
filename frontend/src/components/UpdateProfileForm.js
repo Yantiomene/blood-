@@ -17,6 +17,7 @@ const UpdateUserProfile = () => {
     const [Message, setMessage] = useState('');
     const user = useSelector(selectUser);
     const [formData, setFormData] = useState(user);
+    const [isLoading, setLoading] = useState(false);
     const [editableFields, setEditableFields] = useState({
         username: false,
         email: false,
@@ -55,6 +56,7 @@ const UpdateUserProfile = () => {
     };
 
     const handleSubmit = async (event) => {
+        setLoading(true);
         event.preventDefault();
         try {
             dispatch(updateProfile(formData));
@@ -63,6 +65,7 @@ const UpdateUserProfile = () => {
         } catch (error) {
             setMessage('an error occurred');
         }
+        setLoading(false);
     };
 
     return (
@@ -78,6 +81,7 @@ const UpdateUserProfile = () => {
                         onChange={handleChange}
                         className={inputStyles}
                         disabled={!editableFields.username}
+                        required={true}
                     />
                     {!editableFields.username && (
                         <button
@@ -98,6 +102,7 @@ const UpdateUserProfile = () => {
                         onChange={handleChange}
                         className={inputStyles}
                         disabled={!editableFields.email}
+                        required={true}
                     />
                     {!editableFields.email && (
                         <button
@@ -119,6 +124,7 @@ const UpdateUserProfile = () => {
                         className={inputStyles}
                         aria-describedby="bloodTypeHelpText"
                         disabled={!editableFields.bloodType}
+                        required={true}
                     >
                         <option value="A+">A+</option>
                         <option value="A-">A-</option>
@@ -210,8 +216,9 @@ const UpdateUserProfile = () => {
                 <button
                     className="bg-red-500 inline-block w-full hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                     type="submit"
+                    disabled={isLoading}
                 >
-                    Update
+                    {isLoading ? 'Loading...' : 'Update'}
                 </button>
             </form>
         </>

@@ -11,18 +11,21 @@ const RegisterForm = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [bloodType, setBloodType] = useState('');
     const [registerError, setRegisterError] = useState('');
+    const [isLoading, setIsLoading] = useState(false); // New state variable
 
     const router = useNavigate();
 
     const handleRegister = async (event) => {
         event.preventDefault();
-    
+
+        setIsLoading(true); // Set isLoading to true on submit
+
         if (password !== confirmPassword) {
             setRegisterError('Passwords do not match');
             return;
         }
-        
-        try {    
+
+        try {
             const user = {
                 email,
                 username,
@@ -30,7 +33,7 @@ const RegisterForm = () => {
                 bloodType,
             };
             const response = await register(user);
-            if (response.success){
+            if (response.success) {
                 router(LOGINROUTE);
                 return;
             }
@@ -41,6 +44,7 @@ const RegisterForm = () => {
             console.error('Register error:', error);
         }
 
+        setIsLoading(false); // Set isLoading back to false after login attempt
     };
 
     const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
@@ -60,6 +64,7 @@ const RegisterForm = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         className={inputStyles}
                         aria-describedby="emailHelpText"
+                        required={true}
                     />
                     <small id="emailHelpText" className="text-gray-500">We'll never share your email with anyone else.</small>
                 </div>
@@ -74,6 +79,7 @@ const RegisterForm = () => {
                         onChange={(e) => setUsername(e.target.value)}
                         className={inputStyles}
                         aria-describedby="usernameHelpText"
+                        required={true}
                     />
                     <small id="usernameHelpText" className="text-gray-500">Choose a unique username.</small>
                 </div>
@@ -88,6 +94,7 @@ const RegisterForm = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         className={inputStyles}
                         aria-describedby="passwordHelpText"
+                        required={true}
                     />
                     <small id="passwordHelpText" className="text-gray-500">Must be at least 8 characters long.</small>
                 </div>
@@ -102,6 +109,7 @@ const RegisterForm = () => {
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         className={inputStyles}
                         aria-describedby="confirmPasswordHelpText"
+                        required={true}
                     />
                     <small id="confirmPasswordHelpText" className="text-gray-500">Please re-enter your password.</small>
                 </div>
@@ -114,6 +122,7 @@ const RegisterForm = () => {
                         onChange={(e) => setBloodType(e.target.value)}
                         className={inputStyles}
                         aria-describedby="bloodTypeHelpText"
+                        required={true}
                     >
                         <option value="">Select Blood Type</option>
                         <option value="A+">A+</option>
@@ -131,8 +140,9 @@ const RegisterForm = () => {
                 <button
                     className="bg-red-500 inline-block w-full hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                     type="submit"
+                    disabled={isLoading} // Disable the button when isLoading is true
                 >
-                    Register
+                    {isLoading ? 'Loading...' : 'Register'}
                 </button>
                 <p className="text-gray-500 text-center mt-4 text-sm">
                     Already have an account? <a className='text-red-500 hover:text-red-400' href="/login">Login</a>
