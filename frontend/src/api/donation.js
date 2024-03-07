@@ -3,16 +3,6 @@ import { apiUrl } from './';
 
 axios.defaults.withCredentials = true;
 
-export async function getUsers() {
-    try {
-        const response = await axios.get(`${apiUrl}/users`);
-        return { props: { data: response.data } };
-    } catch (error) {
-        console.error('Failed to get users:', error);
-        throw error;
-    }
-}
-
 export async function getDonationRequest() {
     try {
         const response = await axios.get(`${apiUrl}/donationRequest`, {
@@ -42,6 +32,17 @@ export async function updateDonationRequest(requestData) {
         const response = await axios.put(`${apiUrl}/donationRequest`, requestData)
         return response.data;
     } catch (error) {
+        throw error;
+    }
+}
+
+export async function findMatchingDonors(requestData) {
+    try {
+        console.log(">> finding donors: ", requestData);
+        const response = await axios.post(`${apiUrl}/donors/find`, requestData);
+        return response.data;
+    } catch (error) {
+        console.error('Error finding donors:', error.message);
         throw error;
     }
 }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 // redux
 import { useSelector } from 'react-redux';
 import { selectUser } from '../redux/userSlice';
-import { getDonationRequest } from '../api/donation';
+import { getDonationRequest, findMatchingDonors } from '../api/donation';
 // layouts
 import withCurrentUser from './withCurrentUser';
 // components
@@ -14,6 +14,7 @@ const Dashboard = () => {
     const userData = useSelector(selectUser);
     const [requestList, setRequestList] = useState([]);
     const [showOverlay, setShowOverlay] = useState(false);
+    const [matchingDonors, setMatchingDonors] = useState([]);
 
     useEffect(() => {
         const fetchDonationReqeusts = async () => {
@@ -26,6 +27,19 @@ const Dashboard = () => {
         }
         fetchDonationReqeusts();
     }, [])
+
+    // useEffect(() => {
+    //     const fetchMatchingDonors = async () => {
+    //         try {
+    //             const data = await findMatchingDonors({ bloodType: userData?.bloodType });
+    //             console.log(">> matching donors: ", data);
+    //             setMatchingDonors(data.donors);
+    //         } catch (error) {
+    //             console.log("Error occurred while fetching matching donors: ", error.message)
+    //         }
+    //     }
+    //     fetchMatchingDonors();
+    // }, [userData])
 
     const handleDisplayOverlay = () => {
         setShowOverlay(!showOverlay);

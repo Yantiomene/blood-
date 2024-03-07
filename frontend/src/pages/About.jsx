@@ -2,6 +2,7 @@
 import WithHeader from "../layouts/withHeader";
 // assets
 import { holdDonor } from "../assets";
+import ProfileCard from "../components/profileCard";
 
 const AboutPage = () => {
     return(
@@ -18,7 +19,7 @@ const AboutPage = () => {
         <section className="py-10 px-[10%]">
           <h2 className="text-3xl font-bold mb-4">About Us</h2>
           <p className="text-lg">
-            Blood+ is a digital resource for blood access and donations. We are a team of volunteers who are committed to ensuring that blood is available to those who need it. We are driven by the belief that no one should die because they cannot access blood. We are committed to ensuring that blood is available to those who need it. We are driven by the belief that no one should die because they cannot access blood.
+          Blood+ is more than just a platform—it's a community dedicated to saving lives through blood donation. Founded with a vision of ensuring that no one suffers due to a lack of access to blood, our mission is clear: to provide a reliable and accessible resource for blood donations. Our team of passionate volunteers works tirelessly to connect donors with those in need, facilitating life-saving donations that make a real difference. Together, we're making strides towards a world where everyone has access to the blood they need to thrive.
           </p>
         </section>
 
@@ -49,6 +50,33 @@ const AboutPage = () => {
             Our team is committed to ensuring that blood is available to those who need it. We are driven by the belief that no one should die because they cannot access blood. We are committed to ensuring that blood is available to those who need it. We are driven by the belief that no one should die because they cannot access blood.
           </p>
         </section>
+
+        <section className="pb-10">
+          <div className="pb-10 w-[80%] mx-auto rounded-lg">
+          <div className="flex justify-around gap-4 flex-wrap">
+            <ProfileCard
+              profileImage="https://avatars.githubusercontent.com/u/49885974?v=4"
+              name="Yaninthé Tiomene"
+              contact="https://github.com/Yantiomene"
+              about="Backend Developer"
+            />
+            <ProfileCard
+              profileImage="https://avatars.githubusercontent.com/u/81225469?v=4"
+              name="Esmond Adjei"
+              contact="https://github.com/esmond-adjei"
+              about="Fullstack Developer"
+            />
+            <ProfileCard
+              profileImage="https://avatars.githubusercontent.com/u/24933447?v=4"
+              name="Gregory Slippi-Mensah"
+              contact="https://github.com/GHMatrix"
+              about="Frontend Developer"
+            />
+          </div>
+                      
+          </div>
+        </section>
+
       </WithHeader>
       );
 };
