@@ -28,18 +28,18 @@ const Dashboard = () => {
         fetchDonationReqeusts();
     }, [])
 
-    // useEffect(() => {
-    //     const fetchMatchingDonors = async () => {
-    //         try {
-    //             const data = await findMatchingDonors({ bloodType: userData?.bloodType });
-    //             console.log(">> matching donors: ", data);
-    //             setMatchingDonors(data.donors);
-    //         } catch (error) {
-    //             console.log("Error occurred while fetching matching donors: ", error.message)
-    //         }
-    //     }
-    //     fetchMatchingDonors();
-    // }, [userData])
+    useEffect(() => {
+        const fetchMatchingDonors = async () => {
+            try {
+                const data = await findMatchingDonors({ bloodType: userData?.bloodType });
+                console.log(">> matching donors: ", data.donors, data.hospitals);
+                setMatchingDonors(data.donors);
+            } catch (error) {
+                console.log("Error occurred while fetching matching donors: ", error.message)
+            }
+        }
+        fetchMatchingDonors();
+    }, [userData])
 
     const handleDisplayOverlay = () => {
         setShowOverlay(!showOverlay);
