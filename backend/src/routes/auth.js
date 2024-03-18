@@ -18,7 +18,8 @@ const {
     findNearbyDonors,
     getDonationRequestByUserId,
     getDonors,
-    deleteRequest
+    deleteRequest,
+    findRequestByBloodType
 } = require('../controllers/donationRequest');
 const { registerValidation, loginValidation, resetPasswordValidation } = require('../validators/auth');
 const { validationMiddleware } = require('../middlewares/validations-middleware');
@@ -33,18 +34,22 @@ router.get('/logout', userAuth, logout);
 router.get('/profile', userAuth, getUserProfile);
 router.put('/profile', userAuth, updateUserProfile);
 router.get('/verifyEmail/:code', verifyEmail);
-// donation
+router.post('/passwordResetRequest', passwordResetRequest);
+router.post('/passwordReset', resetPasswordValidation, validationMiddleware,resetPassword);
+router.put('/user/location', userAuth, updateUserLocation);
+
+// requests
 router.post('/donationRequest', userAuth, createDonationRequest);
 router.get('/donationRequest', userAuth, getDonationRequests);
 router.get('/donationRequest/:userId', userAuth, getDonationRequestByUserId);
 router.put('/donationRequest/:requestId', userAuth, updateDonationRequest);
 router.delete('/donationRequest/:requestId', userAuth, deleteRequest);
-// update
-router.put('/user/location', userAuth, updateUserLocation);
+router.get('/donationReq', userAuth, findRequestByBloodType);
+
+// donors
 router.post('/donors/find', userAuth, findNearbyDonors);
 router.get('/donors', userAuth, getDonors);
-router.post('/passwordResetRequest', passwordResetRequest);
-router.post('/passwordReset', resetPasswordValidation, validationMiddleware,resetPassword);
+
 
 
 module.exports = router;

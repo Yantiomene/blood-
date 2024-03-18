@@ -538,6 +538,52 @@ The server is running at [http://localhost:8000](http://localhost:8000)
   }
   ```
 
+### 16. Find request by blood type (requires userAuth)
+
+- **Endpoint**: `http://localhost:8000/api/donationReq`
+- **Method**: GET
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "donationRequests": ["ListofDonationRequests"]
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 404
+- **JSON**:
+```json
+  {
+      "success": false,
+      "error": "Donation request not found"
+  }
+```
+
+- **Status**: 403
+- **JSON**:
+```json
+  {
+      "success": false,
+      "error": "Update your donor status"
+  }
+```
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
+
 ## Blogs routes
 
 ### 1. Create a blog
@@ -896,6 +942,14 @@ curl -X POST \
 ```bash
 curl -X DELETE \
   http://localhost:8000/api/donationRequest/:requestId \
+  -H 'Authorization: Bearer your_access_token'
+```
+
+### 16. Find request by blood type (requires userAuth)
+
+```bash
+curl -X GET \
+  http://localhost:8000/api/donationReq \
   -H 'Authorization: Bearer your_access_token'
 ```
 

@@ -499,6 +499,88 @@ const deleteRequest = async (req, res) => {
 }
 
 
+const findRequestByBloodType = async (req, res) => {
+    console.log('req.user:', req.user)
+    const { isDonor, bloodType } = req.user;
+
+    if(!isDonor) {
+        return res.status(403).json({ success: false, error: 'Update your donor status' });
+    }
+
+    console.log('bloodType:', bloodType);
+
+    try {
+        let compatibleBloodTypes;
+
+        switch (bloodType) {
+            case 'AB+':
+                compatibleBloodTypes = ['AB+'];
+                break;
+            case 'AB-':
+                compatibleBloodTypes = ['AB-', 'AB+'];
+                break;
+            case 'B+':
+                compatibleBloodTypes = ['B+', 'AB+'];
+                break;
+            case 'B-':
+                compatibleBloodTypes = ['B-', 'B+', 'AB-', 'AB+'];
+                break;
+            case 'A+':
+                compatibleBloodTypes = ['A+', 'AB+'];
+                break;
+            case 'A-':
+                compatibleBloodTypes = ['A-', 'A+', 'AB-', 'AB+'];
+                break;
+            case 'O+':
+                compatibleBloodTypes = ['O+', 'A+', 'B+', 'AB+'];
+                break;
+            case 'O-':
+                compatibleBloodTypes = ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'];
+                break;
+            default:
+                return res.status(400).json({
+                    success: false,
+                    error: 'Invalid blood type',
+                });
+        }
+
+        console.log('compatibleBloodTypes:', compatibleBloodTypes)
+        // Find donation requests with compatible blood types
+        const result = await db.query(`
+            SELECT 
+                id,
+                "bloodType", 
+                quantity,
+                "userId",
+                "isFulfilled",
+                ST_X(location::geometry) as latitude, 
+                ST_Y(location::geometry) as longitude,
+                "updated_at"
+            FROM 
+                donation_requests
+            WHERE 
+                "bloodType" IN (${compatibleBloodTypes.map((_, index) => `$${index + 1}`).join(', ')})
+            ORDER BY 
+                "updated_at" DESC;
+        `, compatibleBloodTypes);
+
+        req.logger.info('Fetched donation requests successfully');
+        console.log('Fetched donation requests successfully');
+        return res.status(200).json({
+            success: true,
+            donationRequests: result.rows || [],
+        });
+
+    } catch (error) {
+        req.logger.error('Error finding donation requests:', error.message);
+        console.error('Error finding donation requests:', error.message);
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+        });
+    }
+}
+
 module.exports = {
     getDonationRequests,
     createDonationRequest,
@@ -507,4 +589,5 @@ module.exports = {
     getDonationRequestByUserId,
     getDonors,
     deleteRequest,
+    findRequestByBloodType,
 };
