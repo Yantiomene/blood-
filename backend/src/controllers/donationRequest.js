@@ -468,6 +468,37 @@ const getDonors = async (req, res) => {
 };
 
 
+const deleteRequest = async (req, res) => {
+    const { requestId } = req.params;
+    const userId = req.user.id;
+
+    try {
+        const result = await db.query('DELETE FROM donation_requests WHERE id = $1 AND "userId" = $2 RETURNING *', [requestId, userId]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'Donation request not found',
+            });
+        }
+
+        req.logger.info('Donation request deleted successfully');
+        res.status(200).json({
+            success: true,
+            message: 'Donation request deleted successfully',
+        });
+    
+    } catch (error) {
+        req.logger.error('Error deleting donation request:', error.message);
+        console.error('Error deleting donation request:', error.message);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+        });
+    }
+}
+
+
 module.exports = {
     getDonationRequests,
     createDonationRequest,
@@ -475,4 +506,5 @@ module.exports = {
     findNearbyDonors,
     getDonationRequestByUserId,
     getDonors,
+    deleteRequest,
 };

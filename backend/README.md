@@ -503,6 +503,41 @@ The server is running at [http://localhost:8000](http://localhost:8000)
   }
   ```
 
+### 15. Delete donation request (requires userAuth)
+
+- **Endpoint**: `http://localhost:8000/api/donationRequest/:requestID`
+- **Method**: DELETE
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "message": "Donation request deleted successfully"
+  }
+  ```
+#### Error Response
+
+- **Status**: 404
+- **JSON**:
+```json
+  {
+      "success": false,
+      "error": "Donation request not found"
+  }
+```
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
 ## Blogs routes
 
 ### 1. Create a blog
@@ -856,6 +891,13 @@ curl -X POST \
 }'
 ```
 
+### 15. Delete donation request (requires userAuth)
+
+```bash
+curl -X DELETE \
+  http://localhost:8000/api/donationRequest/:requestId \
+  -H 'Authorization: Bearer your_access_token'
+```
 
 ## Blogs routes
 
