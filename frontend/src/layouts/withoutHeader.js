@@ -1,7 +1,7 @@
 import React from "react";
 import { useLocation, Link } from "react-router-dom";
 import { HOMEROUTE, LOGINROUTE, REGISTERROUTE } from "../api";
-
+import VerifyAlert from "../components/VerifyAlert";
 
 const LinkClass = 'w-1/2 p-2 rounded-md text-center';
 
@@ -9,10 +9,10 @@ export default function WithoutHeader({ children }) {
     const params = useLocation().pathname;
     return (
         <main className="pt-[5%] flex flex-col items-center min-h-screen bg-gray-100">
-            <div>
-                {
-                    (params === LOGINROUTE || params === REGISTERROUTE) &&
-                    <>
+            <VerifyAlert />
+            {
+                (params === LOGINROUTE || params === REGISTERROUTE) ?
+                    <div>
                         <h1 className="p-4 text-4xl text-center text-red-500 font-bold">
                             <Link to={HOMEROUTE}>Blood+</Link>
                         </h1>
@@ -28,10 +28,11 @@ export default function WithoutHeader({ children }) {
                             >Register
                             </Link>
                         </div>
-                    </>
-                }
-                {children}
-            </div>
+                        {children}
+                    </div>
+                    :
+                    children
+            }
         </main>
     );
 };

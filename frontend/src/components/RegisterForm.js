@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { register } from '../api/user';
-import { LOGINROUTE } from '../api';
+import { VERIFYACCOUNT } from '../api';
 
 
 const RegisterForm = () => {
@@ -10,15 +10,25 @@ const RegisterForm = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [bloodType, setBloodType] = useState('');
+
     const [registerError, setRegisterError] = useState('');
-    const [isLoading, setIsLoading] = useState(false); // New state variable
+    const [isLoading, setIsLoading] = useState(false);
+    const [checkPassword, setCheckPassword] = useState(false);
 
     const router = useNavigate();
+
+    const handleConfirmPassword = (e) => {
+        setConfirmPassword(e.target.value);
+        if (e.target.value.length >= 3)
+            setCheckPassword(true);
+        else
+            setCheckPassword(false);
+    }
 
     const handleRegister = async (event) => {
         event.preventDefault();
 
-        setIsLoading(true); // Set isLoading to true on submit
+        setIsLoading(true);
 
         if (password !== confirmPassword) {
             setRegisterError('Passwords do not match');
@@ -32,19 +42,21 @@ const RegisterForm = () => {
                 password,
                 bloodType,
             };
-            const response = await register(user);
-            if (response.success) {
-                router(LOGINROUTE);
+            const response = true //await register(user);
+            if (response) {
+                router(VERIFYACCOUNT);
                 return;
+            } else {
+                console.log(`${response}`);
             }
             setRegisterError('');
         }
         catch (error) {
-            setRegisterError('Registration failed');
+            setRegisterError(`Registration failed: ${error.message}`);
             console.error('Register error:', error);
         }
 
-        setIsLoading(false); // Set isLoading back to false after login attempt
+        setIsLoading(false);
     };
 
     const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
@@ -52,7 +64,7 @@ const RegisterForm = () => {
     return (
         <>
             <form onSubmit={handleRegister} className="w-[90vw] md:w-[40vw] bg-white shadow-md rounded px-8 py-8 mb-4">
-                {registerError && <p className="text-red-500 mb-4">{registerError}</p>}
+                {registerError && <p className="text-red-500 rounded p-2 block bg-red-100 mb-4">{registerError}</p>}
 
                 <div className="mb-4">
                     <label htmlFor="email">Email</label>
@@ -66,7 +78,6 @@ const RegisterForm = () => {
                         aria-describedby="emailHelpText"
                         required={true}
                     />
-                    <small id="emailHelpText" className="text-gray-500">We'll never share your email with anyone else.</small>
                 </div>
 
                 <div className="mb-4">
@@ -101,17 +112,30 @@ const RegisterForm = () => {
 
                 <div className="mb-4">
                     <label htmlFor="confirmPassword">Confirm Password</label>
+                    {
+                        checkPassword &&
+                        <small className={`rounded p-2 block ${confirmPassword === password ? 'bg-green-100 text-green-500' : 'bg-red-100 text-red-500'}`}>
+                            {
+                                confirmPassword === password ?
+                                    "Passwords do match"
+                                    :
+                                    "Passwords do NOT match"
+                            }
+                        </small>
+                    }
                     <input
                         type="password"
                         id="confirmPassword"
                         placeholder="Confirm Password"
                         value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        onChange={handleConfirmPassword}
                         className={inputStyles}
                         aria-describedby="confirmPasswordHelpText"
                         required={true}
                     />
-                    <small id="confirmPasswordHelpText" className="text-gray-500">Please re-enter your password.</small>
+                    <small id="confirmPasswordHelpText" className="text-gray-500">
+                        Please re-enter your password.
+                    </small>
                 </div>
 
                 <div className="mb-4">
@@ -134,13 +158,12 @@ const RegisterForm = () => {
                         <option value="O+">O+</option>
                         <option value="O-">O-</option>
                     </select>
-                    <small id="bloodTypeHelpText" className="text-gray-500">Select your blood type.</small>
                 </div>
 
                 <button
-                    className="bg-red-500 inline-block w-full hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    className={`inline-block w-full text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isLoading ? " bg-gray-500" : " bg-red-500 hover:bg-red-700"}`}
                     type="submit"
-                    disabled={isLoading} // Disable the button when isLoading is true
+                    disabled={isLoading}
                 >
                     {isLoading ? 'Loading...' : 'Register'}
                 </button>

@@ -17,7 +17,9 @@ import {
   ABOUTROUTE,
   BLOGROUTE,
   BLOGDETAILROUTE,
+  VERIFYACCOUNT,
 } from './api';
+import VerifyAccount from './pages/VerifyAccount';
 
 const App = () => (
   <Router>
@@ -29,7 +31,8 @@ const App = () => (
       <Route path={PROFILEROUTE} element={<ProfilePage />} />
       <Route path={ABOUTROUTE} element={<AboutPage />} />
       <Route path={BLOGROUTE} element={<BlogPage />} />
-      <Route path={`${BLOGDETAILROUTE}/:blogID`} element={<BlogDetailPage />} /> {/* Define route for blog detail page */}
+      <Route path={`${BLOGDETAILROUTE}/:blogID`} element={<BlogDetailPage />} />
+      <Route path={VERIFYACCOUNT} element={<VerifyAccount />} />
     </Routes>
   </Router>
 );

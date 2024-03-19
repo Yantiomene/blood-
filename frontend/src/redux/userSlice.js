@@ -33,7 +33,8 @@ const userSlice = createSlice({
       bloodType: '',
       isDonor: false,
       location: [0, 0],
-      contactNumber: ''
+      contactNumber: '',
+      isVerified: false,
     },
     loading: false,
     error: null,

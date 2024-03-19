@@ -76,3 +76,13 @@ export async function checkProtected() {
         throw error;
     }
 }
+
+export async function verifyEmail(code) {
+    try {
+        const response = await axios.get(`${apiUrl}/verifyEmail/${code}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error verifying email:', error);
+        throw error;
+    }
+}
