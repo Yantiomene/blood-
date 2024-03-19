@@ -10,7 +10,7 @@ const VerifyAlert = () => {
     return (
         isloggedIn && user && !user.isVerified && (
             <div className="bg-red-900 text-white text-center py-2">
-                <p>Your account is not verified yet. <a href={VERIFYACCOUNT} className='text-red-200 italic underline'>Verify</a> to verify now.</p>
+                <p>Your account is not verified yet. <a href={VERIFYACCOUNT} className='text-red-200 italic underline'>Click</a> to verify now.</p>
             </div>
         )
     );

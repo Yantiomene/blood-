@@ -5,8 +5,8 @@ import VerifyAlert from '../components/VerifyAlert';
 const WithHeader = ({ children }) => {
     return (
         <>
-            <Header />
             <VerifyAlert />
+            <Header />
             <main className='bg-gray-100'>
                 {children}
             </main>

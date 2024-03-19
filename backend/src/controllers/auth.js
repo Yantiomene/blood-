@@ -265,7 +265,7 @@ exports.updateUserLocation = async (req, res) => {
 
 exports.passwordResetRequest = async (req, res) => {
     const { email } = req.body;
-    
+
     try {
         // check if email exists in database
         const user = await db.query('SELECT * FROM users WHERE email = $1', [email]);
