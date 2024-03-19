@@ -583,6 +583,50 @@ The server is running at [http://localhost:8000](http://localhost:8000)
   }
   ```
 
+### 17. Deny Donation Request (requires userAuth)
+
+- **Endpoint**: `http://localhost:8000/api/denyRequest`
+- **Method**: POST
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "message": "Request denied successfully"
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 400
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Request ID and reason are required"
+  }
+  ```
+
+- **Status**: 404
+- **JSON**:
+```json
+  {
+      "success": false,
+      "error": "Invalid request ID" || "Requestor not found"
+  }
+```
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
 
 ## Blogs routes
 
@@ -951,6 +995,19 @@ curl -X DELETE \
 curl -X GET \
   http://localhost:8000/api/donationReq \
   -H 'Authorization: Bearer your_access_token'
+```
+
+### 17. Deny Donation Request (requires userAuth)
+
+```bash
+curl -X POST \
+  http://localhost:8000/api/denyRequest \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer your_access_token' \
+  -d '{
+    "requestId": "request_id",
+    "reason": "reason_for_denial"
+  }'
 ```
 
 ## Blogs routes

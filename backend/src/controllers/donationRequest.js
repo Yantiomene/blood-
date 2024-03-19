@@ -1,5 +1,5 @@
 const { validateLocationFormat, getNearbyHospitals } = require('../utils/geoUtils');
-const { sendNotificationEmail } = require('../utils/email');
+const { sendNotificationEmail, sendDenyEmail } = require('../utils/email');
 const db = require('../db');
 const wkx = require('wkx');
 const fs = require('fs');
@@ -500,7 +500,6 @@ const deleteRequest = async (req, res) => {
 
 
 const findRequestByBloodType = async (req, res) => {
-    console.log('req.user:', req.user)
     const { isDonor, bloodType } = req.user;
 
     if(!isDonor) {
@@ -581,6 +580,61 @@ const findRequestByBloodType = async (req, res) => {
     }
 }
 
+const denyRequest = async (req, res) => {
+    const { requestId, reason } = req.body;
+    const userId = req.user.id;
+
+    try {
+        if (!requestId || !reason) {
+            return res.status(400).json({
+                success: false,
+                error: 'Request ID and reason are required',
+            });
+        }
+
+        const result = await db.query('SELECT * FROM donation_requests WHERE id = $1', [requestId]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'Invalid request ID',
+            });
+        }
+
+        const request = result.rows[0];
+
+        const requestor = await db.query('SELECT * FROM users WHERE id = $1', [request.userId]);
+
+        if (requestor.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'Requestor not found',
+            });
+        }
+
+        const requestorEmail = requestor.rows[0].email;
+
+        // Send denial email to requestor
+        await sendDenyEmail(requestorEmail, reason);
+
+        // insert denial reason into the database
+        await db.query('INSERT INTO denial_reasons ("userId", "requestId", "reason") VALUES ($1, $2, $3)', [userId, requestId, reason]);
+
+        req.logger.info('Request denied successfully');
+        res.status(200).json({
+            success: true,
+            message: 'Request denied successfully',
+        });
+    } catch (error) {
+        req.logger.error('Error denying request:', error.message);
+        console.error('Error denying request:', error.message);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+        });
+    }
+}
+
 module.exports = {
     getDonationRequests,
     createDonationRequest,
@@ -590,4 +644,5 @@ module.exports = {
     getDonors,
     deleteRequest,
     findRequestByBloodType,
+    denyRequest,
 };

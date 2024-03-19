@@ -19,7 +19,8 @@ const {
     getDonationRequestByUserId,
     getDonors,
     deleteRequest,
-    findRequestByBloodType
+    findRequestByBloodType,
+    denyRequest,
 } = require('../controllers/donationRequest');
 const { registerValidation, loginValidation, resetPasswordValidation } = require('../validators/auth');
 const { validationMiddleware } = require('../middlewares/validations-middleware');
@@ -45,6 +46,7 @@ router.get('/donationRequest/:userId', userAuth, getDonationRequestByUserId);
 router.put('/donationRequest/:requestId', userAuth, updateDonationRequest);
 router.delete('/donationRequest/:requestId', userAuth, deleteRequest);
 router.get('/donationReq', userAuth, findRequestByBloodType);
+router.post('/denyRequest', userAuth, denyRequest);
 
 // donors
 router.post('/donors/find', userAuth, findNearbyDonors);
