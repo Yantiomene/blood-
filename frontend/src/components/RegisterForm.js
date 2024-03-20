@@ -42,7 +42,7 @@ const RegisterForm = () => {
                 password,
                 bloodType,
             };
-            const response = true //await register(user);
+            const response = await register(user);
             if (response) {
                 router(VERIFYACCOUNT);
                 return;

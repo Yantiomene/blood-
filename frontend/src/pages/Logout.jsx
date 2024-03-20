@@ -32,7 +32,7 @@ export default function LogoutPage() {
         }, secondsLeft * 1000);
 
         return () => clearInterval(interval);
-    }, [dispatch, router]);
+    }, [dispatch, secondsLeft, router]);
 
     return (
         <WithoutHeader>
