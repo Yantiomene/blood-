@@ -1,5 +1,5 @@
 const { validateLocationFormat, getNearbyHospitals } = require('../utils/geoUtils');
-const { sendNotificationEmail, sendDenyEmail } = require('../utils/email');
+const { sendNotificationEmail, sendDenyEmail, sendAcceptEmail } = require('../utils/email');
 const db = require('../db');
 const wkx = require('wkx');
 const fs = require('fs');
@@ -635,6 +635,49 @@ const denyRequest = async (req, res) => {
     }
 }
 
+const acceptRequest = async (req, res) => {
+    const { requestId } = req.params;
+
+    try {
+
+        if (!requestId) {
+            return res.status(400).json({
+                success: false,
+                error: 'Request ID is required'
+            });
+        }
+
+        // Fetch request details
+        const request = await db.query('SELECT * FROM donation_requests WHERE id = $1', [requestId]);
+
+        if (request.rows.length === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'Invalid request ID' 
+            });
+        }
+
+        const requestor = await db.query('SELECT * FROM users WHERE id = $1', [request.rows[0].userId]);
+
+        // Send email to requestor
+        await sendAcceptEmail(requestor.rows[0].email, request.rows[0].bloodType, req.user);
+
+        req.logger.info('Request accepted successfuly');
+        return res.status(200).json({
+            success: true,
+            message: 'Request accepted successfuly'
+        });
+    } catch (error) {
+        req.logger.error('Error Accepting request:', error.message);
+        console.error('Error accepting request:', error.message);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+        });
+    }
+
+}
+
 module.exports = {
     getDonationRequests,
     createDonationRequest,
@@ -645,4 +688,5 @@ module.exports = {
     deleteRequest,
     findRequestByBloodType,
     denyRequest,
+    acceptRequest,
 };
