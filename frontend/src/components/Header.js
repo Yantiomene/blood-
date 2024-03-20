@@ -41,7 +41,6 @@ const Header = () => {
                     {isLoggedin && <UserProfileIcon />}
                 </nav>
             </div>
-            {}
         </header>
     );
 };

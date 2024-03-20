@@ -9,6 +9,7 @@ import { HOMEROUTE } from "../api";
 const VerifyAccount = () => {
     const [codes, setCodes] = useState(['', '', '', '', '']);
     const [verificationMessage, setVerificationMessage] = useState('');
+	const [isLoading, setLoading] = useState(false);
     const router = useNavigate();
 	const user = useSelector(selectUser);
   
@@ -21,21 +22,23 @@ const VerifyAccount = () => {
     };
 
     const handleVerify = async () => {
-        const code = codes.join('');
+		const code = codes.join('');
         if (code.length !== 5) {
-            setVerificationMessage('Please enter a 5-digit PIN.');
+			setVerificationMessage('Please enter a 5-digit PIN.');
             return;
         }
         
+		setLoading(true);
         try {
             const response = await verifyEmail(code);
 			if (response.success){
 				setVerificationMessage('PIN verified successfully!');
-				router.push(HOMEROUTE);
+				router(HOMEROUTE);
 			}
         } catch (error) {
 			setVerificationMessage('PIN verification failed. Please try again.');
             console.log("Error verifying user:", error.message);
+			setLoading(false);
         }
     };
 
@@ -61,12 +64,14 @@ const VerifyAccount = () => {
 
                 ))}
             </div>
-            <button
-                onClick={handleVerify} 
-                className="inline-block w-full text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline bg-red-500 hover:bg-red-600 hover:bg-red-700"
-            >
-                Verify
-            </button>
+                <button
+                    className={`inline-block w-full text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isLoading ? " bg-gray-500" : " bg-red-500 hover:bg-red-700"}`}
+                    type="submit"
+                    disabled={isLoading}
+					onClick={handleVerify}
+                >
+                    {isLoading ? 'Loading...' : 'Verify'}
+                </button>
             {verificationMessage && (
                 <p className="mt-4 text-sm text-gray-700">{verificationMessage}</p>
             )}

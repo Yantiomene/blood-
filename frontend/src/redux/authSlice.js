@@ -14,7 +14,6 @@ export const initializeAuthStatus = createAsyncThunk(
       console.log(">> response", response);
       if (response) return true
     } catch (error) {
-      console.log(error.message);
       return false;
     }
   }
@@ -53,8 +52,9 @@ export const authSlice = createSlice({
 export const { authenticateUser, unAuthenticateUser } = authSlice.actions;
 
 export const selectAuthStatus = (state) => {
-  console.log(">> auth state", state.auth.isAuth);
-  return state.auth.isAuth;
+  const loginState = localStorage.getItem('isAuth');
+  console.log(">> getting auth state", loginState); //state.auth.isAuth);
+  return loginState === 'true'; //state.auth.isAuth;
 };
 
 export default authSlice.reducer;

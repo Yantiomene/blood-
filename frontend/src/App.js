@@ -18,8 +18,10 @@ import {
   BLOGROUTE,
   BLOGDETAILROUTE,
   VERIFYACCOUNT,
+  LOGOUTROUTE,
 } from './api';
 import VerifyAccount from './pages/VerifyAccount';
+import LogoutPage from './pages/Logout';
 
 const App = () => (
   <Router>
@@ -33,6 +35,7 @@ const App = () => (
       <Route path={BLOGROUTE} element={<BlogPage />} />
       <Route path={`${BLOGDETAILROUTE}/:blogID`} element={<BlogDetailPage />} />
       <Route path={VERIFYACCOUNT} element={<VerifyAccount />} />
+      <Route path={LOGOUTROUTE} element={<LogoutPage />} />
     </Routes>
   </Router>
 );

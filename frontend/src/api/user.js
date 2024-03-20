@@ -50,6 +50,7 @@ export async function register(user) {
 export async function logout() {
     try {
         const response = await axios.get(`${apiUrl}/logout`);
+        localStorage.removeItem('isAuth'); // insurance no. 2
         return response.data;
     } catch (error) {
         console.error('Logout error:', error);
@@ -72,7 +73,7 @@ export async function checkProtected() {
         const response = await axios.get(`${apiUrl}/protected`);
         return response.data;
     } catch (error) {
-        console.error('Protected route error:', error);
+        console.error('Protected route error:', error.message);
         throw error;
     }
 }

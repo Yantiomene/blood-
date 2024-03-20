@@ -2,10 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 // redux
 import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '../api/user';
-import { unAuthenticateUser } from '../redux/authSlice';
 import { fetchCurrentUser } from '../redux/userSlice';
-import { HOMEROUTE, PROFILEROUTE } from '../api';
+import { HOMEROUTE, LOGOUTROUTE, PROFILEROUTE } from '../api';
 // assets
 import { profilepic } from '../assets';
 import { selectUser } from '../redux/userSlice';
@@ -22,7 +20,7 @@ const UserProfileIcon = () => {
         setIsDropdownOpen(!isDropdownOpen);
     };
 
-    
+
     useEffect(() => {
         console.log(">> before fetching user from USERICON", userData);
         if (!userData || userData.username === '') {
@@ -30,18 +28,6 @@ const UserProfileIcon = () => {
             console.log(">> after fetching user from USERICON", userData);
         }
     }, [userData, dispatch]);
-
-    const handleLogout = async () => {
-        try {
-            const status = await logout();
-            if (status.success) {
-                dispatch(unAuthenticateUser());
-                router(HOMEROUTE);
-            }
-        } catch (error) {
-            console.error('Error logging out:', error);
-        }
-    };
 
     return (
         <div className="relative"
@@ -58,7 +44,7 @@ const UserProfileIcon = () => {
             />
             {isDropdownOpen && (
                 <div className="absolute top-10 right-0 z-50 bg-white rounded shadow">
-                    {userData && (
+                    {userData.username !== '' && (
                         <ul className="p-2">
                             <li className={dropdownItemStyles + ' text-nowrap'}>
                                 <Link to={PROFILEROUTE}>
@@ -69,8 +55,8 @@ const UserProfileIcon = () => {
                                 </Link>
                             </li>
                             <li className={dropdownItemStyles}>Settings</li>
-                            <li className={dropdownItemStyles + ' hover:bg-red-100'} onClick={handleLogout}>
-                                Logout
+                            <li className={dropdownItemStyles + ' hover:bg-red-100 active:bg-red-300 active:text-red-500'}>
+                                <a href={LOGOUTROUTE}>Logout</a>
                             </li>
                         </ul>
                     )}
