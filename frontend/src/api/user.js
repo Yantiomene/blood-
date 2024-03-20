@@ -16,9 +16,7 @@ export async function getUsers() {
 export async function getCurrentUser() {
     try {
         console.log(">> getting current user...");
-        const response = await axios.get(`${apiUrl}/profile`, {
-            withCredentials: true,
-        });
+        const response = await axios.get(`${apiUrl}/profile`);
         console.log(">> recieved current user: ", response.data);
         return response.data;
     } catch (error) {
@@ -50,10 +48,11 @@ export async function register(user) {
 export async function logout() {
     try {
         const response = await axios.get(`${apiUrl}/logout`);
-        localStorage.removeItem('isAuth'); // insurance no. 2
+        localStorage.clear(); // insurance no. 2
+        console.log(">> logging out...success");
         return response.data;
     } catch (error) {
-        console.error('Logout error:', error);
+        console.error('Logout error:', error.message);
         throw error;
     }
 }

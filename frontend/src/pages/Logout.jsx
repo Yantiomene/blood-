@@ -19,8 +19,8 @@ export default function LogoutPage() {
 
         setTimeout(async () => {
             try {
-                const status = await logout();
-                if (status.success) {
+                const response = await logout();
+                if (response.success) {
                     localStorage.setItem("isAuth", "false");
                     dispatch(unAuthenticateUser());
                     router(HOMEROUTE);
