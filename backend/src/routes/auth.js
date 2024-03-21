@@ -9,7 +9,8 @@ const {
     updateUserProfile, 
     updateUserLocation,
     passwordResetRequest,
-    resetPassword
+    resetPassword,
+    requestNewToken
 } = require('../controllers/auth');
 const { 
     createDonationRequest, 
@@ -35,6 +36,7 @@ router.post('/login', loginValidation, validationMiddleware, login);
 router.get('/logout', userAuth, logout);
 router.get('/profile', userAuth, getUserProfile);
 router.put('/profile', userAuth, updateUserProfile);
+router.post('/requestNewToken', requestNewToken);
 router.get('/verifyEmail/:code', verifyEmail);
 router.post('/passwordResetRequest', passwordResetRequest);
 router.post('/passwordReset', resetPasswordValidation, validationMiddleware,resetPassword);

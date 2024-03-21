@@ -628,6 +628,42 @@ The server is running at [http://localhost:8000](http://localhost:8000)
   }
   ```
 
+### 18. Request new token route
+
+- **Endpoint**: `http://localhost:8000/api/requestNewToken`
+- **Method**: POST
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "message": "New verification code sent successfully"
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 404
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Email not found"
+  }
+  ```
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
 ## Blogs routes
 
 ### 1. Create a blog
@@ -1007,6 +1043,17 @@ curl -X POST \
   -d '{
     "requestId": "request_id",
     "reason": "reason_for_denial"
+  }'
+```
+
+### 18. Request new token route
+
+```bash
+curl -X POST \
+  http://localhost:8000/api/requestNewToken \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "email": "email_address"
   }'
 ```
 
