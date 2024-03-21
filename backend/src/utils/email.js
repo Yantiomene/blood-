@@ -295,7 +295,7 @@ const sendAcceptEmail = async (requestorEmail, requestBloodType, donor) => {
       }
   
       h1 {
-        color: #d9534f;
+        color: #b21f2d;
       }
   
       p {
@@ -305,7 +305,7 @@ const sendAcceptEmail = async (requestorEmail, requestBloodType, donor) => {
       .reason {
         font-size: 20px;
         font-weight: bold;
-        color: #d9534f;
+        color: #green;
       }
   
       .thank-you {
@@ -317,8 +317,10 @@ const sendAcceptEmail = async (requestorEmail, requestBloodType, donor) => {
   </head>
   <body>
     <div class="container">
-      <h1>Request Denied</h1>
-      <p>Your request of blood type ${requestBloodType} has been accepted. </br> Donor details: <span class="reason">${donor}</span></p>
+      <h1>Request Accepted</h1>
+      <p>Your request of blood type ${requestBloodType} has been accepted. </br> Donor details: </br><span class="reason">Email: ${donor.email}</span></p>
+      <p class="reason">Contact: ${donor.contactNumber}</p>
+      <p class="reason">Name: ${donor.username}</p>
       <div class="thank-you">Thank you, the Blood+ team</div>
     </div>
   </body>
