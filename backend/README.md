@@ -664,6 +664,96 @@ The server is running at [http://localhost:8000](http://localhost:8000)
   }
   ```
 
+### 19. Find request by date (requires userAuth)
+
+- **Endpoint**: `http://localhost:8000/api/donationReqByDate`
+- **Method**: POST
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "donationRequests": ["ListofDonationRequests"]
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 400
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "startDate and enddate are required" || "Invalid date format, Use YYYY-MM-DD"
+  }
+  ```
+
+- **Status**: 403
+- **JSON**:
+```json
+  {
+      "success": false,
+      "error": "Update your donor status"
+  }
+```
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
+### 20. Find request by priority (requires userAuth)
+
+- **Endpoint**: `http://localhost:8000/api/donationReqByPriority/:urgent`
+- **Method**: POST
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "donationRequests": ["ListofDonationRequests"]
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 400
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Urgent field is required" || "Invalid urgent, use true or false"
+  }
+  ```
+
+- **Status**: 403
+- **JSON**:
+```json
+  {
+      "success": false,
+      "error": "Update your donor status"
+  }
+```
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
 ## Blogs routes
 
 ### 1. Create a blog
@@ -946,7 +1036,8 @@ curl -X POST \
     "bloodType": "A+",
     "quantity": 2,
     "location": [longitude, latitude],
-    "requestingEntity": "User"
+    "requestingEntity": "User",
+    "message": "Please donate blood",
   }'
 ```
 
@@ -988,7 +1079,9 @@ curl -X PUT \
     "quantity": 3,
     "bloodType": "A+",
     "location": [updated_longitude, updated_latitude],
-    "isFulfilled": true
+    "isFulfilled": true,
+    "message": "updated_message"
+    "urgent": true
   }'
 ```
 
@@ -1055,6 +1148,27 @@ curl -X POST \
   -d '{
     "email": "email_address"
   }'
+```
+
+### 19. Find request by date (requires userAuth)
+
+```bash
+curl -X POST \
+  http://localhost:8000/api/donationReqByDate \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer your_access_token' \
+  -d '{
+    "startDate": "YYYY-MM-DD",
+    "endDate": "YYYY-MM-DD"
+  }'
+```
+
+### 20. Find request by priority (requires userAuth)
+
+```bash
+curl -X GET \
+  http://localhost:8000/api/donationReqByPriority/:urgent \
+  -H 'Authorization: Bearer your_access_token' \
 ```
 
 ## Blogs routes
