@@ -560,7 +560,6 @@ const findRequestByBloodType = async (req, res) => {
                 });
         }
 
-        console.log('compatibleBloodTypes:', compatibleBloodTypes)
         // Find donation requests with compatible blood types
         const result = await db.query(`
             SELECT 
@@ -729,6 +728,81 @@ const findRequestByPriority = async (req, res) => {
     }
 }
 
+
+// function to filter request by location
+const findRequestByLocation = async (req, res) => {
+    const { isDonor, bloodType } = req.user;
+    const { location } = req.body;
+
+    if(!isDonor) {
+        return res.status(403).json({ success: false, error: 'Update your donor status' });
+    }
+
+    try {
+        // validate location
+        if (!location) {
+            return res.status(400).json({
+                success: false,
+                error: 'Location is required',
+            });
+        }
+
+        // validate location format
+        if (!Array.isArray(location) || location.length !== 2 || !location.every((coord) => typeof coord === 'number')) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid location format. Use [latitude, longitude]',
+            });
+        }
+
+        const compatibleBloodTypes = getCompatibleBloodTypes(bloodType);
+
+        // Create a point geometry with SRID 4326
+        const point = new wkx.Point(location[1], location[0], 4326);
+
+        // Convert the point geometry to a buffer
+        const buffer = point.toWkb();
+
+        console.log('buffer:', buffer);
+
+        // Find donation requests with compatible blood types
+        const result = await db.query(`
+            SELECT
+                id,
+                "bloodType",
+                quantity,
+                "userId",
+                "isFulfilled",
+                "message",
+                "urgent",
+                ST_X(location::geometry) as latitude,
+                ST_Y(location::geometry) as longitude,
+                ST_Distance(public.ST_SetSRID(location::geometry, 4326), public.ST_SetSRID($1::geometry, 4326)) as distance,
+                "updated_at"
+            FROM
+                donation_requests
+            WHERE
+                "bloodType" IN (${compatibleBloodTypes.map((_, index) => `$${index + 2}`).join(', ')})
+            ORDER BY
+                distance;
+        `, [buffer, ...compatibleBloodTypes]);
+
+        req.logger.info('Fetched donation requests successfully');
+        return res.status(200).json({
+            success: true,
+            donationRequests: result.rows || [],
+        });
+    } catch (error) {
+        req.logger.error('Error finding donation requests:', error.message);
+        console.error('Error finding donation requests:', error.message);
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+        });
+    }
+}
+
+
 // function to handle deny request
 const denyRequest = async (req, res) => {
     const { requestId, reason } = req.body;
@@ -878,5 +952,6 @@ module.exports = {
     denyRequest,
     acceptRequest,
     findRequestByDate,
-    findRequestByPriority
+    findRequestByPriority,
+    findRequestByLocation,
 };

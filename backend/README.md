@@ -754,6 +754,51 @@ The server is running at [http://localhost:8000](http://localhost:8000)
   }
   ```
 
+### 21. Find request by location (requires userAuth)
+
+- **Endpoint**: `http://localhost:8000/api/donationReqByLocation`
+- **Method**: POST
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "donationRequests": ["ListofDonationRequests"]
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 400
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "location is required" || "Invalid location format, Use [longitude, latitude]"
+  }
+  ```
+
+- **Status**: 403
+- **JSON**:
+```json
+  {
+      "success": false,
+      "error": "Update your donor status"
+  }
+```
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
 ## Blogs routes
 
 ### 1. Create a blog
@@ -1169,6 +1214,18 @@ curl -X POST \
 curl -X GET \
   http://localhost:8000/api/donationReqByPriority/:urgent \
   -H 'Authorization: Bearer your_access_token' \
+```
+
+### 21. Find request by location (requires userAuth)
+
+```bash
+curl -X POST \
+  http://localhost:8000/api/donationReqByLocation \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer your_access_token' \
+  -d '{
+    "location": [longitude, latitude]
+  }'
 ```
 
 ## Blogs routes
