@@ -26,6 +26,7 @@ const {
     findRequestByDate,
     findRequestByPriority,
     findRequestByLocation,
+    incrementViewCount,
 } = require('../controllers/donationRequest');
 const { registerValidation, loginValidation, resetPasswordValidation } = require('../validators/auth');
 const { validationMiddleware } = require('../middlewares/validations-middleware');
@@ -57,6 +58,7 @@ router.get('/donationReqByPriority/:urgent', userAuth, findRequestByPriority);
 router.post('/donationReqByLocation', userAuth, findRequestByLocation);
 router.post('/denyRequest', userAuth, denyRequest);
 router.get('/acceptRequest/:requestId', userAuth, acceptRequest);
+router.get('/incrementView/:requestId', userAuth, incrementViewCount);
 
 // donors
 router.post('/donors/find', userAuth, findNearbyDonors);

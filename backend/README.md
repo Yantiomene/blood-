@@ -799,6 +799,43 @@ The server is running at [http://localhost:8000](http://localhost:8000)
   }
   ```
 
+### 22. Increment view count (requires userAuth)
+
+- **Endpoint**: `http://localhost:8000/api/incrementView/:requestId`
+- **Method**: GET
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "message": "View count incremented successfully",
+      "Donation_request": "updatedDonationRequest"
+  }
+  ```
+
+### Error Response
+
+- **Status**: 404
+- **JSON**:
+```json
+  {
+      "success": false,
+      "error": "Donation request not found"
+  }
+```
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
 ## Blogs routes
 
 ### 1. Create a blog
@@ -1226,6 +1263,14 @@ curl -X POST \
   -d '{
     "location": [longitude, latitude]
   }'
+```
+
+### 22. Increment view count (requires userAuth)
+
+```bash
+curl -X GET \
+  http://localhost:8000/api/incrementView/:requestId \
+  -H 'Authorization: Bearer your_access_token'
 ```
 
 ## Blogs routes

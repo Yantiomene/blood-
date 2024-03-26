@@ -570,6 +570,7 @@ const findRequestByBloodType = async (req, res) => {
                 "isFulfilled",
                 "message",
                 "urgent",
+                "views_count",
                 ST_X(location::geometry) as latitude, 
                 ST_Y(location::geometry) as longitude,
                 "updated_at"
@@ -635,6 +636,7 @@ const findRequestByDate = async (req, res) => {
                 "isFulfilled",
                 "message",
                 "urgent",
+                "views_count",
                 ST_X(location::geometry) as latitude, 
                 ST_Y(location::geometry) as longitude,
                 "updated_at"
@@ -701,6 +703,7 @@ const findRequestByPriority = async (req, res) => {
                 "isFulfilled",
                 "message",
                 "urgent",
+                "views_count",
                 ST_X(location::geometry) as latitude,
                 ST_Y(location::geometry) as longitude,
                 "updated_at"
@@ -765,7 +768,7 @@ const findRequestByLocation = async (req, res) => {
 
         console.log('buffer:', buffer);
 
-        // Find donation requests with compatible blood types
+        // Find donation requests with compatible blood types by distance
         const result = await db.query(`
             SELECT
                 id,
@@ -775,6 +778,7 @@ const findRequestByLocation = async (req, res) => {
                 "isFulfilled",
                 "message",
                 "urgent",
+                "views_count",
                 ST_X(location::geometry) as latitude,
                 ST_Y(location::geometry) as longitude,
                 ST_Distance(public.ST_SetSRID(location::geometry, 4326), public.ST_SetSRID($1::geometry, 4326)) as distance,
@@ -903,6 +907,48 @@ const acceptRequest = async (req, res) => {
 }
 
 
+// function to increment the view count
+const incrementViewCount = async (req, res) => {
+    const { requestId } = req.params;
+
+    try {
+        if (!requestId) {
+            return res.status(400).json({
+                success: false,
+                error: 'Request ID is required'
+            });
+        }
+
+        // Fetch request details
+        const existingRequest = await db.query('SELECT * FROM donation_requests WHERE id = $1', [requestId]);
+
+        if (existingRequest.rows.length === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'Invalid request ID' 
+            });
+        }
+
+        // increment the view count
+        const request = await db.query('UPDATE donation_requests SET views_count=$1 WHERE id=$2 RETURNING *', [existingRequest.rows[0].views_count + 1, requestId]);
+
+        req.logger.info('View count incremented successfuly');
+        return res.status(200).json({
+            success: true,
+            message: 'View count incremented successfuly',
+            Donation_request: request.rows[0]
+        });
+
+    } catch (error) {
+        req.logger.error('Error incrementing view count:', error.message);
+        console.error('Error incrementing view count:', error.message);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+        });
+    }
+}
+
 // Function to get Compatible blood types from a donor blood type
 const getCompatibleBloodTypes = (bloodType) => {
     let compatibleBloodTypes = [];
@@ -954,4 +1000,5 @@ module.exports = {
     findRequestByDate,
     findRequestByPriority,
     findRequestByLocation,
+    incrementViewCount,
 };
