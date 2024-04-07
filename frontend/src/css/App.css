@@ -1,38 +1,58 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
+@keyframes dropin {
   from {
-    transform: rotate(0deg);
+    transform: translateY(-10px);
   }
+
   to {
-    transform: rotate(360deg);
+    transform: translateY(0);
   }
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 100%;
+  }
+}
+
+.donation-request-form,
+.app-message {
+  animation: dropin var(--animation-duration) cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.dropdown {
+  animation: appear calc(var(--animation-duration)/3) linear;
+}
+
+/* ---------------- */
+
+.app-message {
+  width: var(--app-message-width);
+  padding: 8px 16px;
+
+  position: fixed;
+  top: 100px;
+  left: calc(50% - var(--app-message-width) / 2);
+  z-index: 1000;
+
+  filter: brightness(160%);
+  background-color: var(--white);
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+}
+
+.app-message.success {
+  background-color: var(--color-success);
+}
+
+.app-message.error {
+  background-color: var(--color-error);
+}
+
+.app-message.warning {
+  background-color: var(--color-warning);
 }

@@ -2,6 +2,7 @@ import React from "react";
 import { useLocation, Link } from "react-router-dom";
 import { HOMEROUTE, LOGINROUTE, REGISTERROUTE } from "../api";
 import VerifyAlert from "../components/VerifyAlert";
+import MessageAlert from "../components/messageAlert";
 
 const LinkClass = 'w-1/2 p-2 rounded-md text-center';
 
@@ -10,6 +11,7 @@ export default function WithoutHeader({ children }) {
     return (
         <>
             <VerifyAlert />
+            <MessageAlert />
             <main className="pt-[5%] flex flex-col items-center min-h-screen bg-gray-100">
                 {
                     (params === LOGINROUTE || params === REGISTERROUTE) ?

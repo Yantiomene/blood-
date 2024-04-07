@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { showMessage } from '../redux/globalComponentSlice';
 import { register } from '../api/user';
 import { VERIFYACCOUNT } from '../api';
 
@@ -11,11 +13,11 @@ const RegisterForm = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [bloodType, setBloodType] = useState('');
 
-    const [registerError, setRegisterError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [checkPassword, setCheckPassword] = useState(false);
 
     const router = useNavigate();
+    const dispatch = useDispatch();
 
     const handleConfirmPassword = (e) => {
         setConfirmPassword(e.target.value);
@@ -31,7 +33,7 @@ const RegisterForm = () => {
         setIsLoading(true);
 
         if (password !== confirmPassword) {
-            setRegisterError('Passwords do not match');
+            dispatch(showMessage({heading: "Error", text: "Passwords do not match"}));
             return;
         }
 
@@ -49,10 +51,9 @@ const RegisterForm = () => {
             } else {
                 console.log(`>> registration error: ${response}`);
             }
-            setRegisterError('');
         }
         catch (error) {
-            setRegisterError(`Registration failed: ${error.message}`);
+            dispatch(showMessage({heading:'Error', text: `Registration failed: ${error.message}`}))
             console.error('Register error:', error);
         }
 
@@ -64,8 +65,6 @@ const RegisterForm = () => {
     return (
         <>
             <form onSubmit={handleRegister} className="w-[90vw] md:w-[40vw] bg-white shadow-md rounded px-8 py-8 mb-4">
-                {registerError && <p className="text-red-500 rounded p-2 block bg-red-100 mb-4">{registerError}</p>}
-
                 <div className="mb-4">
                     <label htmlFor="email">Email</label>
                     <input

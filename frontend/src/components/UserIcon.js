@@ -8,7 +8,7 @@ import { LOGOUTROUTE, PROFILEROUTE } from '../api';
 import { profilepic } from '../assets';
 import { selectUser } from '../redux/userSlice';
 
-const dropdownItemStyles = "px-4 py-2 hover:bg-gray-100 rounded cursor-pointer";
+const dropdownItemStyles = "px-4 py-2 hover:bg-gray-100 hover:text-red-600 rounded cursor-pointer";
 
 const UserProfileIcon = () => {
     const dispatch = useDispatch();
@@ -42,7 +42,7 @@ const UserProfileIcon = () => {
                 alt="Profile Icon"
             />
             {isDropdownOpen && (
-                <div className="absolute top-10 right-0 z-50 bg-white rounded shadow">
+                <div className="dropdown absolute top-10 right-0 z-50 bg-white rounded shadow-lg">
                     {userData.username !== '' && (
                         <ul className="p-2">
                             <li className={dropdownItemStyles + ' text-nowrap'}>

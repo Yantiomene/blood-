@@ -4,13 +4,12 @@ import { DASHBOARDROUTE, REGISTERROUTE } from '../api';
 import { login } from '../api/user';
 import { useDispatch } from 'react-redux';
 import { authenticateUser } from "../redux/authSlice";
+import { showMessage } from "../redux/globalComponentSlice";
 
 const LoginForm = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [loginError, setLoginError] = useState('');
-    const [isLoading, setIsLoading] = useState(false); // New state variable
-
+    const [isLoading, setIsLoading] = useState(false);
     const router = useNavigate();
     const dispatch = useDispatch();
 
@@ -26,7 +25,7 @@ const LoginForm = () => {
                 router(DASHBOARDROUTE);
             }
         } catch (error) {
-            setLoginError('Invalid email or password');
+            dispatch(showMessage({heading: "Error", text: "Invalid email or password"}));
         }
 
         setIsLoading(false);
@@ -37,7 +36,6 @@ const LoginForm = () => {
     return (
         <>
             <form onSubmit={handleSubmit} className="w-[90vw] md:w-[40vw] bg-white shadow-md rounded px-8 py-8 mb-4">
-                {loginError && <p className="text-red-500 mb-4">{loginError}</p>}
                 <div className="mb-4">
                     <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
                         Email:
