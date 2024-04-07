@@ -10,7 +10,7 @@ export default function LogoutPage() {
     const router = useNavigate();
     const dispatch = useDispatch();
     const [timeoutMessage, setTimeoutMessage] = useState("Logging out...");
-    const [secondsLeft, setSecondsLeft] = useState(5);
+    const [secondsLeft, setSecondsLeft] = useState(3);
 
     useEffect(() => {
         const interval = setInterval(() => {

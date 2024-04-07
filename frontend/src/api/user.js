@@ -59,7 +59,6 @@ export async function logout() {
 
 export async function updateProfile(user) {
     try {
-        console.log(">> profile update: ", user);
         const response = await axios.put(`${apiUrl}/profile`, user)
         return response.data;
     } catch (error) {

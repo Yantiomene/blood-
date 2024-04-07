@@ -249,6 +249,7 @@ exports.requestNewToken = async (req, res) => {
 
         // Send verification email with the short code
         sendVerificationEmail(email, verificationCode);
+        console.log(">> VERIFICATION CODE: ", verificationCode);
 
         req.logger.info('New verification code sent successfully');
         return res.status(200).json({

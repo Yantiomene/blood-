@@ -47,7 +47,7 @@ const RegisterForm = () => {
                 router(VERIFYACCOUNT);
                 return;
             } else {
-                console.log(`${response}`);
+                console.log(`>> registration error: ${response}`);
             }
             setRegisterError('');
         }
