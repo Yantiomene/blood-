@@ -85,3 +85,13 @@ export async function verifyEmail(code) {
         throw error;
     }
 }
+
+export async function requestNewToken(userEmail) {
+    try {
+        const response = await axios.post(`${apiUrl}/requestNewToken`, userEmail);
+        return response.data;
+    } catch (error) {
+        console.error('Error requesting new token:', error);
+        throw error;
+    }
+}

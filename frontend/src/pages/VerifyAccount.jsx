@@ -3,13 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectUser } from "../redux/userSlice";
 import WithoutHeader from "../layouts/withoutHeader";
-import { verifyEmail } from "../api/user";
+import { requestNewToken, verifyEmail } from "../api/user";
 import { HOMEROUTE } from "../api";
 import withCurrentUser from "../layouts/withCurrentUser";
 
+
+const successStyle = "bg-green-100 border border-green-300";
+const errorStyle = "bg-red-100 border border-red-300";
+
 const VerifyAccount = () => {
     const [codes, setCodes] = useState(['', '', '', '', '']);
-    const [verificationMessage, setVerificationMessage] = useState('');
+    const [verificationMessage, setVerificationMessage] = useState({
+        message: '',
+        success: false,
+    });
 	const [isLoading, setLoading] = useState(false);
     const router = useNavigate();
 	const user = useSelector(selectUser);
@@ -22,10 +29,23 @@ const VerifyAccount = () => {
         setCodes(newCodes);
     };
 
+    const handleRequestNewToken = async () => {
+        setLoading(true)
+        try {
+            const response = await requestNewToken({email: user.email});
+            if (response.success) {
+                setVerificationMessage({message: 'New verification email sent!', success: true});
+            }
+        } catch (error) {
+            console.error('Error requesting new token:', error.message);
+        }
+        setLoading(false);
+    }
+
     const handleVerify = async () => {
 		const code = codes.join('');
         if (code.length !== 5) {
-			setVerificationMessage('Please enter a 5-digit PIN.');
+			setVerificationMessage({message: 'Please enter a 5-digit PIN.', success: false});
             return;
         }
         
@@ -33,14 +53,14 @@ const VerifyAccount = () => {
         try {
             const response = await verifyEmail(code);
 			if (response.success){
-				setVerificationMessage('PIN verified successfully!');
+				setVerificationMessage({message: 'PIN verified successfully!', success: true});
 				router(HOMEROUTE);
 			}
         } catch (error) {
-			setVerificationMessage('PIN verification failed. Please try again.');
+			setVerificationMessage({message: 'PIN verification failed. Please try again.', success: false});
             console.log("Error verifying user:", error.message);
-			setLoading(false);
         }
+        setLoading(false);
     };
 
     return (
@@ -72,9 +92,17 @@ const VerifyAccount = () => {
             >
                 {isLoading ? 'Loading...' : 'Verify'}
             </button>
-            {verificationMessage && (
-                <p className="mt-4 text-sm text-gray-700">{verificationMessage}</p>
+            {(verificationMessage.message !== '') && (
+                <p 
+                    className={`${"mt-4 text-sm text-gray-700 p-2 " + (verificationMessage.success ? successStyle : errorStyle)}`}
+                >{`${verificationMessage.message}`}
+                </p>
             )}
+        </div>
+        <div>
+            <p className="text-center text-gray-500 text-sm">
+                Didn't receive the email? <button onClick={handleRequestNewToken}>Resend</button>
+            </p>
         </div>
       </WithoutHeader>
   );

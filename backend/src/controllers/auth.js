@@ -209,7 +209,7 @@ exports.updateUserProfile = async (req, res) => {
 // function to generate a new verification code
 exports.requestNewToken = async (req, res) => {
     const { email } = req.body;
-
+    console.log(">> EMAIL: ", email, req.body);
     try {
         // check if email exists
         if (!email) {
@@ -249,7 +249,7 @@ exports.requestNewToken = async (req, res) => {
 
         // Send verification email with the short code
         sendVerificationEmail(email, verificationCode);
-        console.log(">> VERIFICATION CODE: ", verificationCode);
+        console.log(">> NEW VERIFICATION CODE: ", verificationCode);
 
         req.logger.info('New verification code sent successfully');
         return res.status(200).json({
