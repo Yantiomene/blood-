@@ -51,7 +51,7 @@ const Dashboard = () => {
 
     return (
         <>
-            <header className="bg-white sticky top-0 z-40 shadow">
+            <header className="bg-gray-200 py-4">
                 <nav className="container mx-auto px-4 py-2 flex items-center justify-between">
                     <h1 className="text-xl font-bold">Welcome, {userData?.username}!</h1>
                     {

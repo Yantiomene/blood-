@@ -22,7 +22,7 @@ const Header = () => {
     return (
         <header className="bg-white p-4">
             <div className="container mx-auto flex justify-between items-center">
-                <Link to={HOMEROUTE} className="text-red-500 text-2xl font-bold">
+                <Link to={HOMEROUTE} className="text-red-500 text-3xl font-bold">
                     <div className="flex items-center gap-6">
                         Blood+
                     </div>

@@ -1,6 +1,16 @@
 @keyframes dropin {
   from {
-    transform: translateY(-10px);
+    transform: translateY(-10%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes popin {
+  from {
+    transform: translateY(10%);
   }
 
   to {
@@ -18,9 +28,12 @@
   }
 }
 
-.donation-request-form,
 .app-message {
   animation: dropin var(--animation-duration) cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.donation-request-form{  
+  animation: popin var(--animation-duration) cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .dropdown {
