@@ -583,6 +583,258 @@ The server is running at [http://localhost:8000](http://localhost:8000)
   }
   ```
 
+### 17. Deny Donation Request (requires userAuth)
+
+- **Endpoint**: `http://localhost:8000/api/denyRequest`
+- **Method**: POST
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "message": "Request denied successfully"
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 400
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Request ID and reason are required"
+  }
+  ```
+
+- **Status**: 404
+- **JSON**:
+```json
+  {
+      "success": false,
+      "error": "Invalid request ID" || "Requestor not found"
+  }
+```
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
+### 18. Request new token route
+
+- **Endpoint**: `http://localhost:8000/api/requestNewToken`
+- **Method**: POST
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "message": "New verification code sent successfully"
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 404
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Email not found"
+  }
+  ```
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
+### 19. Find request by date (requires userAuth)
+
+- **Endpoint**: `http://localhost:8000/api/donationReqByDate`
+- **Method**: POST
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "donationRequests": ["ListofDonationRequests"]
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 400
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "startDate and enddate are required" || "Invalid date format, Use YYYY-MM-DD"
+  }
+  ```
+
+- **Status**: 403
+- **JSON**:
+```json
+  {
+      "success": false,
+      "error": "Update your donor status"
+  }
+```
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
+### 20. Find request by priority (requires userAuth)
+
+- **Endpoint**: `http://localhost:8000/api/donationReqByPriority/:urgent`
+- **Method**: POST
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "donationRequests": ["ListofDonationRequests"]
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 400
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Urgent field is required" || "Invalid urgent, use true or false"
+  }
+  ```
+
+- **Status**: 403
+- **JSON**:
+```json
+  {
+      "success": false,
+      "error": "Update your donor status"
+  }
+```
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
+### 21. Find request by location (requires userAuth)
+
+- **Endpoint**: `http://localhost:8000/api/donationReqByLocation`
+- **Method**: POST
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "donationRequests": ["ListofDonationRequests"]
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 400
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "location is required" || "Invalid location format, Use [longitude, latitude]"
+  }
+  ```
+
+- **Status**: 403
+- **JSON**:
+```json
+  {
+      "success": false,
+      "error": "Update your donor status"
+  }
+```
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
+### 22. Increment view count (requires userAuth)
+
+- **Endpoint**: `http://localhost:8000/api/incrementView/:requestId`
+- **Method**: GET
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "message": "View count incremented successfully",
+      "Donation_request": "updatedDonationRequest"
+  }
+  ```
+
+### Error Response
+
+- **Status**: 404
+- **JSON**:
+```json
+  {
+      "success": false,
+      "error": "Donation request not found"
+  }
+```
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
 
 ## Blogs routes
 
@@ -866,7 +1118,8 @@ curl -X POST \
     "bloodType": "A+",
     "quantity": 2,
     "location": [longitude, latitude],
-    "requestingEntity": "User"
+    "requestingEntity": "User",
+    "message": "Please donate blood",
   }'
 ```
 
@@ -908,7 +1161,9 @@ curl -X PUT \
     "quantity": 3,
     "bloodType": "A+",
     "location": [updated_longitude, updated_latitude],
-    "isFulfilled": true
+    "isFulfilled": true,
+    "message": "updated_message"
+    "urgent": true
   }'
 ```
 
@@ -950,6 +1205,71 @@ curl -X DELETE \
 ```bash
 curl -X GET \
   http://localhost:8000/api/donationReq \
+  -H 'Authorization: Bearer your_access_token'
+```
+
+### 17. Deny Donation Request (requires userAuth)
+
+```bash
+curl -X POST \
+  http://localhost:8000/api/denyRequest \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer your_access_token' \
+  -d '{
+    "requestId": "request_id",
+    "reason": "reason_for_denial"
+  }'
+```
+
+### 18. Request new token route
+
+```bash
+curl -X POST \
+  http://localhost:8000/api/requestNewToken \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "email": "email_address"
+  }'
+```
+
+### 19. Find request by date (requires userAuth)
+
+```bash
+curl -X POST \
+  http://localhost:8000/api/donationReqByDate \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer your_access_token' \
+  -d '{
+    "startDate": "YYYY-MM-DD",
+    "endDate": "YYYY-MM-DD"
+  }'
+```
+
+### 20. Find request by priority (requires userAuth)
+
+```bash
+curl -X GET \
+  http://localhost:8000/api/donationReqByPriority/:urgent \
+  -H 'Authorization: Bearer your_access_token' \
+```
+
+### 21. Find request by location (requires userAuth)
+
+```bash
+curl -X POST \
+  http://localhost:8000/api/donationReqByLocation \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer your_access_token' \
+  -d '{
+    "location": [longitude, latitude]
+  }'
+```
+
+### 22. Increment view count (requires userAuth)
+
+```bash
+curl -X GET \
+  http://localhost:8000/api/incrementView/:requestId \
   -H 'Authorization: Bearer your_access_token'
 ```
 

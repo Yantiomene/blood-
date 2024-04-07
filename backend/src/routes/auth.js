@@ -9,7 +9,8 @@ const {
     updateUserProfile, 
     updateUserLocation,
     passwordResetRequest,
-    resetPassword
+    resetPassword,
+    requestNewToken
 } = require('../controllers/auth');
 const { 
     createDonationRequest, 
@@ -19,7 +20,13 @@ const {
     getDonationRequestByUserId,
     getDonors,
     deleteRequest,
-    findRequestByBloodType
+    findRequestByBloodType,
+    denyRequest,
+    acceptRequest,
+    findRequestByDate,
+    findRequestByPriority,
+    findRequestByLocation,
+    incrementViewCount,
 } = require('../controllers/donationRequest');
 const { registerValidation, loginValidation, resetPasswordValidation } = require('../validators/auth');
 const { validationMiddleware } = require('../middlewares/validations-middleware');
@@ -33,6 +40,7 @@ router.post('/login', loginValidation, validationMiddleware, login);
 router.get('/logout', userAuth, logout);
 router.get('/profile', userAuth, getUserProfile);
 router.put('/profile', userAuth, updateUserProfile);
+router.post('/requestNewToken', requestNewToken);
 router.get('/verifyEmail/:code', verifyEmail);
 router.post('/passwordResetRequest', passwordResetRequest);
 router.post('/passwordReset', resetPasswordValidation, validationMiddleware,resetPassword);
@@ -45,6 +53,12 @@ router.get('/donationRequest/:userId', userAuth, getDonationRequestByUserId);
 router.put('/donationRequest/:requestId', userAuth, updateDonationRequest);
 router.delete('/donationRequest/:requestId', userAuth, deleteRequest);
 router.get('/donationReq', userAuth, findRequestByBloodType);
+router.post('/donationReqByDate', userAuth, findRequestByDate);
+router.get('/donationReqByPriority/:urgent', userAuth, findRequestByPriority);
+router.post('/donationReqByLocation', userAuth, findRequestByLocation);
+router.post('/denyRequest', userAuth, denyRequest);
+router.get('/acceptRequest/:requestId', userAuth, acceptRequest);
+router.get('/incrementView/:requestId', userAuth, incrementViewCount);
 
 // donors
 router.post('/donors/find', userAuth, findNearbyDonors);

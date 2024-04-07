@@ -205,6 +205,67 @@ exports.updateUserProfile = async (req, res) => {
     }
 };
 
+
+// function to generate a new verification code
+exports.requestNewToken = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        // check if email exists
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                error: 'Email is required',
+            });
+        }
+
+        // check if email exists in database
+        const user = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+        if (!user.rows[0]) {
+            return res.status(404).json({
+                success: false,
+                error: 'Email not found',
+            })
+        }
+
+        // Generate a new verification code 
+        const verificationCode = generateShortCode();
+
+        // check if redis client is connected
+        if (!redisClient.isAlive()) {
+            throw new Error('Redis client not connected');
+        }
+
+        // Check if there's an existing verification code for the email
+        const existingCode = await redisClient.get(email);
+
+        // If there's an existing code, delete it
+        if (existingCode) {
+            await redisClient.del(existingCode);
+        }
+
+        // Store the new verification code in Redis
+        await redisClient.set(verificationCode, email, 60 * 60); // Expire in 1h (3600 seconds)
+
+        // Send verification email with the short code
+        sendVerificationEmail(email, verificationCode);
+
+        req.logger.info('New verification code sent successfully');
+        return res.status(200).json({
+            success: true,
+            message: 'New verification code sent successfully',
+        });
+
+    } catch (error) {
+        req.logger.error('Error sending new verification code:', error.message);
+        console.error('Error sending new verification code:', error.message);
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+        });
+    }
+};
+
 exports.verifyEmail = async (req, res) => {
     const verificationCode = req.params.code;
 
