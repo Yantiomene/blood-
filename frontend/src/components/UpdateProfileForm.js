@@ -14,8 +14,8 @@ const labelStyles = "block mb-1"
 const messageStyles = "text-center mt-4 text-gray-600 italic"
 
 const UpdateUserProfile = () => {
-    const [Message, setMessage] = useState('');
     const user = useSelector(selectUser);
+    const [Message, setMessage] = useState('');
     const [formData, setFormData] = useState(user);
     const [isLoading, setLoading] = useState(false);
     const [editableFields, setEditableFields] = useState({
@@ -26,7 +26,7 @@ const UpdateUserProfile = () => {
         location: false,
         contactNumber: false
     });
-    
+
     const router = useNavigate();
     const dispatch = useDispatch();
 
