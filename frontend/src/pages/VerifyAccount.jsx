@@ -1,18 +1,16 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { selectUser } from "../redux/userSlice";
+import { useDispatch } from "react-redux";
 import { showMessage } from "../redux/globalComponentSlice";
 import { requestNewToken, verifyEmail } from "../api/user";
 import { HOMEROUTE } from "../api";
 import AuthRequired from "../layouts/authRequired";
 
 
-const VerifyAccount = () => {
+const VerifyAccount = ({ currentUser: user }) => {
     const [codes, setCodes] = useState(['', '', '', '', '']);
 	const [isLoading, setLoading] = useState(false);
     const router = useNavigate();
-	const user = useSelector(selectUser);
     const dispatch = useDispatch();
 
     const handleCodeChange = (index, value) => {

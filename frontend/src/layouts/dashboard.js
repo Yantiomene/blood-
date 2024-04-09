@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 // redux
 import { useSelector, useDispatch } from 'react-redux';
-import { selectUser } from '../redux/userSlice';
 import { getDonationRequest, findMatchingDonors } from '../api/donation';
 import { displayOverlayContainer } from '../redux/globalComponentSlice';
 // layouts
@@ -11,9 +10,8 @@ import Overlay from './overlayContainer';
 import DonationCard from '../components/DonorCard';
 import DonationRequestForm from '../components/donationRequestForm';
 
-const Dashboard = () => {
+const Dashboard = ({currentUser: userData}) => {
 
-    const userData = useSelector(selectUser);
     const [requestList, setRequestList] = useState([]);
     const [matchingDonors, setMatchingDonors] = useState([]);
 

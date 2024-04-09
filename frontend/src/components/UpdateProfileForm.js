@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { updateUserProfile as updateProfile, selectUser } from '../redux/userSlice';
+import { useDispatch } from 'react-redux';
+import { updateUserProfile as updateProfile } from '../redux/userSlice';
 import { useNavigate } from 'react-router-dom';
 import { DASHBOARDROUTE } from '../api';
 // layouts
@@ -13,8 +13,7 @@ const fieldStyles = "mb-4 flex items-center gap-4"
 const labelStyles = "block mb-1"
 const messageStyles = "text-center mt-4 text-gray-600 italic"
 
-const UpdateUserProfile = () => {
-    const user = useSelector(selectUser);
+const UpdateUserProfile = ({ currentUser: user }) => {
     const [Message, setMessage] = useState('');
     const [formData, setFormData] = useState(user);
     const [isLoading, setLoading] = useState(false);

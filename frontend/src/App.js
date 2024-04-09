@@ -10,7 +10,8 @@ import BlogPage from './pages/Blog';
 import BlogDetailPage from './pages/BlogDetailPage';
 import WithHeader from './layouts/withHeader';
 import WithoutHeader from './layouts/withoutHeader';
-
+import VerifyAccount from './pages/VerifyAccount';
+import LogoutPage from './pages/Logout';
 import {
   LOGINROUTE,
   REGISTERROUTE,
@@ -23,8 +24,6 @@ import {
   VERIFYACCOUNT,
   LOGOUTROUTE,
 } from './api';
-import VerifyAccount from './pages/VerifyAccount';
-import LogoutPage from './pages/Logout';
 
 const App = () => (
   <Router>
