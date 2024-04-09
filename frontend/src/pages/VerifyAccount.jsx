@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { selectUser } from "../redux/userSlice";
 import { showMessage } from "../redux/globalComponentSlice";
-import WithoutHeader from "../layouts/withoutHeader";
 import { requestNewToken, verifyEmail } from "../api/user";
 import { HOMEROUTE } from "../api";
 import withCurrentUser from "../layouts/withCurrentUser";
@@ -59,7 +58,7 @@ const VerifyAccount = () => {
     };
 
     return (
-      <WithoutHeader>
+      <>
         <div className="w-[90vw] md:w-[40vw] mt-[10%] bg-white shadow-md rounded px-8 py-8 mb-4">
             <h2 className="text-2xl font-semibold mb-4">PIN Verification</h2>
             <p className="my-4">
@@ -93,7 +92,7 @@ const VerifyAccount = () => {
                 Didn't receive the email? <button onClick={handleRequestNewToken}>Resend</button>
             </p>
         </div>
-      </WithoutHeader>
+      </>
   );
 };
 

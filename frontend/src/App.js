@@ -8,6 +8,8 @@ import ProfilePage from './pages/ProfilePage';
 import AboutPage from './pages/About';
 import BlogPage from './pages/Blog';
 import BlogDetailPage from './pages/BlogDetailPage';
+import WithHeader from './layouts/withHeader';
+import WithoutHeader from './layouts/withoutHeader';
 
 import {
   LOGINROUTE,
@@ -27,16 +29,18 @@ import LogoutPage from './pages/Logout';
 const App = () => (
   <Router>
     <Routes>
-      <Route path={HOMEROUTE} element={<Home />} />
-      <Route path={LOGINROUTE} element={<LoginPage />} />
-      <Route path={REGISTERROUTE} element={<RegisterPage />} />
-      <Route path={DASHBOARDROUTE} element={<DashboardPage />} />
-      <Route path={PROFILEROUTE} element={<ProfilePage />} />
-      <Route path={ABOUTROUTE} element={<AboutPage />} />
-      <Route path={BLOGROUTE} element={<BlogPage />} />
-      <Route path={`${BLOGDETAILROUTE}/:blogID`} element={<BlogDetailPage />} />
-      <Route path={VERIFYACCOUNT} element={<VerifyAccount />} />
-      <Route path={LOGOUTROUTE} element={<LogoutPage />} />
+      {/* pages without headers */}
+      <Route path={HOMEROUTE} element={<WithHeader><Home /></WithHeader>} />
+      <Route path={LOGINROUTE} element={<WithoutHeader><LoginPage /></WithoutHeader>} />
+      <Route path={REGISTERROUTE} element={<WithoutHeader><RegisterPage /></WithoutHeader>} />
+      <Route path={VERIFYACCOUNT} element={<WithoutHeader><VerifyAccount /></WithoutHeader>} />
+      <Route path={PROFILEROUTE} element={<WithoutHeader><ProfilePage /></WithoutHeader>} />
+      <Route path={LOGOUTROUTE} element={<WithoutHeader><LogoutPage /></WithoutHeader>} />
+      {/* pages with headers */}
+      <Route path={DASHBOARDROUTE} element={<WithHeader><DashboardPage /></WithHeader>} />
+      <Route path={ABOUTROUTE} element={<WithHeader><AboutPage /></WithHeader>} />
+      <Route path={BLOGROUTE} element={<WithHeader><BlogPage /></WithHeader>} />
+      <Route path={`${BLOGDETAILROUTE}/:blogID`} element={<WithHeader><BlogDetailPage /></WithHeader>} />
     </Routes>
   </Router>
 );
