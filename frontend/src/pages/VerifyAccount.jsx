@@ -5,7 +5,7 @@ import { selectUser } from "../redux/userSlice";
 import { showMessage } from "../redux/globalComponentSlice";
 import { requestNewToken, verifyEmail } from "../api/user";
 import { HOMEROUTE } from "../api";
-import withCurrentUser from "../layouts/withCurrentUser";
+import AuthRequired from "../layouts/authRequired";
 
 
 const VerifyAccount = () => {
@@ -96,4 +96,4 @@ const VerifyAccount = () => {
   );
 };
 
-export default withCurrentUser(VerifyAccount);
+export default AuthRequired(VerifyAccount);

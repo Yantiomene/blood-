@@ -4,7 +4,7 @@ import { updateUserProfile as updateProfile, selectUser } from '../redux/userSli
 import { useNavigate } from 'react-router-dom';
 import { DASHBOARDROUTE } from '../api';
 // layouts
-import withCurrentUser from '../layouts/withCurrentUser';
+import AuthRequired from '../layouts/authRequired';
 
 
 const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
@@ -225,4 +225,4 @@ const UpdateUserProfile = () => {
     );
 };
 
-export default withCurrentUser(UpdateUserProfile);
+export default AuthRequired(UpdateUserProfile);

@@ -2,8 +2,8 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchCurrentUser, selectUser } from '../redux/userSlice';
 
-const withCurrentUser = (WrappedComponent) => {
-    return function WithCurrentUserWrapper(props) {
+const AuthRequired = (WrappedComponent) => {
+    return function AuthRequiredWrapper(props) {
         const dispatch = useDispatch();
         const user = useSelector(selectUser);
         const isLoading = useSelector(state => state.user.loading);
@@ -29,4 +29,4 @@ const withCurrentUser = (WrappedComponent) => {
     };
 };
 
-export default withCurrentUser;
+export default AuthRequired;

@@ -5,7 +5,7 @@ import { selectUser } from '../redux/userSlice';
 import { getDonationRequest, findMatchingDonors } from '../api/donation';
 import { displayOverlayContainer } from '../redux/globalComponentSlice';
 // layouts
-import withCurrentUser from './withCurrentUser';
+import AuthRequired from './authRequired';
 // components
 import Overlay from './overlayContainer';
 import DonationCard from '../components/DonorCard';
@@ -95,4 +95,4 @@ const Dashboard = () => {
     );
 };
 
-export default withCurrentUser(Dashboard);
+export default AuthRequired(Dashboard);
