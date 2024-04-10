@@ -5,6 +5,7 @@ import { showMessage } from "../redux/globalComponentSlice";
 import { requestNewToken, verifyEmail } from "../api/user";
 import { HOMEROUTE } from "../api";
 import AuthRequired from "../layouts/authRequired";
+import { fetchCurrentUser } from "../redux/userSlice";
 
 
 const VerifyAccount = ({ currentUser: user }) => {
@@ -46,6 +47,7 @@ const VerifyAccount = ({ currentUser: user }) => {
             const response = await verifyEmail(code);
 			if (response.success){
                 dispatch(showMessage({heading: "Success", text: 'PIN verified successfully'}));
+                dispatch(fetchCurrentUser());
 				router(HOMEROUTE);
 			}
         } catch (error) {

@@ -8,9 +8,9 @@
   --animation-duration: 800ms;
 
   --white: #ffffff;
-  --color-success: #34d399;
-  --color-error: #f87171;
-  --color-warning: #f59e0b;
+  --color-success: #99f5d3;
+  --color-error: #fdacac;
+  --color-warning: #fdd38b;
 }
 
 body {

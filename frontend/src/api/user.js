@@ -15,9 +15,7 @@ export async function getUsers() {
 
 export async function getCurrentUser() {
     try {
-        console.log(">> getting current user...");
         const response = await axios.get(`${apiUrl}/profile`);
-        console.log(">> recieved current user: ", response.data);
         return response.data;
     } catch (error) {
         console.error('Error getting user profile:', error.message);
@@ -40,8 +38,8 @@ export async function register(user) {
         const response = await axios.post(`${apiUrl}/register`, user);
         return response.data;
     } catch (error) {
-        console.error('Registration error:', error);
-        throw error;
+        console.error('>> Registration error:', error.response.data.errors[0]);
+        throw error.response.data.errors[0];
     }
 }
 
@@ -58,7 +56,7 @@ export async function logout() {
 
 export async function updateProfile(user) {
     try {
-        const response = await axios.put(`${apiUrl}/profile`, user)
+        const response = await axios.put(`${apiUrl}/profile`, user);
         return response.data;
     } catch (error) {
         throw error;

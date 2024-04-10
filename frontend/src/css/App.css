@@ -32,7 +32,7 @@
   animation: dropin var(--animation-duration) cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.donation-request-form{  
+.donation-request-form {  
   animation: popin var(--animation-duration) cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -51,7 +51,6 @@
   left: calc(50% - var(--app-message-width) / 2);
   z-index: 1000;
 
-  filter: brightness(160%);
   background-color: var(--white);
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);

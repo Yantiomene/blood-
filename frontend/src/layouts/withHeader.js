@@ -6,8 +6,8 @@ import MessageAlert from '../components/messageAlert';
 const WithHeader = ({ children }) => {
     return (
         <>
-            <VerifyAlert />
             <Header />
+            <VerifyAlert />
             <MessageAlert/>
             <main className='bg-gray-100'>
                 {children}

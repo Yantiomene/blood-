@@ -8,7 +8,7 @@ import { LOGOUTROUTE, PROFILEROUTE } from '../api';
 import { profilepic } from '../assets';
 import { selectUser, validateAuthStatus } from '../redux/userSlice';
 
-const dropdownItemStyles = "px-4 py-2 hover:bg-gray-100 hover:text-red-600 rounded cursor-pointer";
+const dropdownItemStyles = "px-3 py-2 hover:bg-gray-100 text-gray-800 hover:text-red-600 rounded cursor-pointer block";
 
 const UserProfileIcon = () => {
     const dispatch = useDispatch();
@@ -41,19 +41,26 @@ const UserProfileIcon = () => {
             />
             {isDropdownOpen && (
                 <div className="dropdown absolute top-10 right-0 z-50 bg-white rounded shadow-lg">
-                    {userData.username !== '' && (
+                    {isLoggedin && (
                         <ul className="p-2">
-                            <li className={dropdownItemStyles + ' text-nowrap'}>
-                                <Link to={PROFILEROUTE}>
+                            <li>
+                                <span className="mb-2 px-3 py-2 bg-red-100 rounded-full block text-nowrap">
                                     {userData.username}
                                     <span className='ml-2 px-1 rounded-full text-white bg-red-500 text-center text-xs'>
                                         {userData.bloodType}
                                     </span>
+                                </span>
+                                <hr/>
+                            </li>
+                            <li>
+                                <Link to={PROFILEROUTE} className={dropdownItemStyles}>
+                                    Settings
                                 </Link>
                             </li>
-                            <li className={dropdownItemStyles}>Settings</li>
-                            <li className={dropdownItemStyles + ' hover:bg-red-100 active:bg-red-300 active:text-red-500'}>
-                                <Link to={LOGOUTROUTE}>Logout</Link>
+                            <li>
+                                <Link to={LOGOUTROUTE}
+                                    className={dropdownItemStyles}
+                                >Logout</Link>
                             </li>
                         </ul>
                     )}

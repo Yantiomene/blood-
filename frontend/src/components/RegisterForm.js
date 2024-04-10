@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { showMessage } from '../redux/globalComponentSlice';
-import { register } from '../api/user';
+import { register, login } from '../api/user';
 import { VERIFYACCOUNT } from '../api';
 
 
@@ -46,6 +46,10 @@ const RegisterForm = () => {
             };
             const response = await register(user);
             if (response) {
+                // successfully registered users should be logged in
+                // verification is not a priority at this moment. it's a necessary action
+                // preceeding the creation of an account
+                await login({ email, password });
                 router(VERIFYACCOUNT);
                 return;
             } else {
@@ -53,7 +57,7 @@ const RegisterForm = () => {
             }
         }
         catch (error) {
-            dispatch(showMessage({heading:'Error', text: `Registration failed: ${error.message}`}))
+            dispatch(showMessage({heading:'Error', text: `${error.msg}`}))
             console.error('Register error:', error);
         }
 

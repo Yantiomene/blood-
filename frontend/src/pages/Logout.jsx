@@ -26,6 +26,7 @@ export default function LogoutPage() {
                         setTimeout(() => {
                             clearInterval(interval);
                             router(HOMEROUTE);
+                            return;
                         }, 3000);
                     } else {
                         setTimeoutMessage("Logout request failed.");
@@ -36,10 +37,10 @@ export default function LogoutPage() {
                 }
             }, 0);
         } else {
-            // Handle case where user is not logged in
-            setTimeoutMessage("You are not logged in.");
+            // will handle more cases where user is not logged in
+            setTimeoutMessage("You're already logged");
         }
-    }, [dispatch, router]);
+    }, [dispatch, isLoggedIn, router]);
 
     return (
         <div className="mt-20 h-screen">
