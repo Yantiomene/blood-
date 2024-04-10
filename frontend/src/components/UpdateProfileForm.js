@@ -69,7 +69,7 @@ const UpdateUserProfile = ({ currentUser: user }) => {
 
     return (
         <>
-            <form onSubmit={handleSubmit} className="w-[90vw] md:w-[40vw] bg-white rounded px-8 py-8 mb-4">
+            <form onSubmit={handleSubmit} className="offset-horizontal w-[90vw] md:w-[40vw] bg-white rounded-md px-8 py-8 mb-4">
                 <div className={fieldStyles}>
                     <label className={labelStyles}>Username</label>
                     <input

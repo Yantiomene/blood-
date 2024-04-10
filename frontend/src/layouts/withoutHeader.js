@@ -12,10 +12,10 @@ export default function WithoutHeader({ children }) {
         <>
             <VerifyAlert />
             <MessageAlert />
-            <main className="pt-[5%] flex flex-col items-center min-h-screen bg-gray-100">
+            <main className="flex flex-col items-center min-h-screen bg-gray-100">
                 {
                     (params === LOGINROUTE || params === REGISTERROUTE) ?
-                        <div>
+                        <div className="mt-[8%]">
                             <h1 className="p-4 text-4xl text-center text-red-500 font-bold">
                                 <Link to={HOMEROUTE}>Blood+</Link>
                             </h1>

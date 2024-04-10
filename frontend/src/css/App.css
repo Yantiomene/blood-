@@ -68,3 +68,8 @@
 .app-message.warning {
   background-color: var(--color-warning);
 }
+
+/* ------------- */
+.offset-horizontal {
+  transform: translateY(-10%);
+}
