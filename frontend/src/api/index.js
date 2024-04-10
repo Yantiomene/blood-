@@ -11,3 +11,4 @@ export const BLOGROUTE = "/site/blog";
 export const ABOUTROUTE = "/site/about";
 export const BLOGDETAILROUTE = "/site/blog/post";
 export const VERIFYACCOUNT = "/verify/account";
+export const RESETPASSWORD = "/forgot-password";

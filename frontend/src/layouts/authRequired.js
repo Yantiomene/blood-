@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchCurrentUser, selectUser, validateAuthStatus } from '../redux/userSlice';
+import Loader from '../components/loader';
 
 const AuthRequired = (WrappedComponent) => {
     return function AuthRequiredWrapper(props) {
@@ -10,7 +11,7 @@ const AuthRequired = (WrappedComponent) => {
         const isLoading = useSelector(state => state.user.loading);
 
         useEffect(() => {
-            if (!isLoggedin) {
+            if (isLoggedin) {
                 dispatch(fetchCurrentUser());
             }
         }, [isLoggedin, dispatch]);
@@ -19,7 +20,7 @@ const AuthRequired = (WrappedComponent) => {
             return (
                 <div
                     className="rounded-lg mb-10 mx-auto bg-white text-center w-[80vw] h-[60vh] flex items-center justify-center"
-                >Loading...
+                ><Loader/>
                 </div>
             )
         } else {

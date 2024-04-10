@@ -18,6 +18,16 @@
   }
 }
 
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+  
+}
+
 @keyframes appear {
   from {
     opacity: 0;
@@ -25,6 +35,16 @@
 
   to {
     opacity: 100%;
+  }
+}
+
+
+@keyframes rotate {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -40,6 +60,10 @@
   animation: appear calc(var(--animation-duration)/3) linear;
 }
 
+.slide-in {
+  animation: slide-in calc(var(--animation-duration)/2) ease-out;
+}
+
 /* ---------------- */
 
 .app-message {
@@ -53,8 +77,6 @@
 
   background-color: var(--white);
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-
 }
 
 .app-message.success {
@@ -72,4 +94,13 @@
 /* ------------- */
 .offset-horizontal {
   transform: translateY(-10%);
+}
+
+.loader {
+  background-color: transparent;
+  border-radius: 1000px;
+  border: 4px solid #aaa;
+  border-top-color: #f55b4a;
+  
+  animation: rotate 1s linear infinite;
 }

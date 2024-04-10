@@ -3,6 +3,7 @@ import { useLocation, Link } from "react-router-dom";
 import { HOMEROUTE, LOGINROUTE, REGISTERROUTE } from "../api";
 import VerifyAlert from "../components/VerifyAlert";
 import MessageAlert from "../components/messageAlert";
+import Logo from "../components/logo";
 
 const LinkClass = 'w-1/2 p-2 rounded-md text-center';
 
@@ -16,9 +17,7 @@ export default function WithoutHeader({ children }) {
                 {
                     (params === LOGINROUTE || params === REGISTERROUTE) ?
                         <div className="mt-[8%]">
-                            <h1 className="p-4 text-4xl text-center text-red-500 font-bold">
-                                <Link to={HOMEROUTE}>Blood+</Link>
-                            </h1>
+                            <Logo />
                             <div className='w-full h-[50px] p-2 my-2 flex items-center gap-10 bg-gray-200 rounded'>
                                 <Link
                                     className={LinkClass + `${(params === LOGINROUTE) ? ' bg-red-400' : ' bg-gray-200'}`}

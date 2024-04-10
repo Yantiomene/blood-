@@ -6,6 +6,7 @@ import { showMessage } from '../redux/globalComponentSlice';
 import { DASHBOARDROUTE } from '../api';
 // layouts
 import AuthRequired from '../layouts/authRequired';
+import Loader from './loader';
 
 
 const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
@@ -212,11 +213,11 @@ const UpdateUserProfile = ({ currentUser: user }) => {
                 </div>
 
                 <button
-                    className="bg-red-500 inline-block w-full hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    className={`inline-block w-full text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isLoading ? " bg-red-200" : " bg-red-500 hover:bg-red-700"}`}
                     type="submit"
                     disabled={isLoading}
                 >
-                    {isLoading ? 'Loading...' : 'Update'}
+                    {isLoading ? <Loader/> : 'Update'}
                 </button>
             </form>
         </>

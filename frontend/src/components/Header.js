@@ -12,8 +12,9 @@ import {
 import { useSelector } from "react-redux";
 import { validateAuthStatus } from "../redux/userSlice";
 // components
-import NavItem from './NavItem';
-import UserProfileIcon from "./UserIcon";
+import NavItem from './navItem';
+import UserProfileIcon from "./userIcon";
+import Logo from "./logo";
 
 const Header = () => {
     const pathname = useLocation().pathname;
@@ -22,11 +23,7 @@ const Header = () => {
     return (
         <header className="bg-white p-4">
             <div className="container mx-auto flex justify-between items-center">
-                <Link to={HOMEROUTE} className="text-red-500 text-3xl font-bold">
-                    <div className="flex items-center gap-6">
-                        Blood+
-                    </div>
-                </Link>
+                <Logo/>
 
                 <nav className="flex items-center gap-6">
                     <ul className="md:flex space-x-4 hidden mr-10">

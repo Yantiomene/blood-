@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import { showMessage } from '../redux/globalComponentSlice';
 import { register, login } from '../api/user';
 import { VERIFYACCOUNT } from '../api';
+import Loader from './loader';
 
 
 const RegisterForm = () => {
@@ -164,11 +165,11 @@ const RegisterForm = () => {
                 </div>
 
                 <button
-                    className={`inline-block w-full text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isLoading ? " bg-gray-500" : " bg-red-500 hover:bg-red-700"}`}
+                    className={`inline-block w-full text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isLoading ? " bg-red-200" : " bg-red-500 hover:bg-red-700"}`}
                     type="submit"
                     disabled={isLoading}
                 >
-                    {isLoading ? 'Loading...' : 'Register'}
+                    {isLoading ? <Loader/> : 'Register'}
                 </button>
                 <p className="text-gray-500 text-center mt-4 text-sm">
                     Already have an account? <a className='text-red-500 hover:text-red-400' href="/login">Login</a>

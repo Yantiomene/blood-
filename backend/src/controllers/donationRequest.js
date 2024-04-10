@@ -9,7 +9,6 @@ const createDonationRequest = async (req, res) => {
     const userId = req.user.id;
 
     try {
-
         if (!bloodType || !quantity || !location || !message) {
             return res.status(400).json({
                 success: false,

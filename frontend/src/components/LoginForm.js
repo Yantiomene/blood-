@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DASHBOARDROUTE, REGISTERROUTE } from '../api';
+import { DASHBOARDROUTE, REGISTERROUTE, RESETPASSWORD } from '../api';
 import { login } from '../api/user';
 import { useDispatch } from 'react-redux';
 import { fetchCurrentUser } from "../redux/userSlice";
-// import { authenticateUser } from "../redux/authSlice";
 import { showMessage } from "../redux/globalComponentSlice";
+import Loader from './loader';
 
 const LoginForm = () => {
     const [email, setEmail] = useState('');
@@ -23,6 +23,7 @@ const LoginForm = () => {
             const response = await login({ email, password });
             if (response.success) {
                 dispatch(fetchCurrentUser());
+                dispatch(showMessage({heading: "Success", text: "Login Successful"}));
                 router(DASHBOARDROUTE);
             }
         } catch (error) {
@@ -64,15 +65,15 @@ const LoginForm = () => {
                     />
                     <small className="text-gray-500 italic text-sm">
                         Forgot password?
-                        <a href="/forgot-password"> Click here</a>
+                        <a href={RESETPASSWORD} className="text-red-500"> Click here</a>
                     </small>
                 </div>
                 <button
-                    className={`inline-block w-full text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isLoading ? " bg-gray-500" : " bg-red-500 hover:bg-red-700"}`}
+                    className={`inline-block w-full text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isLoading ? " bg-red-200" : " bg-red-500 hover:bg-red-700"}`}
                     type="submit"
                     disabled={isLoading}
                 >
-                    {isLoading ? 'Loading...' : 'Login'}
+                    {isLoading ? <Loader/> : 'Login'}
                 </button>
                 <p className="text-gray-500 text-center mt-4 text-sm">
                     Don't have an account? <a className='text-red-500 hover:text-red-400' href={REGISTERROUTE}>Register</a>

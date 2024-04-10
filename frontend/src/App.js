@@ -10,7 +10,7 @@ import BlogPage from './pages/Blog';
 import BlogDetailPage from './pages/BlogDetailPage';
 import WithHeader from './layouts/withHeader';
 import WithoutHeader from './layouts/withoutHeader';
-import VerifyAccount from './pages/VerifyAccount';
+import VerifyAccount from './pages/VerifyAccountPage';
 import LogoutPage from './pages/Logout';
 import {
   LOGINROUTE,
@@ -23,23 +23,26 @@ import {
   BLOGDETAILROUTE,
   VERIFYACCOUNT,
   LOGOUTROUTE,
+  RESETPASSWORD,
 } from './api';
+import ResetPasswordForm from './components/ResetPassword';
 
 const App = () => (
   <Router>
     <Routes>
-      {/* pages without headers */}
-      <Route path={HOMEROUTE} element={<WithHeader><Home /></WithHeader>} />
-      <Route path={LOGINROUTE} element={<WithoutHeader><LoginPage /></WithoutHeader>} />
-      <Route path={REGISTERROUTE} element={<WithoutHeader><RegisterPage /></WithoutHeader>} />
-      <Route path={VERIFYACCOUNT} element={<WithoutHeader><VerifyAccount /></WithoutHeader>} />
-      <Route path={PROFILEROUTE} element={<WithoutHeader><ProfilePage /></WithoutHeader>} />
-      <Route path={LOGOUTROUTE} element={<WithoutHeader><LogoutPage /></WithoutHeader>} />
       {/* pages with headers */}
+      <Route path={HOMEROUTE} element={<WithHeader><Home /></WithHeader>} />
       <Route path={DASHBOARDROUTE} element={<WithHeader><DashboardPage /></WithHeader>} />
       <Route path={ABOUTROUTE} element={<WithHeader><AboutPage /></WithHeader>} />
       <Route path={BLOGROUTE} element={<WithHeader><BlogPage /></WithHeader>} />
       <Route path={`${BLOGDETAILROUTE}/:blogID`} element={<WithHeader><BlogDetailPage /></WithHeader>} />
+      {/* pages without headers */}
+      <Route path={LOGINROUTE} element={<WithoutHeader><LoginPage /></WithoutHeader>} />
+      <Route path={RESETPASSWORD} element={<WithoutHeader><ResetPasswordForm /></WithoutHeader>} />
+      <Route path={REGISTERROUTE} element={<WithoutHeader><RegisterPage /></WithoutHeader>} />
+      <Route path={VERIFYACCOUNT} element={<WithoutHeader><VerifyAccount /></WithoutHeader>} />
+      <Route path={PROFILEROUTE} element={<WithoutHeader><ProfilePage /></WithoutHeader>} />
+      <Route path={LOGOUTROUTE} element={<WithoutHeader><LogoutPage /></WithoutHeader>} />
     </Routes>
   </Router>
 );

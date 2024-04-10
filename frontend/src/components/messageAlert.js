@@ -10,7 +10,7 @@ const MessageAlert = () => {
 
     return (
         <div className={
-            "app-message text-gray-900 " +
+            "app-message text-gray-900 shadow-lg" +
             `${message.heading === 'Success' ? ' success'
                 : message.heading === 'Error' ? ' error'
                     : message.heading === 'Warning' ? ' warning'

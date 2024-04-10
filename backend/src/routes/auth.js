@@ -43,7 +43,7 @@ router.put('/profile', userAuth, updateUserProfile);
 router.post('/requestNewToken', requestNewToken);
 router.get('/verifyEmail/:code', verifyEmail);
 router.post('/passwordResetRequest', passwordResetRequest);
-router.post('/passwordReset', resetPasswordValidation, validationMiddleware,resetPassword);
+router.post('/passwordReset', resetPasswordValidation, validationMiddleware, resetPassword);
 router.put('/user/location', userAuth, updateUserLocation);
 
 // requests

@@ -9,6 +9,7 @@ import AuthRequired from './authRequired';
 import Overlay from './overlayContainer';
 import DonationCard from '../components/DonorCard';
 import DonationRequestForm from '../components/donationRequestForm';
+import Loader from '../components/loader';
 
 const Dashboard = ({currentUser: userData}) => {
 
@@ -57,6 +58,7 @@ const Dashboard = ({currentUser: userData}) => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {
+                        requestList ?
                         requestList.map((data) =>
                             <DonationCard
                                 key={data.id}
@@ -69,11 +71,14 @@ const Dashboard = ({currentUser: userData}) => {
                                 location={data.location}
                             />
                         )
+                        :
+                        <Loader size="40px"/> // TODO: in case of failure, alert after timeout
                     }
                 </div>
 
                 <div className="bg-gray-200 h-[600px] my-10 p-4 rounded">
                     <h1 className="mt-20 text-5xl text-center text-gray-400 font-bold">say something</h1>
+                    <Loader size="50px"/>
                 </div>
             </div>
         </>

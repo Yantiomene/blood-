@@ -54,6 +54,25 @@ export async function logout() {
     }
 }
 
+export async function requestPasswordReset(userEmail) {
+    try {
+        const response = await axios.post(`${apiUrl}/passwordResetRequest`, userEmail);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export async function resetPasswordWithPIN(credentials) {
+    try {
+        const response = await axios.post(`${apiUrl}/passwordReset`, credentials);
+        return response.data;
+    } catch (error) {
+        console.error('Password reset error', error.message);
+        throw error;
+    }
+}
+
 export async function updateProfile(user) {
     try {
         const response = await axios.put(`${apiUrl}/profile`, user);

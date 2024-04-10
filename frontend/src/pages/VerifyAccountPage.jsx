@@ -6,6 +6,8 @@ import { requestNewToken, verifyEmail } from "../api/user";
 import { HOMEROUTE } from "../api";
 import AuthRequired from "../layouts/authRequired";
 import { fetchCurrentUser } from "../redux/userSlice";
+import Logo from "../components/logo";
+import Loader from "../components/loader";
 
 
 const VerifyAccount = ({ currentUser: user }) => {
@@ -58,11 +60,12 @@ const VerifyAccount = ({ currentUser: user }) => {
     };
 
     return (
-      <>
-        <div className="w-[90vw] md:w-[40vw] mt-[10%] bg-white shadow-md rounded px-8 py-8 mb-4">
+      <div className="mt-[10%]">
+        <Logo/>
+        <div className="w-[90vw] md:w-[40vw] my-4 bg-white shadow-md rounded px-8 py-8 mb-4">
             <h2 className="text-2xl font-semibold mb-4">PIN Verification</h2>
             <p className="my-4">
-                A verification pin to your email <span className="italic text-red-500">@{user?.email}</span>.
+                A verification pin was sent to your email <span className="italic text-red-500">@{user?.email}</span>.
             </p>
             <div className="flex mb-4">
                 {codes.map((code, index) => (
@@ -84,15 +87,15 @@ const VerifyAccount = ({ currentUser: user }) => {
                 disabled={isLoading}
                 onClick={handleVerify}
             >
-                {isLoading ? 'Loading...' : 'Verify'}
+                {isLoading ? <Loader/> : 'Verify'}
             </button>
         </div>
         <div>
             <p className="text-center text-gray-500 text-sm">
-                Didn't receive the email? <button onClick={handleRequestNewToken}>Resend</button>
+                Didn't receive the email? <button onClick={handleRequestNewToken} className="text-red-500">Resend</button>
             </p>
         </div>
-      </>
+      </div>
   );
 };
 
