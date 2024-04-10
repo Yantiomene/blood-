@@ -5,17 +5,10 @@ import { convertGeoToPoint } from '../util/geo';
 export const fetchCurrentUser = createAsyncThunk(
   'user/fetchCurrentUser',
   async () => {
-    console.log(">> fetching current user from store...");
     const response = await getCurrentUser();
-    console.log(">> after fetching currrent user", response.user);
-
     if (response.user) {
-        response.user.location = convertGeoToPoint(response.user.location);
-        console.log(">> after process user", response.user);
-    } else {
-        console.log(">> after fetching current user ERROR", response.user);
+      response.user.location = convertGeoToPoint(response.user.location);
     }
-
     return response.user;
   }
 );
@@ -28,23 +21,30 @@ export const updateUserProfile = createAsyncThunk(
   }
 );
 
+const anonymousUser = {
+  username: '',
+  email: '',
+  bloodType: '',
+  isDonor: false,
+  location: [0, 0],
+  contactNumber: '',
+  isVerified: false,
+}
+
 const userSlice = createSlice({
   name: 'user',
   initialState: {
-    data: {
-      username: '',
-      email: '',
-      bloodType: '',
-      isDonor: false,
-      location: [0, 0],
-      contactNumber: '',
-      isVerified: false,
-    },
+    data: anonymousUser,
+    authStatus: false,
     loading: false,
     error: null,
   },
   reducers: {
-    // Add other synchronous actions if needed
+    unAuthenticateUser: (state) => {
+      state.authStatus = false;
+      state.data = anonymousUser;
+      console.log(">> unauthenticating current user");
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -54,10 +54,12 @@ const userSlice = createSlice({
       .addCase(fetchCurrentUser.fulfilled, (state, action) => {
         state.loading = false;
         state.data = action.payload;
+        state.authStatus = true;
       })
       .addCase(fetchCurrentUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
+        state.authStatus = false;
       })
       .addCase(updateUserProfile.pending, (state) => {
         state.loading = true;
@@ -65,6 +67,7 @@ const userSlice = createSlice({
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.loading = false;
         state.data = action.payload;
+        state.authStatus = true;
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;
@@ -74,4 +77,6 @@ const userSlice = createSlice({
 });
 
 export const selectUser = (state) => state.user.data;
+export const validateAuthStatus = (state) => state.user.authStatus;
+export const { unAuthenticateUser } = userSlice.actions;
 export default userSlice.reducer;

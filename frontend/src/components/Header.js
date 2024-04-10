@@ -10,14 +10,14 @@ import {
 } from "../api";
 // redux
 import { useSelector } from "react-redux";
-import { selectAuthStatus } from "../redux/authSlice";
+import { validateAuthStatus } from "../redux/userSlice";
 // components
 import NavItem from './NavItem';
 import UserProfileIcon from "./UserIcon";
 
 const Header = () => {
     const pathname = useLocation().pathname;
-    const isLoggedin = useSelector(selectAuthStatus);
+    const isLoggedin = useSelector(validateAuthStatus);
 
     return (
         <header className="bg-white p-4">

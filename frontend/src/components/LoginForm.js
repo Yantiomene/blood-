@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { DASHBOARDROUTE, REGISTERROUTE } from '../api';
 import { login } from '../api/user';
 import { useDispatch } from 'react-redux';
-import { authenticateUser } from "../redux/authSlice";
+import { fetchCurrentUser } from "../redux/userSlice";
+// import { authenticateUser } from "../redux/authSlice";
 import { showMessage } from "../redux/globalComponentSlice";
 
 const LoginForm = () => {
@@ -21,7 +22,7 @@ const LoginForm = () => {
         try {
             const response = await login({ email, password });
             if (response.success) {
-                dispatch(authenticateUser());
+                dispatch(fetchCurrentUser());
                 router(DASHBOARDROUTE);
             }
         } catch (error) {

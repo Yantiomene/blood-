@@ -6,27 +6,25 @@ import { fetchCurrentUser } from '../redux/userSlice';
 import { LOGOUTROUTE, PROFILEROUTE } from '../api';
 // assets
 import { profilepic } from '../assets';
-import { selectUser } from '../redux/userSlice';
+import { selectUser, validateAuthStatus } from '../redux/userSlice';
 
 const dropdownItemStyles = "px-4 py-2 hover:bg-gray-100 hover:text-red-600 rounded cursor-pointer";
 
 const UserProfileIcon = () => {
     const dispatch = useDispatch();
     const userData = useSelector(selectUser);
+    const isLoggedin = useSelector(validateAuthStatus);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const handleDropdownToggle = () => {
         setIsDropdownOpen(!isDropdownOpen);
     };
 
-
     useEffect(() => {
-        console.log(">> before fetching user from USERICON", userData);
-        if (!userData || userData.username === '') {
+        if (!isLoggedin) {
             dispatch(fetchCurrentUser());
-            console.log(">> after fetching user from USERICON", userData);
         }
-    }, [userData, dispatch]);
+    }, [isLoggedin, dispatch]);
 
     return (
         <div className="relative"

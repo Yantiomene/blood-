@@ -1,20 +1,19 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchCurrentUser, selectUser } from '../redux/userSlice';
+import { fetchCurrentUser, selectUser, validateAuthStatus } from '../redux/userSlice';
 
 const AuthRequired = (WrappedComponent) => {
     return function AuthRequiredWrapper(props) {
         const dispatch = useDispatch();
         const user = useSelector(selectUser);
+        const isLoggedin = useSelector(validateAuthStatus);
         const isLoading = useSelector(state => state.user.loading);
 
         useEffect(() => {
-            // console.log(">> before fetching user from HOC", user);
-            if (!user || user.username === '') {
+            if (!isLoggedin) {
                 dispatch(fetchCurrentUser());
-                // console.log(">> after fetching user from HOC", user);
             }
-        }, [user, dispatch]);
+        }, [isLoggedin, dispatch]);
 
         if (isLoading) {
             return (

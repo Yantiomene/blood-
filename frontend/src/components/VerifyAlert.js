@@ -1,10 +1,9 @@
 import { useSelector } from 'react-redux';
-import { selectAuthStatus } from "../redux/authSlice";
-import { selectUser } from "../redux/userSlice";
+import { selectUser, validateAuthStatus } from "../redux/userSlice";
 import { VERIFYACCOUNT } from '../api';
 
 const VerifyAlert = () => {
-    const isloggedIn = useSelector(selectAuthStatus);
+    const isloggedIn = useSelector(validateAuthStatus);
     const user = useSelector(selectUser);
     
     if (!isloggedIn) return;

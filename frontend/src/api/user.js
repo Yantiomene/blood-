@@ -48,7 +48,6 @@ export async function register(user) {
 export async function logout() {
     try {
         const response = await axios.get(`${apiUrl}/logout`);
-        localStorage.clear(); // insurance no. 2
         console.log(">> logging out...success");
         return response.data;
     } catch (error) {
