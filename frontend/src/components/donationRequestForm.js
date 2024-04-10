@@ -10,15 +10,15 @@ const buttonStyles = "inline-block w-full text-white font-bold py-2 px-4 rounded
 const DonationRequestForm = () => {
     const [formData, setFormData] = useState({
         bloodType: 'A+',
-        quantity: 0.0,
-        location: [0, 0]
+        quantity: 10.0,
+        location: [0, 0],
+        message: '',
     })
     const [requestError, setRequestError] = useState('');
     const [requestSuccess, setRequestSuccess] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        console.log("name, value:", name, value);
         setFormData({ ...formData, [name]: value });
     };
     
@@ -33,7 +33,8 @@ const DonationRequestForm = () => {
         try {
             const response = await makeDonationRequest(formData);
             setRequestError('');
-            setRequestSuccess(response.message)
+            setRequestSuccess(response.message);
+            
         } catch (error) {
             setRequestSuccess('');
             setRequestError('Invalid Donation Request Format');
@@ -96,6 +97,17 @@ const DonationRequestForm = () => {
                         placeholder='latitude, longitude'
                         required={true}
                     />
+                </div>
+
+                <div className={fieldStyles}>
+                    <label className={labelStyles}>Message</label>
+                    <textarea
+                        id="message"
+                        name="message"
+                        onChange={handleChange}
+                        className={inputStyles}
+                        placeholder='touch the heart of your donors. start writing...'
+                    ></textarea>
                 </div>
 
                 <div className="">

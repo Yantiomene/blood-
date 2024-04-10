@@ -30,19 +30,6 @@ const Dashboard = ({currentUser: userData}) => {
         fetchDonationReqeusts();
     }, [])
 
-    // useEffect(() => {
-    //     const fetchMatchingDonors = async () => {
-    //         try {
-    //             const data = await findMatchingDonors({ bloodType: userData?.bloodType });
-    //             console.log(">> matching donors: ", data.donors, data.hospitals);
-    //             setMatchingDonors(data.donors);
-    //         } catch (error) {
-    //             console.log("Error occurred while fetching matching donors: ", error.message)
-    //         }
-    //     }
-    //     fetchMatchingDonors();
-    // }, [userData])
-
     const handleDisplayOverlay = () => {
         dispatch(displayOverlayContainer());
     }
@@ -51,9 +38,9 @@ const Dashboard = ({currentUser: userData}) => {
         <>
             <header className="bg-gray-200 py-4">
                 <nav className="container mx-auto px-4 py-2 flex items-center justify-between">
-                    <h1 className="text-xl font-bold">Welcome, {userData?.username}!</h1>
+                    <h1 className="text-xl font-bold">Welcome, {userData.username}!</h1>
                     {
-                        !userData?.isDonor &&
+                        !userData.isDonor &&
                         <button
                             onClick={handleDisplayOverlay}
                             className="bg-red-500 hover:bg-red-800 text-white px-4 py-2 rounded-full">

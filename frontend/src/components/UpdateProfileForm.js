@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { updateUserProfile as updateProfile } from '../redux/userSlice';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { fetchCurrentUser, updateUserProfile as updateProfile } from '../redux/userSlice';
+import { showMessage } from '../redux/globalComponentSlice';
 import { DASHBOARDROUTE } from '../api';
 // layouts
 import AuthRequired from '../layouts/authRequired';
@@ -11,10 +12,8 @@ const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-gray-7
 const editStyles = "bg-blue-500 text-white rounded-md px-2 py-1 focus:outline-none focus:bg-blue-600"
 const fieldStyles = "mb-4 flex items-center gap-4"
 const labelStyles = "block mb-1"
-const messageStyles = "text-center mt-4 text-gray-600 italic"
 
 const UpdateUserProfile = ({ currentUser: user }) => {
-    const [Message, setMessage] = useState('');
     const [formData, setFormData] = useState(user);
     const [isLoading, setLoading] = useState(false);
     const [editableFields, setEditableFields] = useState({
@@ -59,10 +58,11 @@ const UpdateUserProfile = ({ currentUser: user }) => {
         event.preventDefault();
         try {
             dispatch(updateProfile(formData));
+            dispatch(showMessage({heading: "Success", text: "Successfully updated profile info"}));
+            dispatch(fetchCurrentUser());
             router(DASHBOARDROUTE);
-            setMessage('successfully updated info');
         } catch (error) {
-            setMessage('an error occurred');
+            dispatch(showMessage({heading: "Error", text: "An error occurred while updating profile info"}));
         }
         setLoading(false);
     };
@@ -70,7 +70,6 @@ const UpdateUserProfile = ({ currentUser: user }) => {
     return (
         <>
             <form onSubmit={handleSubmit} className="w-[90vw] md:w-[40vw] bg-white rounded px-8 py-8 mb-4">
-                {Message && <p className={messageStyles}>{Message}</p>}
                 <div className={fieldStyles}>
                     <label className={labelStyles}>Username</label>
                     <input

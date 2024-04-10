@@ -17,7 +17,7 @@ export const updateUserProfile = createAsyncThunk(
   'user/updateUserProfile',
   async (userData) => {
     const response = await updateProfile(userData);
-    return response.user;
+    return response;
   }
 );
 
@@ -26,9 +26,9 @@ const anonymousUser = {
   email: '',
   bloodType: '',
   isDonor: false,
+  isVerified: false,
   location: [0, 0],
   contactNumber: '',
-  isVerified: false,
 }
 
 const userSlice = createSlice({
@@ -66,7 +66,6 @@ const userSlice = createSlice({
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.loading = false;
-        state.data = action.payload;
         state.authStatus = true;
       })
       .addCase(updateUserProfile.rejected, (state, action) => {

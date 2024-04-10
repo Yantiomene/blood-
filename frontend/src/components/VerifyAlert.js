@@ -6,7 +6,7 @@ const VerifyAlert = () => {
     const isloggedIn = useSelector(validateAuthStatus);
     const user = useSelector(selectUser);
     
-    console.log(">> user verfication status: ", user.isVerified);
+    // console.log(">> user verfication status: ", user.isVerified);
 
     if (!isloggedIn) return;
     return (
