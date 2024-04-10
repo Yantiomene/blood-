@@ -24,6 +24,7 @@ require('./middlewares/passport-middleware');
 // impoort routes
 const authRoutes = require('./routes/auth');
 const blogRoutes = require('./routes/blogsRoute');
+const messageRoutes = require('./routes/messagesRoute');
 
 //initialize middlewares
 app.use(express.json());
@@ -38,6 +39,7 @@ app.use(passport.initialize());
 // initialize routes
 app.use('/api', authRoutes);
 app.use('/blogs', blogRoutes);
+app.use('/api', messageRoutes);
 
 
 // Log errors

@@ -992,6 +992,57 @@ The server is running at [http://localhost:8000](http://localhost:8000)
   }
   ```
 
+
+## Message routes
+
+### 1. Create a message
+
+- **Endpoint**: `http://localhost:8000/api/messages`
+- **Method**: POST
+
+#### Success Response
+
+- **Status**: 201
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "message": {
+        "id": ,
+        "senderId": ,
+        "recipientId": ,
+        "created_at": ,
+        "updated_at": ,
+        "content": ,
+        "messagetype": ,
+        "status": ,
+        "conversationId": ,
+        "metadata": ,
+        "event": ,
+      }
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 400
+- **JSON**:
+  ```json
+  {
+    "success": false,
+     "error": ,
+  }
+  ```
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
+
 ## Additional Information
 
 - **User Authentication**: Some routes require user authentication (`userAuth`).
@@ -1312,6 +1363,27 @@ curl -X PUT \
     "title": "updated_title",
     "content": "updated_content",
     "image": "updated_image_src"
+  }'
+```
+
+
+## Message routes
+
+### 1. Create a message
+
+```bash
+curl -X POST \
+  http://localhost:8000/api/messages \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization : Bearer your access token' \
+  -d '{
+    "senderId": "sender_id",
+    "receiverId": "recipient_id",
+    "content": "message_content",
+    "messagetype": "message_type",
+    "conversationId": "conversation_id",
+    "metadata": "message_metadata",
+    "event": "message_event"
   }'
 ```
 
