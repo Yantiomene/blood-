@@ -1042,6 +1042,242 @@ The server is running at [http://localhost:8000](http://localhost:8000)
   }
   ```
 
+### 2. Get messages by conversation id
+
+- **Endpoint**: `http://localhost:8000/api/messages/:conversationId`
+- **Method**: GET
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "messages": ["List of messages"]
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 400
+- **JSON**:
+  ```json
+  {
+    "success": false,
+     "error": ,
+  }
+  ```
+
+- **Status**: 404
+- **JSON**:
+  ```json
+  {
+    "success": false,
+     "error": "No messages found",
+  }
+  ```
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
+### 3. Get conversation by user id
+
+- **Endpoint**: `http://localhost:8000/api/conversations/:userId`
+- **Method**: GET
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "conversations": ["List of conversations"]
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 400
+- **JSON**:
+  ```json
+  {
+    "success": false,
+     "error": ,
+  }
+  ```
+
+- **Status**: 404
+- **JSON**:
+  ```json
+  {
+    "success": false,
+     "error": "No conversations found",
+  }
+  ```
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
+### 4. Get messages by User id
+
+- **Endpoint**: `http://localhost:8000/api/messages/user/:userId`
+- **Method**: GET
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "messages": ["List of messages"]
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 400
+- **JSON**:
+  ```json
+  {
+    "success": false,
+     "error": ,
+  }
+  ```
+
+- **Status**: 404
+- **JSON**:
+  ```json
+  {
+    "success": false,
+     "error": "No messages found",
+  }
+  ```
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
+### 5. Update message
+
+- **Endpoint**: `http://localhost:8000/api/updateMessage/:messageId`
+- **Method**: PUT
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "message": {
+        "id": ,
+        "senderId": ,
+        "recipientId": ,
+        "created_at": ,
+        "updated_at": ,
+        "content": ,
+        "messagetype": ,
+        "status": ,
+        "conversationId": ,
+        "metadata": ,
+        "event": ,
+      }
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 400
+- **JSON**:
+  ```json
+  {
+    "success": false,
+     "error": ,
+  }
+  ```
+
+- **Status**: 404
+- **JSON**:
+  ```json
+  {
+    "success": false,
+     "error": "Message not found",
+  }
+  ```
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
+
+### 6. Delete message
+
+- **Endpoint**: `http://localhost:8000/api/deleteMessage/:messageId`
+- **Method**: DELETE
+
+#### Success Response
+
+- **Status**: 200
+- **JSON**:
+  ```json
+  {
+      "success": true,
+      "message": "Message deleted successfully"
+  }
+  ```
+
+#### Error Response
+
+- **Status**: 400
+- **JSON**:
+  ```json
+  {
+    "success": false,
+     "error": ,
+  }
+  ```
+
+- **Status**: 404
+- **JSON**:
+  ```json
+  {
+    "success": false,
+     "error": "Message not found",
+  }
+  ```
+
+- **Status**: 500
+- **JSON**:
+  ```json
+  {
+      "success": false,
+      "error": "Internal server error"
+  }
+  ```
 
 ## Additional Information
 
@@ -1385,6 +1621,54 @@ curl -X POST \
     "metadata": "message_metadata",
     "event": "message_event"
   }'
+```
+
+### 2. Get messages by conversation id
+
+```bash
+curl -X GET \
+  http://localhost:8000/api/messages/:conversationId \
+  -H 'Authorization : Bearer your access token'
+```
+
+### 3. Get conversation by user id
+
+```bash
+curl -X GET \
+  http://localhost:8000/api/conversations/:userId \
+  -H 'Authorization : Bearer your access token'
+```
+
+### 4. Get messages by User id
+
+```bash
+curl -X GET \
+  http://localhost:8000/api/messages/user/:userId \
+  -H 'Authorization : Bearer your access token'
+```
+
+### 5. Update message
+
+```bash
+curl -X PUT \
+  http://localhost:8000/api/updateMessage/:messageId \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization : Bearer your access token' \
+  -d '{
+    "content": "updated_message_content",
+    "messagetype": "updated_message_type",
+    "status": "updated_message_status",
+    "metadata": "updated_message_metadata",
+    "event": "updated_message_event"
+  }'
+```
+
+### 6. Delete message
+
+```bash
+curl -X DELETE \
+  http://localhost:8000/api/deleteMessage/:messageId \
+  -H 'Authorization : Bearer your access token'
 ```
 
 Make sure to replace `your_username`, `your_email@example.com`, `your_password`, `your_access_token`, `updated_username`, `updated_email@example.com`, `your_verification_code`, `longitude`, `latitude`, `updated_longitude`, `updated_latitude`, `:requestId` and `requesting_blood_type` with actual values.
