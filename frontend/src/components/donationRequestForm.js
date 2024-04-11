@@ -27,7 +27,7 @@ const DonationRequestForm = () => {
         const [longitude, latitude] = value.split(',').map(parseFloat);
         setFormData({ ...formData, location: [longitude, latitude] });
     };
-    
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
