@@ -33,14 +33,14 @@ const UserProfileIcon = () => {
             onClick={handleDropdownToggle}
         >
             <img
-                className="shrink-0 w-10 h-10 rounded-full cursor-pointer"
+                className="shrink-0 w-10 h-10 rounded-full cursor-pointer outline outline-transparent hover:outline-gray-300"
                 src={profilepic}
                 width={40}
                 height={40}
                 alt="Profile Icon"
             />
             {isDropdownOpen && (
-                <div className="dropdown absolute top-10 right-0 z-50 bg-white rounded shadow-lg">
+                <div className="dropdown border border-gray-200 absolute top-10 right-0 z-50 bg-white rounded-md shadow">
                     {isLoggedin && (
                         <ul className="p-2">
                             <li>

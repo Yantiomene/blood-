@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { fetchCurrentUser, updateUserProfile as updateProfile } from '../redux/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCurrentUser, selectUser, updateUserProfile as updateProfile } from '../redux/userSlice';
 import { showMessage } from '../redux/globalComponentSlice';
 import { DASHBOARDROUTE } from '../api';
 // layouts
-import AuthRequired from '../layouts/authRequired';
 import Loader from './loader';
 
 
@@ -14,7 +13,8 @@ const editStyles = "bg-blue-500 text-white rounded-md px-2 py-1 focus:outline-no
 const fieldStyles = "mb-4 flex items-center gap-4"
 const labelStyles = "block mb-1"
 
-const UpdateUserProfile = ({ currentUser: user }) => {
+const UpdateUserProfile = () => {
+    const user = useSelector(selectUser)
     const [formData, setFormData] = useState(user);
     const [isLoading, setLoading] = useState(false);
     const [editableFields, setEditableFields] = useState({
@@ -70,7 +70,7 @@ const UpdateUserProfile = ({ currentUser: user }) => {
 
     return (
         <>
-            <form onSubmit={handleSubmit} className="offset-horizontal w-[90vw] md:w-[40vw] bg-white rounded-md px-8 py-8 mb-4">
+            <form onSubmit={handleSubmit} className="w-[90vw] md:w-[40vw] bg-white rounded-md p-8">
                 <div className={fieldStyles}>
                     <label className={labelStyles}>Username</label>
                     <input
@@ -224,4 +224,4 @@ const UpdateUserProfile = ({ currentUser: user }) => {
     );
 };
 
-export default AuthRequired(UpdateUserProfile);
+export default UpdateUserProfile;

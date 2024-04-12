@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react';
+// import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchCurrentUser, selectUser, validateAuthStatus } from '../redux/userSlice';
+import { fetchCurrentUser, validateAuthStatus } from '../redux/userSlice';
 import Loader from '../components/loader';
+// import { LOGINROUTE } from '../api';
 
 const AuthRequired = (WrappedComponent) => {
     return function AuthRequiredWrapper(props) {
         const dispatch = useDispatch();
-        const user = useSelector(selectUser);
+        // const router = useNavigate();
         const isLoggedin = useSelector(validateAuthStatus);
         const isLoading = useSelector(state => state.user.loading);
 
@@ -14,6 +16,9 @@ const AuthRequired = (WrappedComponent) => {
             if (isLoggedin) {
                 dispatch(fetchCurrentUser());
             }
+            //  else {
+            //     router(LOGINROUTE);
+            // }
         }, [isLoggedin, dispatch]);
 
         if (isLoading) {
@@ -24,7 +29,7 @@ const AuthRequired = (WrappedComponent) => {
                 </div>
             )
         } else {
-            return <WrappedComponent {...props} currentUser={user} />;
+            return <WrappedComponent {...props} />;
         }
     };
 };

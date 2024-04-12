@@ -53,13 +53,13 @@ const userSlice = createSlice({
       })
       .addCase(fetchCurrentUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.data = action.payload;
         state.authStatus = true;
+        state.data = action.payload;
       })
       .addCase(fetchCurrentUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
         state.authStatus = false;
+        state.error = action.error.message;
       })
       .addCase(updateUserProfile.pending, (state) => {
         state.loading = true;

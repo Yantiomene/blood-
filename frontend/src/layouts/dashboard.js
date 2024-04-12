@@ -10,13 +10,15 @@ import Overlay from './overlayContainer';
 import DonationCard from '../components/DonorCard';
 import DonationRequestForm from '../components/donationRequestForm';
 import Loader from '../components/loader';
+import { selectUser } from '../redux/userSlice';
 
-const Dashboard = ({currentUser: userData}) => {
+const Dashboard = () => {
 
     const [requestList, setRequestList] = useState([]);
     const [matchingDonors, setMatchingDonors] = useState([]);
 
     const dispatch = useDispatch();
+    const userData = useSelector(selectUser);
     const showOverlay = useSelector((state) => state.globalComponent.displayOverlay);
 
     useEffect(() => {
