@@ -25,6 +25,7 @@ const Dashboard = () => {
         const fetchDonationReqeusts = async () => {
             try {
                 const data = await getDonationRequest();
+                console.log(data.donationRequests[0]);
                 setRequestList(data.donationRequests);
             } catch (error) {
                 console.log("Error occurred while fetching donation requests: ", error.message)
@@ -39,7 +40,7 @@ const Dashboard = () => {
 
     return (
         <>
-            <header className="bg-gray-200 py-4">
+            <header className="bg-slate-200 py-4">
                 <nav className="container mx-auto px-4 py-2 flex items-center justify-between">
                     <h1 className="text-xl font-bold">Welcome, {userData.username}!</h1>
                     {
@@ -55,10 +56,10 @@ const Dashboard = () => {
             {
                 showOverlay && <Overlay><DonationRequestForm /></Overlay>
             }
-            <div className="container mx-auto px-4 py-8">
+            <div className="container md:w-[60vw] md:m-auto mx-auto px-4 py-8">
                 <h2 className="text-2xl font-bold mb-4">Blood Donation Requests</h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {
                         requestList ?
                         requestList.map((data) =>
@@ -71,6 +72,10 @@ const Dashboard = () => {
                                 created_at={data.created_at}
                                 updated_at={data.updated_at}
                                 location={data.location}
+                                userId={data.userId}
+                                message={data.message}
+                                viewsCount={data.views_count}
+                                urgent={data.urgent}
                             />
                         )
                         :
@@ -78,8 +83,8 @@ const Dashboard = () => {
                     }
                 </div>
 
-                <div className="bg-gray-200 h-[600px] my-10 p-4 rounded">
-                    <h1 className="mt-20 text-5xl text-center text-gray-400 font-bold">say something</h1>
+                <div className="bg-slate-200 h-[600px] my-10 p-4 rounded">
+                    <h1 className="mt-20 text-5xl text-center text-slate-400 font-bold">say something</h1>
                     <Loader size="50px"/>
                 </div>
             </div>

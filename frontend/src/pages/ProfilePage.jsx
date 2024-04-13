@@ -1,5 +1,5 @@
 import { useLocation } from "react-router-dom";
-import { PROFILEROUTE } from "../api";
+import { ACCOUNTROUTE, HISTORYROUTE, PREFERENCES, PROFILEROUTE } from "../api";
 import UpdateProfileForm from "../components/UpdateProfileForm";
 import UserProfileIcon from "../components/userIcon";
 import NavItem from "../components/navItem";
@@ -14,29 +14,28 @@ const navRoutes = [
         component: UpdateProfileForm
     },
     {
-        route: '/account',
+        route: ACCOUNTROUTE,
         text: 'Account',
         tooltip: 'Account',
         component: UpdateProfileForm
     },
     {
-        route: '/preferences',
+        route: PREFERENCES,
         text: 'Preferences',
         tooltip: 'Preferences',
         component: UpdateProfileForm
     },
     {
-        route: '/history',
+        route: HISTORYROUTE,
         text: 'History',
         tooltip: 'History',
         component: UpdateProfileForm
     }
 ];
 
-
 const ProfilePage = () => {
     const params = useLocation().pathname;
-    const routes = [PROFILEROUTE];
+    const routes = [PROFILEROUTE, HISTORYROUTE, PREFERENCES, ACCOUNTROUTE ];
 
     return (
         <>
@@ -44,11 +43,12 @@ const ProfilePage = () => {
             <UserProfileIcon /> {/* will later change to use a specialized component */}
         </div>
         <div className="offset-horizontal flex gap-2 p-4 bg-white rounded-lg">
-            <nav className="account-page-nav w-1/4 rounded bg-gray-100">
+            <nav className="account-page-nav w-1/4 max-w-fit rounded bg-gray-100">
                 <ul className="md:flex flex-col gap-2 justify-between px-2 py-6">
                     {
-                        navRoutes.map(({ route, text, tooltip }) => (
-                            <NavItem 
+                        navRoutes.map(({route, text, tooltip }, index) => (
+                            <NavItem
+                                key={index}
                                 href={route}
                                 text={tooltip} 
                                 isActive={params === route}
@@ -59,13 +59,18 @@ const ProfilePage = () => {
                     }
                 </ul>
             </nav>
+            <div className="w-[90vw] md:w-[40vw] min-h-[80vh]">
             {
                 // will add more components here
                 routes.includes(params) && (
-                    params === PROFILEROUTE ? <UpdateProfileForm/>
-                    : <UpdateProfileForm/>
+                    params === PROFILEROUTE ? <UpdateProfileForm/> :
+                    params === ACCOUNTROUTE ? <h1 className="bg-blue-400">Account</h1> :
+                    params === PREFERENCES ? <h1 className="bg-blue-400">preferences</h1> :
+                    params === HISTORYROUTE ? <h1 className="bg-blue-400">History</h1> :
+                    <UpdateProfileForm/>
                 )
             }
+            </div>
         </div>
         </>
     );

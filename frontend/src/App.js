@@ -24,6 +24,9 @@ import {
   VERIFYACCOUNT,
   LOGOUTROUTE,
   RESETPASSWORD,
+  HISTORYROUTE,
+  ACCOUNTROUTE,
+  PREFERENCES,
 } from './api';
 import ResetPasswordForm from './components/ResetPassword';
 
@@ -38,11 +41,16 @@ const App = () => (
       <Route path={`${BLOGDETAILROUTE}/:blogID`} element={<WithHeader><BlogDetailPage /></WithHeader>} />
       {/* pages without headers */}
       <Route path={LOGINROUTE} element={<WithoutHeader><LoginPage /></WithoutHeader>} />
+      <Route path={LOGOUTROUTE} element={<WithoutHeader><LogoutPage /></WithoutHeader>} />
       <Route path={RESETPASSWORD} element={<WithoutHeader><ResetPasswordForm /></WithoutHeader>} />
       <Route path={REGISTERROUTE} element={<WithoutHeader><RegisterPage /></WithoutHeader>} />
       <Route path={VERIFYACCOUNT} element={<WithoutHeader><VerifyAccount /></WithoutHeader>} />
+
       <Route path={PROFILEROUTE} element={<WithoutHeader><ProfilePage /></WithoutHeader>} />
-      <Route path={LOGOUTROUTE} element={<WithoutHeader><LogoutPage /></WithoutHeader>} />
+      <Route path={HISTORYROUTE} element={<WithoutHeader><ProfilePage /></WithoutHeader>} />
+      <Route path={ACCOUNTROUTE} element={<WithoutHeader><ProfilePage /></WithoutHeader>} />
+      <Route path={PREFERENCES} element={<WithoutHeader><ProfilePage /></WithoutHeader>} />
+      
     </Routes>
   </Router>
 );

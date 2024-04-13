@@ -42,10 +42,8 @@ const UpdateUserProfile = () => {
     const handleLocationChange = (e) => {
         const { name, value } = e.target;
         if (name === 'longitude') {
-            console.log("longitude, value", name, value);
             setFormData({ ...formData, location: [value, formData.location[1]] });
         } else if (name === 'latitude') {
-            console.log("latitude, value", name, value);
             setFormData({ ...formData, location: [formData.location[0], value] });
         }
     };

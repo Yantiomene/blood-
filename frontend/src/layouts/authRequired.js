@@ -24,8 +24,8 @@ const AuthRequired = (WrappedComponent) => {
         if (isLoading) {
             return (
                 <div
-                    className="rounded-md my-10 mx-auto bg-white text-center w-[80vw] h-[60vh] flex items-center justify-center"
-                ><Loader/>
+                    className="rounded-md mt-[20vh] w-[80vw] h-[60vh] mx-auto bg-white text-center flex items-center justify-center"
+                ><Loader size="50px" />
                 </div>
             )
         } else {

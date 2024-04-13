@@ -153,7 +153,7 @@ const ResetPasswordForm = () => {
                             type="submit"
                             disabled={isLoading}
                         >
-                            {isLoading ? <Loader /> : 'Send Code'}
+                            {isLoading ? <Loader /> : 'Reset Password'}
                         </button>
                     </div>
 
@@ -167,7 +167,7 @@ const ResetPasswordForm = () => {
                             <input
                                 className={inputStyles}
                                 id="email"
-                                type="text"
+                                type="email"
                                 placeholder="Enter an active email to receive reset pin code"
                                 value={email}
                                 onChange={(event) => setEmail(event.target.value)}

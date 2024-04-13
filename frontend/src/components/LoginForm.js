@@ -23,37 +23,38 @@ const LoginForm = () => {
             const response = await login({ email, password });
             if (response.success) {
                 dispatch(fetchCurrentUser());
-                dispatch(showMessage({heading: "Success", text: "Login Successful"}));
+                dispatch(showMessage({ heading: "Success", text: "Login Successful" }));
                 router(DASHBOARDROUTE);
             }
         } catch (error) {
-            dispatch(showMessage({heading: "Error", text: "Invalid email or password"}));
+            dispatch(showMessage({ heading: "Error", text: "Invalid email or password" }));
         }
 
         setIsLoading(false);
     };
 
-    const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
+    const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-slate-700 leading-tight focus:outline-none focus:shadow-outline";
 
     return (
         <>
             <form onSubmit={handleSubmit} className="w-[90vw] md:w-[40vw] bg-white shadow-md rounded px-8 py-8 mb-4">
                 <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-                        Email:
+                    <label className="block text-slate-700 text-sm font-bold mb-2" htmlFor="email">
+                        Email
                     </label>
+                    
                     <input
                         className={inputStyles}
                         id="email"
-                        type="text"
+                        type="email"
                         placeholder="Enter your email"
                         value={email}
-                        onChange={(event)=> setEmail(event.target.value)}
+                        onChange={(event) => setEmail(event.target.value)}
                     />
                 </div>
                 <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-                        Password:
+                    <label className="block text-slate-700 text-sm font-bold mb-2" htmlFor="password">
+                        Password
                     </label>
                     <input
                         className={inputStyles}
@@ -61,9 +62,9 @@ const LoginForm = () => {
                         type="password"
                         placeholder="Enter your password"
                         value={password}
-                        onChange={(event)=> setPassword(event.target.value)}
+                        onChange={(event) => setPassword(event.target.value)}
                     />
-                    <small className="text-gray-500 italic text-sm">
+                    <small className="text-slate-500 italic text-sm">
                         Forgot password?
                         <a href={RESETPASSWORD} className="text-red-500"> Click here</a>
                     </small>
@@ -73,9 +74,9 @@ const LoginForm = () => {
                     type="submit"
                     disabled={isLoading}
                 >
-                    {isLoading ? <Loader/> : 'Login'}
+                    {isLoading ? <Loader /> : 'Login'}
                 </button>
-                <p className="text-gray-500 text-center mt-4 text-sm">
+                <p className="text-slate-500 text-center mt-4 text-sm">
                     Don't have an account? <a className='text-red-500 hover:text-red-400' href={REGISTERROUTE}>Register</a>
                 </p>
             </form>

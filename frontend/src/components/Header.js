@@ -1,4 +1,7 @@
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import clsx from 'clsx';
+
 // routes
 import {
     BLOGROUTE,
@@ -6,7 +9,6 @@ import {
     DASHBOARDROUTE,
     LOGINROUTE,
     REGISTERROUTE,
-    HOMEROUTE,
 } from "../api";
 // redux
 import { useSelector } from "react-redux";
@@ -19,11 +21,37 @@ import Logo from "./logo";
 const Header = () => {
     const pathname = useLocation().pathname;
     const isLoggedin = useSelector(validateAuthStatus);
+    const [isScrolled, setIsScrolled] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            // Check if the user has scrolled
+            if (window.scrollY > 0) {
+                setIsScrolled(true);
+            } else {
+                setIsScrolled(false);
+            }
+        };
+
+        // Attach scroll event listener
+        window.addEventListener('scroll', handleScroll);
+
+        // Cleanup
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
 
     return (
-        <header className="bg-white p-4">
+        <header className={clsx(
+            "bg-white p-2 sticky top-0 w-full z-40 transition-all duration-300", {
+            'shadow': isScrolled,
+            'shadow-none': !isScrolled
+        }
+        )}
+        >
             <div className="container mx-auto flex justify-between items-center">
-                <Logo/>
+                <Logo />
 
                 <nav className="flex items-center gap-6">
                     <ul className="md:flex space-x-4 hidden mr-10">

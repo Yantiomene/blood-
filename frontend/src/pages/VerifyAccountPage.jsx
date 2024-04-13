@@ -1,16 +1,17 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { showMessage } from "../redux/globalComponentSlice";
 import { requestNewToken, verifyEmail } from "../api/user";
 import { HOMEROUTE } from "../api";
 import AuthRequired from "../layouts/authRequired";
-import { fetchCurrentUser } from "../redux/userSlice";
+import { fetchCurrentUser, selectUser } from "../redux/userSlice";
 import Logo from "../components/logo";
 import Loader from "../components/loader";
 
 
-const VerifyAccount = ({ currentUser: user }) => {
+const VerifyAccount = () => {
+    const user = useSelector(selectUser);
     const [codes, setCodes] = useState(['', '', '', '', '']);
 	const [isLoading, setLoading] = useState(false);
     const router = useNavigate();

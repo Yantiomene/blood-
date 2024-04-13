@@ -14,19 +14,19 @@ export default function WithoutHeader({ children }) {
         <>
             <VerifyAlert />
             <MessageAlert />
-            <main className="flex flex-col items-center min-h-screen bg-gray-100">
+            <main className="flex flex-col items-center min-h-screen bg-slate-100">
                 {
                     (routes.includes(params)) ?
                         <div className="mt-[8%]">
                             <Logo />
-                            <div className='w-full h-[50px] p-2 my-2 flex items-center gap-10 bg-gray-200 rounded'>
+                            <div className='w-full h-14 p-2 my-2 flex items-center gap-10 bg-slate-200 rounded-md'>
                                 <Link
-                                    className={LinkClass + `${(params === LOGINROUTE) ? ' bg-red-400' : ' bg-gray-200'}`}
+                                    className={LinkClass + `${(params === LOGINROUTE) ? ' bg-red-400' : ' bg-slate-200'}`}
                                     to={LOGINROUTE}
                                 >Login
                                 </Link>
                                 <Link
-                                    className={LinkClass + `${(params === REGISTERROUTE) ? ' bg-red-400' : ' bg-gray-200'}`}
+                                    className={LinkClass + `${(params === REGISTERROUTE) ? ' bg-red-400' : ' bg-slate-200'}`}
                                     to={REGISTERROUTE}
                                 >Register
                                 </Link>
