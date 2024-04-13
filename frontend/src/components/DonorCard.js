@@ -49,7 +49,7 @@ const DonationCard = (props) => {
     return (
         <div
             onClick={() => handleCardClick(id)}
-            className="card group w-96 max-h-72 p-4 bg-white cursor-pointer transition-all duration-100 hover:shadow-md hover:border-red-100 outline outline-transparent active:outline-red-100 rounded-lg"
+            className="card group flex flex-col w-96 h-48 p-4 bg-white cursor-pointer transition-all duration-100 hover:shadow-md hover:border-red-100 outline outline-transparent active:outline-red-100 rounded-lg"
         >
             <div className="card__top flex items-center justify-between">
                 <div className="top-left flex items-center gap-2">
@@ -67,11 +67,16 @@ const DonationCard = (props) => {
                 </div>
             </div>
             <div className="card__middle">
-                <p className="card__text bg-slate-100 text-slate-500 truncate py-1 px-2 my-4 text-sm rounded">My apologies for misunderstanding your request. With Tailwind CSS alone, you can achieve transitions by using the transition utility classNamees provided by Tailwind.</p>
+                {
+                    message &&
+                    <p className="card__text bg-slate-100 text-slate-500 truncate py-1 px-2 my-4 text-sm rounded">
+                        {message}
+                    </p>
+                }
             </div>
-            <div className="card__foot flex items-end justify-between">
+            <div className="card__foot flex items-end justify-between mt-auto border-t border-t-slate-100">
                 <div className="bottom-left">
-                    <div className="card__location flex items-center mb-2 gap-1">
+                    <div className="card__location flex items-center gap-1">
                         <span className="icon-location w-4 h-4 bg-blue-500 border-2 border-blue-200 rounded-full"></span>
                         <p>Ghana</p>
                     </div>

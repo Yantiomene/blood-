@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { makeDonationRequest } from '../api/donation';
 
 
-const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
+const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-slate-700 leading-tight focus:outline-none focus:shadow-outline";
 const fieldStyles = "mb-4 flex items-center gap-4"
-const labelStyles = "block text-gray-700 text-sm font-bold mb-2"
+const labelStyles = "block text-slate-700 text-sm font-bold mb-2"
 const buttonStyles = "inline-block w-full text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
 
 const DonationRequestForm = () => {

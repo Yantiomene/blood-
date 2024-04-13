@@ -25,18 +25,13 @@ const Header = () => {
 
     useEffect(() => {
         const handleScroll = () => {
-            // Check if the user has scrolled
             if (window.scrollY > 0) {
                 setIsScrolled(true);
             } else {
                 setIsScrolled(false);
             }
         };
-
-        // Attach scroll event listener
         window.addEventListener('scroll', handleScroll);
-
-        // Cleanup
         return () => {
             window.removeEventListener('scroll', handleScroll);
         };
@@ -50,7 +45,7 @@ const Header = () => {
         }
         )}
         >
-            <div className="container mx-auto flex justify-between items-center">
+            <div className="container mx-auto px-4 flex justify-between items-center">
                 <Logo />
 
                 <nav className="flex items-center gap-6">
