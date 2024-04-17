@@ -162,7 +162,7 @@ const ResetPasswordForm = () => {
                         <h3 className='text-2xl my-2 font-bold text-gray-400'>Request for Password Reset</h3>
                         <div className="mb-4">
                             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-                                Email:
+                                Email
                             </label>
                             <input
                                 className={inputStyles}

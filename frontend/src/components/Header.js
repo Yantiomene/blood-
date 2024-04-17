@@ -56,7 +56,7 @@ const Header = () => {
                     <ul className="flex space-x-4">
                         {isLoggedin && <NavItem href={DASHBOARDROUTE} isActive={pathname === DASHBOARDROUTE}>Dashboard</NavItem>}
                         {!isLoggedin && <NavItem href={LOGINROUTE} isActive={pathname === LOGINROUTE}>Login</NavItem>}
-                        {!isLoggedin && <NavItem href={REGISTERROUTE} isActive={pathname === REGISTERROUTE}>Register</NavItem>}
+                        {!isLoggedin && <NavItem href={REGISTERROUTE} isActive={pathname === REGISTERROUTE}>Join</NavItem>}
                     </ul>
                     {isLoggedin && <UserProfileIcon />}
                 </nav>

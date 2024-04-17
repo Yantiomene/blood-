@@ -31,7 +31,7 @@ const Dashboard = () => {
         const fetchDonationReqeusts = async () => {
             try {
                 const data = await getDonationRequest();
-                setRequestList(data.donationRequests);
+                setRequestList(data.donationRequests.reverse());
             } catch (error) {
                 console.log("Error occurred while fetching donation requests: ", error.message)
             }
@@ -69,7 +69,7 @@ const Dashboard = () => {
             <div className="container md:w-[60vw] md:m-auto mx-auto px-4 py-8">
                 <h2 className="text-2xl font-bold mb-4">Blood Donation Requests</h2>
 
-                <nav className="flex items-center gap-6 mb-4">
+                <nav className="flex items-center gap-6 mb-8">
                     <ul className='flex space-x-4'>
                         <NavItem
                             href={'/dashboard?q=mine'}

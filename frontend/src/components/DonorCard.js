@@ -1,35 +1,16 @@
-import React from 'react';
-
-const convertDateTime = (dateStr) => {
-    const date = new Date(dateStr).toDateString();
-    const time = new Date(dateStr).toLocaleTimeString();
-    return `${date} at ${time}`;
-}
-
-const calculateDelta = (dateStr) => {
-
-}
-
-const sample = {
-    "id": 2,
-    "userId": 9,
-    "bloodType": "B-",
-    "quantity": 3,
-    "isFulfilled": false,
-    "requestingEntity": "User",
-    "requestingEntityId": 9,
-    "created_at": "2024-03-04T12:22:56.032Z",
-    "updated_at": "2024-03-04T12:22:56.032Z",
-    "location": "0101000020E610000000000000000028400000000000804040",
-    "message": null,
-    "urgent": false,
-    "views_count": 0
-}
+import { calculateTimeDelta } from "../util/datetime";
+import { getDonationRequestByUserId, deleteDonationRequest } from "../api/donation";
 
 const DonationCard = (props) => {
 
-    const handleCardClick = (cardId) => {
-        console.log("card clicked", cardId);
+    const handleCardClick = async (cardId) => {
+        const cardDetail = await getDonationRequestByUserId(cardId);
+        console.log("card clicked", cardDetail);
+    }
+
+    const handleDeleteCard = async (cardId) => {
+        const response = await deleteDonationRequest(cardId);
+        console.log("card deleted", response);
     }
 
     const {
@@ -38,9 +19,9 @@ const DonationCard = (props) => {
         quantity,
         created_at,
         updated_at,
-        location,
         userId,
         message,
+        location,
         isFulfilled, // not yet
         viewsCount, // not yet
         urgent, // not yet
@@ -81,9 +62,14 @@ const DonationCard = (props) => {
                         <p>Ghana</p>
                     </div>
                     <div className="card__date text-xs text-slate-400 flex gap-2">
-                        <p>Requested 3 days ago</p>
-                        <p>•</p>
-                        <p>Updated 3 days ago</p>
+                        <p>Requested {calculateTimeDelta(created_at)}</p>
+                        {
+                            updated_at !== created_at &&
+                            <>
+                                <p>•</p>
+                                <p>Updated {calculateTimeDelta(updated_at)}</p>
+                            </>
+                        }
                     </div>
                 </div>
                 <small className="card__status bg-yellow-200 border border-yellow-400 text-yellow-600 px-3 py-1 rounded-full">pending</small>
