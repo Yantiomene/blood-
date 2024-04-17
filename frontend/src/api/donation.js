@@ -3,7 +3,7 @@ import { apiUrl } from './';
 
 axios.defaults.withCredentials = true;
 
-// DONATION LIST
+// DONATION REQUESTS
 export async function getDonationRequest() {
     try {
         const response = await axios.get(`${apiUrl}/donationRequest`, {
@@ -27,19 +27,6 @@ export async function getDonationRequestByUserId(userId) {
     }
 }
 
-
-export async function findMatchingDonors(requestData) {
-    try {
-        console.log(">> finding donors: ", requestData);
-        const response = await axios.post(`${apiUrl}/donors/find`, requestData);
-        return response.data;
-    } catch (error) {
-        console.error('Error finding donors:', error.message);
-        throw error;
-    }
-}
-
-// DONATION ITEM
 export async function makeDonationRequest(requestData) {
     try {
         console.log("making donation request: ", requestData);
@@ -71,6 +58,19 @@ export async function deleteDonationRequest(requestId) {
     }
 }
 
+// DONORS
+export async function findMatchingDonors(requestData) {
+    try {
+        console.log(">> finding donors: ", requestData);
+        const response = await axios.post(`${apiUrl}/donors/find`, requestData);
+        return response.data;
+    } catch (error) {
+        console.error('Error finding donors:', error.message);
+        throw error;
+    }
+}
+
+// SEARCH
 export async function findDonationRequestByBloodType(bloodType) {
     try {
         console.log(">> find donation request by blood type: ", bloodType);
@@ -111,6 +111,7 @@ export async function findDonationRequestByLocation(location) {
     }
 }
 
+// REQUEST MANAGEMENT
 export async function denyDonationRequest(requestId) {
     try {
         console.log(">> deny donation request: ", requestId);
