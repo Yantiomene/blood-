@@ -36,7 +36,7 @@ const DonationCard = (props) => {
                 <div className="top-left flex items-center gap-2">
                     <div className="card__profile-icon w-10 h-10 bg-red-300 rounded-full"></div>
                     <div className='leading-none'>
-                        <small>Esmond, {userId} is requesting</small>
+                        <small>User <b>{userId}</b> is requesting</small>
                         <h1 className="card__title text-3xl font-bold">{quantity}ml of {bloodType}</h1>
                     </div>
                 </div>

@@ -52,10 +52,12 @@ router.get('/donationRequest', userAuth, getDonationRequests);
 router.get('/donationRequest/:userId', userAuth, getDonationRequestByUserId);
 router.put('/donationRequest/:requestId', userAuth, updateDonationRequest);
 router.delete('/donationRequest/:requestId', userAuth, deleteRequest);
+// find requests
 router.get('/donationReq', userAuth, findRequestByBloodType);
 router.post('/donationReqByDate', userAuth, findRequestByDate);
 router.get('/donationReqByPriority/:urgent', userAuth, findRequestByPriority);
 router.post('/donationReqByLocation', userAuth, findRequestByLocation);
+// request interactions
 router.post('/denyRequest', userAuth, denyRequest);
 router.get('/acceptRequest/:requestId', userAuth, acceptRequest);
 router.get('/incrementView/:requestId', userAuth, incrementViewCount);

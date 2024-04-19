@@ -39,9 +39,9 @@ const Header = () => {
 
     return (
         <header className={clsx(
-            "bg-white p-2 sticky top-0 w-full z-40 transition-all duration-300", {
-            'shadow': isScrolled,
-            'shadow-none': !isScrolled
+            "bg-white sticky top-0 w-full z-40 transition-all duration-200", {
+            'shadow p-2': isScrolled,
+            'shadow-none p-4': !isScrolled
         }
         )}
         >
