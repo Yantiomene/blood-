@@ -17,6 +17,7 @@ import { validateAuthStatus } from "../redux/userSlice";
 import NavItem from './navItem';
 import UserProfileIcon from "./userIcon";
 import Logo from "./logo";
+import VerifyAlert from "./VerifyAlert";
 
 const Header = () => {
     const pathname = useLocation().pathname;
@@ -39,13 +40,20 @@ const Header = () => {
 
     return (
         <header className={clsx(
-            "bg-white sticky top-0 w-full z-40 transition-all duration-200", {
-            'shadow p-2': isScrolled,
-            'shadow-none p-4': !isScrolled
+            " bg-white sticky top-0 w-full z-40", {
+            'shadow': isScrolled,
+            'shadow-none': !isScrolled
         }
         )}
         >
-            <div className="container mx-auto px-4 flex justify-between items-center">
+            <div className={clsx("container mx-auto px-4 flex justify-between items-center transition-all duration-200", {
+                'p-2': isScrolled,
+                'p-4': !isScrolled
+            }
+
+            )}
+
+            >
                 <Logo />
 
                 <nav className="flex items-center gap-6">
@@ -61,6 +69,7 @@ const Header = () => {
                     {isLoggedin && <UserProfileIcon />}
                 </nav>
             </div>
+            <VerifyAlert />
         </header>
     );
 };
