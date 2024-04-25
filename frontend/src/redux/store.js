@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import userSlice from './userSlice';
-import { globalComponentReducer, appMessageReducer } from './globalComponentSlice';
+import { appMessageReducer } from './globalComponentSlice';
 
 const saveState = (state) => {
     try {
@@ -17,6 +17,11 @@ const loadState = () => {
         if (serializedState === null) {
             return undefined;
         }
+        if (new Date().getTime() > JSON.parse(serializedState).sessionExpireDate) {
+            console.log(">> session expired", new Date().getTime(), JSON.parse(serializedState).sessionExpireDate);
+            localStorage.removeItem('bplus');
+            return undefined;
+        }
         return JSON.parse(serializedState);
     } catch (error) {
         console.error('Error loading state from localStorage:', error);
@@ -28,7 +33,6 @@ const persistedState = loadState();
 const store = configureStore({
   reducer: {
     user: userSlice,
-    globalComponent: globalComponentReducer,
     appMessage: appMessageReducer,
   },
   preloadedState: persistedState, // Initialize with persisted state

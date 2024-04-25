@@ -35,7 +35,7 @@ const DonationCard = (props) => {
     // update card
     const handleUpdateCard = async (cardId) => {
         try {
-            const response = await updateDonationRequest(cardId);
+            const response = await updateDonationRequest(cardId); // will upate later to use same as create request form
             if (response.success) {
                 showMessage({ heading: 'Success', text: 'Request updated' });
             }
@@ -57,6 +57,7 @@ const DonationCard = (props) => {
         isFulfilled, // not yet
         viewsCount, // not yet
         urgent, // not yet
+        editable = false,
     } = props;
 
     return (
@@ -65,7 +66,7 @@ const DonationCard = (props) => {
                 className="card flex flex-col w-96 h-48 p-4 bg-white transition-all duration-100 hover:shadow-md hover:border-red-100 outline outline-transparent active:outline-red-100 rounded-lg"
             >
                 <div className="card__top flex items-center justify-between">
-                    <div className="top-left flex items-center gap-2 cursor-pointer"
+                    <div className="top-left flex items-center gap-2 cursor-pointer group"
                         onClick={() => handleViewCard(id)}
                     >
                         <div
@@ -76,19 +77,22 @@ const DonationCard = (props) => {
                         </div>
                         <div className='leading-none'>
                             <small><span className="my-1 px-1 rounded bg-slate-200">User {userId}</span> is requesting</small>
-                            <h1 className="card__title text-2xl font-bold">{quantity}ml of {bloodType}</h1>
+                            <h1 className="card__title text-2xl font-bold group-hover:text-red-400">{quantity}ml of {bloodType}</h1>
                         </div>
                     </div>
-                    <div className="top-right flex items-center gap-2">
-                        <span
-                            className={menuButtonStyle + " active:border-blue-300 hover:bg-blue-100 text-blue-400"}
-                            onClick={() => setShowUpdateMenu(true)}
-                        >E</span>
-                        <span
-                            className={menuButtonStyle + " active:border-red-300 hover:bg-red-100 text-red-400"}
-                            onClick={() => setShowDeleteMenu(true)}
-                        >X</span>
-                    </div>
+                    {
+                        editable &&
+                        <div className="top-right flex items-center gap-2">
+                            <span
+                                className={menuButtonStyle + " active:border-blue-300 hover:bg-blue-100 text-blue-400"}
+                                onClick={() => setShowUpdateMenu(true)}
+                            >E</span>
+                            <span
+                                className={menuButtonStyle + " active:border-red-300 hover:bg-red-100 text-red-400"}
+                                onClick={() => setShowDeleteMenu(true)}
+                            >X</span>
+                        </div>
+                    }
                     {
                         showDeleteMenu ?
                             <Overlay showWindow={setShowDeleteMenu}>
@@ -99,11 +103,11 @@ const DonationCard = (props) => {
                                     </p>
                                     <div className='flex gap-2 flex-row-reverse'>
                                         <button
-                                            className='px-2 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg'
+                                            className='px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg'
                                             onClick={() => handleDeleteCard(id)}
                                         >Confirm</button>
                                         <button
-                                            className='px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-500 rounded-lg'
+                                            className='px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-500 rounded-lg'
                                             onClick={() => setShowDeleteMenu(false)}
                                         >Cancel</button>
                                     </div>
@@ -115,15 +119,15 @@ const DonationCard = (props) => {
                                     <div className='p-4 md:w-[30vw] bg-white'>
                                         <h2 className='text-2xl text-blue-400 mb-2'>Update request for <b>{quantity}ml of {bloodType}</b></h2>
                                         <p className='leading-4 mb-4'>
-                                            Are you sure you want to delete this request?
+                                            update the request details
                                         </p>
                                         <div className='flex gap-2 flex-row-reverse'>
                                             <button
-                                                className='px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg'
+                                                className='px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg'
                                                 onClick={() => handleUpdateCard(id)}
-                                            >Confirm</button>
+                                            >Update</button>
                                             <button
-                                                className='px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-500 rounded-lg'
+                                                className='px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-500 rounded-lg'
                                                 onClick={() => setShowUpdateMenu(false)}
                                             >Cancel</button>
                                         </div>
@@ -157,7 +161,7 @@ const DonationCard = (props) => {
                             }
                         </div>
                     </div>
-                    <small className="card__status bg-yellow-200 border border-yellow-400 text-yellow-600 px-3 py-1 rounded-full">pending</small>
+                    <small className="card__status bg-yellow-100 border border-yellow-300 text-yellow-600 px-2 rounded-full">pending</small>
                 </div>
             </div>
 

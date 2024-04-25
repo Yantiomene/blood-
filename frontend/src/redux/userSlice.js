@@ -36,6 +36,7 @@ const userSlice = createSlice({
   initialState: {
     data: anonymousUser,
     authStatus: false,
+    sessionExpireDate: null,
     loading: false,
     error: null,
   },
@@ -45,6 +46,9 @@ const userSlice = createSlice({
       state.data = anonymousUser;
       console.log(">> unauthenticating current user");
     },
+    setSessionExpireDate: (state, action) => {
+      state.sessionExpireDate = action.payload;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -77,5 +81,5 @@ const userSlice = createSlice({
 
 export const selectUser = (state) => state.user.data;
 export const validateAuthStatus = (state) => state.user.authStatus;
-export const { unAuthenticateUser } = userSlice.actions;
+export const { unAuthenticateUser, setSessionExpireDate } = userSlice.actions;
 export default userSlice.reducer;

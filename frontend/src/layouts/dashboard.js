@@ -3,9 +3,9 @@ import { useLocation } from 'react-router-dom';
 import { DASHBOARDROUTE } from '../api';
 import { getDateFromToday } from '../util/datetime';
 // redux
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { findDonationRequestByLocation, findRequestByBloodType, getDonationRequests, getDonationRequestByUserId, findDonationRequestByDate, findDonationRequestByPriority } from '../api/donation';
-import { displayOverlayContainer, showMessage } from '../redux/globalComponentSlice';
+import { showMessage } from '../redux/globalComponentSlice';
 // layouts
 import AuthRequired from './authRequired';
 // components
@@ -16,26 +16,10 @@ import Loader from '../components/loader';
 import { selectUser } from '../redux/userSlice';
 import NavItem from '../components/navItem';
 
-const buttonStyle = "text-slate-600 border border-slate-300 hover:text-red-600 px-3 py-2 hover:bg-slate-200 active:bg-slate-300 rounded-md transition duration-100";
+const buttonStyle = "block text-slate-600 border border-slate-300 hover:text-red-600 px-3 py-2 hover:bg-slate-200 active:bg-slate-300 rounded-md transition duration-100";
 const buttonActiveStyle = "bg-slate-300";
 
-const filterItems = [
-    {
-        title: 'my requests',
-        href: '?q=mine',
-    },
-    {
-        title: 'best matches',
-        href: '?q=matches',
-    },
-    {
-        title: 'close to me',
-        href: '?q=zone',
-    },
-    {
-        title: 'very urgent',
-        href: '?q=urgent',
-    },
+const DateFilterItems = [
     {
         title: 'today',
         href: '?days=1',
@@ -57,10 +41,33 @@ const Dashboard = () => {
     const [requestList, setRequestList] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [showCreateRequest, setShowCreateRequest] = useState(false);
+    const [showDateFilterList, setShowDateFilterList] = useState(false);
 
-    const dispatch = useDispatch();
     const userData = useSelector(selectUser);
-    const showOverlay = useSelector((state) => state.globalComponent.displayOverlay);
+
+    const filterItems = [
+        {
+            title: 'my requests',
+            href: '?q=mine',
+            accessible: !userData.isDonor,
+        },
+        {
+            title: 'best matches',
+            href: '?q=matches',
+            accessible: userData.isDonor,
+        },
+        {
+            title: 'close to me',
+            href: '?q=zone',
+            accessible: userData.isDonor,
+        },
+        {
+            title: 'very urgent',
+            href: '?q=urgent',
+            accessible: userData.isDonor,
+        },
+    ]
+
 
     useEffect(() => {
         const handleFilterMyRequests = async () => {
@@ -108,10 +115,6 @@ const Dashboard = () => {
         handleFilterMyRequests();
     }, [queryKey, queryValue, userData.id, userData.location]);
 
-    const handleDisplayOverlay = () => {
-        dispatch(displayOverlayContainer());
-    }
-
     return (
         <>
             <header className="bg-slate-200 py-4">
@@ -120,7 +123,7 @@ const Dashboard = () => {
                     {
                         !userData.isDonor &&
                         <button
-                            onClick={()=> setShowCreateRequest(true)}
+                            onClick={() => setShowCreateRequest(true)}
                             className="bg-red-500 hover:bg-red-800 text-white px-4 py-2 rounded-full">
                             + request donation
                         </button>
@@ -131,9 +134,7 @@ const Dashboard = () => {
                 showCreateRequest && <Overlay showWindow={setShowCreateRequest}><DonationRequestForm /></Overlay>
             }
             <div className="container md:w-[60vw] md:m-auto mx-auto px-4 py-8">
-                <h2 className="text-2xl font-bold mb-4">Blood Donation Requests ({`${requestList.length}`})</h2>
-
-                <nav className="flex items-center mb-8">
+                <nav className="flex justify-between items-center relative">
                     <ul className='flex flex-wrap gap-x-2 gap-y-4'>
                         <NavItem
                             href={DASHBOARDROUTE}
@@ -143,6 +144,7 @@ const Dashboard = () => {
                         >View All</NavItem>
                         {
                             filterItems.map((item, index) => (
+                                item.accessible &&
                                 <NavItem
                                     key={index}
                                     href={`${DASHBOARDROUTE}${item.href}`}
@@ -153,8 +155,31 @@ const Dashboard = () => {
                             ))
                         }
                     </ul>
+                    <ul className='flex flex-col w-fit bg-white overflow-hidden rounded-md shadow-md absolute top-0 right-0'>
+                        <span
+                            className="text-slate-600 px-3 py-2 cursor-pointer"
+                            onClick={() => setShowDateFilterList(!showDateFilterList)}
+                        >Filter by date {showDateFilterList ? '↓' : '↑'}</span>
+                        {
+                            showDateFilterList &&
+                            <div className='bg-white p-2 flex flex-col border-t border-t-slate-200'>
+                                {
+                                    DateFilterItems.map((item, index) => (
+                                        <NavItem
+                                            key={index}
+                                            href={`${DASHBOARDROUTE}${item.href}`}
+                                            isActive={query === item.href}
+                                            className='block hover:bg-slate-200 px-3 py-2 rounded-md transition duration-100 cursor-pointer text-slate-600'
+                                            activeStyle={buttonActiveStyle}
+                                        >{item.title}</NavItem>
+                                    ))
+                                }
+                            </div>
+                        }
+                    </ul>
                 </nav>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <small className="text-sm italic text-gray-400 ">Displaying ({`${requestList.length}`}) blood donation requests </small>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
                     {
                         isLoading ?
                             <Loader size="40px" />
@@ -176,6 +201,7 @@ const Dashboard = () => {
                                         message={data.message}
                                         viewsCount={data.views_count}
                                         urgent={data.urgent}
+                                        editable={data.userId === userData.id}
                                     />
                                 )
                     }

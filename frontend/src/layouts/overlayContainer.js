@@ -6,9 +6,14 @@ const Overlay = ({ showWindow, children }) => {
 
     const ref = useRef(null);
 
+    const closeWindow = () => {
+        document.body.style.overflow = 'auto';
+        showWindow(false);
+    }
+
     const handleClickAway = (event) => {
         if (ref.current && !ref.current.contains(event.target)) {
-            showWindow(false);
+            closeWindow();
         }
     }
 
@@ -30,7 +35,7 @@ const Overlay = ({ showWindow, children }) => {
                 className="overlay-window bg-white rounded-lg shadow-md overflow-hidden relative"
             >
                 <button
-                    onClick={() => showWindow(false)}
+                    onClick={closeWindow}
                     className={menuButtonStyle + " float-right m-4 right-4 top-4 active:border-slate-300 hover:bg-slate-100 text-slate-400"}
                 >X</button>
                 {children}
