@@ -43,7 +43,7 @@ const DonationRequestForm = () => {
 
     return (
         <>
-            <form onSubmit={handleSubmit} className="donation-request-form w-[90vw] md:w-[40vw] h-fit bg-white shadow-md rounded px-8 py-8 mb-4">
+            <form onSubmit={handleSubmit} className="w-[90vw] md:w-[40vw] h-fit bg-white px-8 py-8 mb-4">
                 {requestError && <p className="text-red-500 mb-4">{requestError}</p>}
                 {requestError && <p className="text-green-500 mb-4">{requestSuccess}</p>}
                 <div className={fieldStyles}>

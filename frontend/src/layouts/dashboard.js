@@ -56,6 +56,7 @@ const Dashboard = () => {
     const queryValue = query.split('=')[1];
     const [requestList, setRequestList] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [showCreateRequest, setShowCreateRequest] = useState(false);
 
     const dispatch = useDispatch();
     const userData = useSelector(selectUser);
@@ -119,7 +120,7 @@ const Dashboard = () => {
                     {
                         !userData.isDonor &&
                         <button
-                            onClick={handleDisplayOverlay}
+                            onClick={()=> setShowCreateRequest(true)}
                             className="bg-red-500 hover:bg-red-800 text-white px-4 py-2 rounded-full">
                             + request donation
                         </button>
@@ -127,7 +128,7 @@ const Dashboard = () => {
                 </nav>
             </header>
             {
-                showOverlay && <Overlay><DonationRequestForm /></Overlay>
+                showCreateRequest && <Overlay showWindow={setShowCreateRequest}><DonationRequestForm /></Overlay>
             }
             <div className="container md:w-[60vw] md:m-auto mx-auto px-4 py-8">
                 <h2 className="text-2xl font-bold mb-4">Blood Donation Requests ({`${requestList.length}`})</h2>

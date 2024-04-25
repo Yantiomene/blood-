@@ -48,12 +48,12 @@
   }
 }
 
-.app-messag {
+.card__menu {
   animation: dropin var(--animation-duration) cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .app-message,
-.donation-request-form {  
+.overlay-window  {  
   animation: popin var(--animation-duration) cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 

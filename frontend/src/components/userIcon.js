@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 // redux
 import { useDispatch, useSelector } from 'react-redux';
@@ -15,6 +15,7 @@ const UserProfileIcon = () => {
     const userData = useSelector(selectUser);
     const isLoggedin = useSelector(validateAuthStatus);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const ref = useRef(null);
 
     const handleDropdownToggle = () => {
         setIsDropdownOpen(!isDropdownOpen);
@@ -25,6 +26,19 @@ const UserProfileIcon = () => {
             dispatch(fetchCurrentUser());
         }
     }, [isLoggedin, dispatch]);
+
+    const handleClickAway = (event) => {
+        if (ref.current && !ref.current.contains(event.target))
+            setIsDropdownOpen(false);
+    }
+
+    useEffect(() => {
+        document.addEventListener('mousedown', handleClickAway);
+        return () => {
+            document.removeEventListener('mousedown', handleClickAway);
+        }
+    }, []);
+
 
     return (
         <div className="relative"
@@ -41,7 +55,7 @@ const UserProfileIcon = () => {
                 <div className="dropdown border border-slate-200 absolute top-14 right-0 z-50 bg-white rounded-md shadow">
                     <div className="absolute h-4 w-4 -top-2 right-3 rounded-tl bg-white border-t border-l border-slate-200 transform rotate-45"></div>
                     {isLoggedin && (
-                        <ul className="p-2 relative">
+                        <ul ref={ref} className="p-2 relative">
                             <li>
                                 <span className="mb-2 px-3 py-2 bg-red-100 rounded-full block text-nowrap">
                                     {userData.username}

@@ -50,6 +50,7 @@ const LoginForm = () => {
                         placeholder="Enter your email"
                         value={email}
                         onChange={(event) => setEmail(event.target.value)}
+                        required={true}
                     />
                 </div>
                 <div className="mb-4">
@@ -63,6 +64,7 @@ const LoginForm = () => {
                         placeholder="Enter your password"
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
+                        required={true}
                     />
                     <small className="text-slate-500 italic text-sm">
                         Forgot password?
