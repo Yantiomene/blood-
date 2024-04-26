@@ -19,21 +19,6 @@ import NavItem from '../components/navItem';
 const buttonStyle = "block text-slate-600 border border-slate-300 hover:text-red-600 px-3 py-2 hover:bg-slate-200 active:bg-slate-300 rounded-md transition duration-100";
 const buttonActiveStyle = "bg-slate-300";
 
-const DateFilterItems = [
-    {
-        title: 'today',
-        href: '?days=1',
-    },
-    {
-        title: 'last week',
-        href: '?days=7',
-    },
-    {
-        title: 'last month',
-        href: '?days=30'
-    },
-]
-
 const Dashboard = () => {
     const query = useLocation().search;
     const queryKey = query.split('=')[0];
@@ -68,6 +53,21 @@ const Dashboard = () => {
         },
     ]
 
+    const DateFilterItems = [
+        {
+            title: 'today',
+            href: '?days=1',
+        },
+        {
+            title: 'last week',
+            href: '?days=7',
+        },
+        {
+            title: 'last month',
+            href: '?days=30'
+        },
+    ]
+    
 
     useEffect(() => {
         const handleFilterMyRequests = async () => {
@@ -119,7 +119,13 @@ const Dashboard = () => {
         <>
             <header className="bg-slate-200 py-4">
                 <nav className="container mx-auto px-4 py-2 flex items-center justify-between">
-                    <h1 className="text-xl font-bold">Welcome, {userData.username}!</h1>
+                    <div className='flex items-center gap-x-2'>
+                        <h1 className="text-xl font-bold">Welcome, {userData.username}!</h1>
+                        {
+                            userData.isDonor &&
+                            <span className='px-3 py-1 rounded-full text-xs bg-green-400 text-white italic'>proud donor</span>
+                        }
+                    </div>
                     {
                         !userData.isDonor &&
                         <button

@@ -28,11 +28,11 @@ const Overlay = ({ showWindow, children }) => {
     return (
         <div
             id="overlay-container"
-            style={{ backgroundColor: "rgb(0 0 0 / 68%)" }}
-            className="absolute top-0 right-0 z-50 w-full h-full top-0 flex flex-col pt-[8%] items-center"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.33)" }}
+            className="fixed top-0 left-0 z-50 w-screen h-screen flex justify-center items-center"
         >
             <div ref={ref}
-                className="overlay-window bg-white rounded-lg shadow-md overflow-hidden relative"
+                className="overlay-window bg-white rounded-lg shadow-md overflow-hidden"
             >
                 <button
                     onClick={closeWindow}
