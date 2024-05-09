@@ -1,30 +1,32 @@
 import React from "react";
 import { useLocation, Link } from "react-router-dom";
-import { HOMEROUTE, LOGINROUTE, REGISTERROUTE } from "../api";
+import { LOGINROUTE, REGISTERROUTE } from "../api";
 import VerifyAlert from "../components/VerifyAlert";
+import MessageAlert from "../components/messageAlert";
+import Logo from "../components/logo";
 
 const LinkClass = 'w-1/2 p-2 rounded-md text-center';
 
 export default function WithoutHeader({ children }) {
     const params = useLocation().pathname;
+    const routes = [LOGINROUTE, REGISTERROUTE];
     return (
         <>
             <VerifyAlert />
-            <main className="pt-[5%] flex flex-col items-center min-h-screen bg-gray-100">
+            <MessageAlert />
+            <main className="flex flex-col items-center min-h-screen bg-slate-100">
                 {
-                    (params === LOGINROUTE || params === REGISTERROUTE) ?
-                        <div>
-                            <h1 className="p-4 text-4xl text-center text-red-500 font-bold">
-                                <Link to={HOMEROUTE}>Blood+</Link>
-                            </h1>
-                            <div className='w-full h-[50px] p-2 my-2 flex items-center gap-10 bg-gray-200 rounded'>
+                    (routes.includes(params)) ?
+                        <div className="mt-[8%]">
+                            <Logo />
+                            <div className='w-full h-14 p-2 my-2 flex items-center gap-10 bg-slate-200 rounded-md'>
                                 <Link
-                                    className={LinkClass + `${(params === LOGINROUTE) ? ' bg-red-400' : ' bg-gray-200'}`}
+                                    className={LinkClass + `${(params === LOGINROUTE) ? ' bg-red-400' : ' bg-slate-200'}`}
                                     to={LOGINROUTE}
                                 >Login
                                 </Link>
                                 <Link
-                                    className={LinkClass + `${(params === REGISTERROUTE) ? ' bg-red-400' : ' bg-gray-200'}`}
+                                    className={LinkClass + `${(params === REGISTERROUTE) ? ' bg-red-400' : ' bg-slate-200'}`}
                                     to={REGISTERROUTE}
                                 >Register
                                 </Link>

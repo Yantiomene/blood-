@@ -1,29 +1,32 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-const initialState = {
-    displayOverlay: false
+const appMessageInitial = {
+    displayMessage: false,
+    heading: null,
+    text: null,
 };
 
-const bodyElem = document.querySelector('body');
-
-export const globalComponent = createSlice({
-    name: 'globalComponent',
-    initialState,
+export const appMessage = createSlice({
+    name: 'appMessage',
+    initialState: appMessageInitial,
     reducers: {
-        displayOverlayContainer: (state) => {
-            state.displayOverlay = true;
-            bodyElem?.classList.add('overflow-hidden');
+        showMessage: (state, action) => {
+            state.displayMessage = true;
+            console.log(">>action", action.payload)
+            state.heading = action.payload.heading;
+            state.text = action.payload.text;
+            console.log("after action", state.heading, state.text);
         },
-        removeOverlayContainer: (state) => {
-            state.displayOverlay = false;
-            bodyElem?.classList.remove('overflow-hidden');
-        },
+        exitMessage: (state) => {
+            state.displayMessage = false;
+        }
     }
 });
 
-export const {
-    displayOverlayContainer,
-    removeOverlayContainer,
-} = globalComponent.actions;
 
-export default globalComponent.reducer;
+export const {
+    showMessage,
+    exitMessage
+} = appMessage.actions;
+
+export const appMessageReducer = appMessage.reducer;

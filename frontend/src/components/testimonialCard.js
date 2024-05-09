@@ -1,7 +1,7 @@
 const TestimonialCard = ({ name, image, testimonial }) => {
     return (
         <div className="relative bg-white shadow-lg rounded-lg overflow-hidden">
-            <img src={image} alt="Testimonial" className="w-full h-64 object-cover object-center" />
+            <img src={image} alt="Testimonial" className="w-full h-64 object-cover object-center grayscale" />
             <div className="p-6">
                 <h3 className="text-xl font-semibold mb-2">{name}</h3>
                 <p className="text-gray-600">{testimonial}</p>

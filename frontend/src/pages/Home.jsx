@@ -2,13 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { bloodDonor } from "../assets";
 import { REGISTERROUTE } from '../api';
-import WithHeader from "../layouts/withHeader";
 import ProfileCard from '../components/profileCard';
 import TestimonialCard from '../components/testimonialCard';
 
 const Home = () => {
     return (
-        <WithHeader>
+      <>
             {/* Hero Section */}
             <section className="relative h-screen">
                 <div className="absolute inset-0">
@@ -116,7 +115,7 @@ const Home = () => {
         </section>
 
           </div>
-        </WithHeader>
+        </>
     );
 };
 

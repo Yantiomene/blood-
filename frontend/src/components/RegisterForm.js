@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { register } from '../api/user';
+import { useDispatch } from 'react-redux';
+import { showMessage } from '../redux/globalComponentSlice';
+import { register, login } from '../api/user';
 import { VERIFYACCOUNT } from '../api';
+import Loader from './loader';
 
 
 const RegisterForm = () => {
@@ -11,11 +14,11 @@ const RegisterForm = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [bloodType, setBloodType] = useState('');
 
-    const [registerError, setRegisterError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [checkPassword, setCheckPassword] = useState(false);
 
     const router = useNavigate();
+    const dispatch = useDispatch();
 
     const handleConfirmPassword = (e) => {
         setConfirmPassword(e.target.value);
@@ -31,7 +34,7 @@ const RegisterForm = () => {
         setIsLoading(true);
 
         if (password !== confirmPassword) {
-            setRegisterError('Passwords do not match');
+            dispatch(showMessage({heading: "Error", text: "Passwords do not match"}));
             return;
         }
 
@@ -44,15 +47,18 @@ const RegisterForm = () => {
             };
             const response = await register(user);
             if (response) {
+                // successfully registered users should be logged in
+                // verification is not a priority at this moment. it's a necessary action
+                // preceeding the creation of an account
+                await login({ email, password });
                 router(VERIFYACCOUNT);
                 return;
             } else {
-                console.log(`${response}`);
+                console.log(`>> registration error: ${response}`);
             }
-            setRegisterError('');
         }
         catch (error) {
-            setRegisterError(`Registration failed: ${error.message}`);
+            dispatch(showMessage({heading:'Error', text: `${error.msg}`}))
             console.error('Register error:', error);
         }
 
@@ -64,8 +70,6 @@ const RegisterForm = () => {
     return (
         <>
             <form onSubmit={handleRegister} className="w-[90vw] md:w-[40vw] bg-white shadow-md rounded px-8 py-8 mb-4">
-                {registerError && <p className="text-red-500 rounded p-2 block bg-red-100 mb-4">{registerError}</p>}
-
                 <div className="mb-4">
                     <label htmlFor="email">Email</label>
                     <input
@@ -161,11 +165,11 @@ const RegisterForm = () => {
                 </div>
 
                 <button
-                    className={`inline-block w-full text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isLoading ? " bg-gray-500" : " bg-red-500 hover:bg-red-700"}`}
+                    className={`inline-block w-full text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isLoading ? " bg-red-200" : " bg-red-500 hover:bg-red-700"}`}
                     type="submit"
                     disabled={isLoading}
                 >
-                    {isLoading ? 'Loading...' : 'Register'}
+                    {isLoading ? <Loader/> : 'Register'}
                 </button>
                 <p className="text-gray-500 text-center mt-4 text-sm">
                     Already have an account? <a className='text-red-500 hover:text-red-400' href="/login">Login</a>

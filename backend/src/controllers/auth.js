@@ -209,7 +209,6 @@ exports.updateUserProfile = async (req, res) => {
 // function to generate a new verification code
 exports.requestNewToken = async (req, res) => {
     const { email } = req.body;
-
     try {
         // check if email exists
         if (!email) {
@@ -249,6 +248,7 @@ exports.requestNewToken = async (req, res) => {
 
         // Send verification email with the short code
         sendVerificationEmail(email, verificationCode);
+        console.log(">> NEW VERIFICATION CODE: ", verificationCode);
 
         req.logger.info('New verification code sent successfully');
         return res.status(200).json({
@@ -338,13 +338,13 @@ exports.passwordResetRequest = async (req, res) => {
             })
         }
 
-        // Generate and store a reset token in Redis
-        const resetToken = generateShortCode();
-
         // Store verification code in Redis
         if (!redisClient.isAlive()) {
             throw new Error('Redis client not connected');
         }
+        
+        // Generate and store a reset token in Redis
+        const resetToken = generateShortCode();
 
         // Check if there's an existing token for the email
         const existingCode = await redisClient.get(email);
@@ -359,6 +359,8 @@ exports.passwordResetRequest = async (req, res) => {
 
         // Send password reset email with the short code
         sendPasswordResetEmail(email, resetToken);
+
+        console.log(">> SENT PASSWORD RESET TOKEN: ", resetToken);
 
         req.logger.info('Password reset email sent successfully');
         return res.status(200).json({
@@ -378,6 +380,8 @@ exports.passwordResetRequest = async (req, res) => {
 
 exports.resetPassword = async (req, res) => {
     const { code, password } = req.body;
+
+    console.log(">> RESET PASSWORD", req.body, "\nCODE: ", code, "\nPASSWORD: ", password);
 
     try {
         // Retrieve verification code from Redis

@@ -5,17 +5,10 @@ import { convertGeoToPoint } from '../util/geo';
 export const fetchCurrentUser = createAsyncThunk(
   'user/fetchCurrentUser',
   async () => {
-    console.log(">> fetching current user from store...");
     const response = await getCurrentUser();
-    console.log(">> after fetching currrent user", response.user);
-
     if (response.user) {
-        response.user.location = convertGeoToPoint(response.user.location);
-        console.log(">> after process user", response.user);
-    } else {
-        console.log(">> after fetching current user ERROR", response.user);
+      response.user.location = convertGeoToPoint(response.user.location);
     }
-
     return response.user;
   }
 );
@@ -24,27 +17,38 @@ export const updateUserProfile = createAsyncThunk(
   'user/updateUserProfile',
   async (userData) => {
     const response = await updateProfile(userData);
-    return response.user;
+    return response;
   }
 );
+
+const anonymousUser = {
+  username: '',
+  email: '',
+  bloodType: '',
+  isDonor: false,
+  isVerified: false,
+  location: [0, 0],
+  contactNumber: '',
+}
 
 const userSlice = createSlice({
   name: 'user',
   initialState: {
-    data: {
-      username: '',
-      email: '',
-      bloodType: '',
-      isDonor: false,
-      location: [0, 0],
-      contactNumber: '',
-      isVerified: false,
-    },
+    data: anonymousUser,
+    authStatus: false,
+    sessionExpireDate: null,
     loading: false,
     error: null,
   },
   reducers: {
-    // Add other synchronous actions if needed
+    unAuthenticateUser: (state) => {
+      state.authStatus = false;
+      state.data = anonymousUser;
+      console.log(">> unauthenticating current user");
+    },
+    setSessionExpireDate: (state, action) => {
+      state.sessionExpireDate = action.payload;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -53,10 +57,12 @@ const userSlice = createSlice({
       })
       .addCase(fetchCurrentUser.fulfilled, (state, action) => {
         state.loading = false;
+        state.authStatus = true;
         state.data = action.payload;
       })
       .addCase(fetchCurrentUser.rejected, (state, action) => {
         state.loading = false;
+        state.authStatus = false;
         state.error = action.error.message;
       })
       .addCase(updateUserProfile.pending, (state) => {
@@ -64,7 +70,7 @@ const userSlice = createSlice({
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.loading = false;
-        state.data = action.payload;
+        state.authStatus = true;
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;
@@ -74,4 +80,6 @@ const userSlice = createSlice({
 });
 
 export const selectUser = (state) => state.user.data;
+export const validateAuthStatus = (state) => state.user.authStatus;
+export const { unAuthenticateUser, setSessionExpireDate } = userSlice.actions;
 export default userSlice.reducer;

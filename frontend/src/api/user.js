@@ -15,9 +15,7 @@ export async function getUsers() {
 
 export async function getCurrentUser() {
     try {
-        console.log(">> getting current user...");
         const response = await axios.get(`${apiUrl}/profile`);
-        console.log(">> recieved current user: ", response.data);
         return response.data;
     } catch (error) {
         console.error('Error getting user profile:', error.message);
@@ -40,15 +38,14 @@ export async function register(user) {
         const response = await axios.post(`${apiUrl}/register`, user);
         return response.data;
     } catch (error) {
-        console.error('Registration error:', error);
-        throw error;
+        console.error('>> Registration error:', error.response.data.errors[0]);
+        throw error.response.data.errors[0];
     }
 }
 
 export async function logout() {
     try {
         const response = await axios.get(`${apiUrl}/logout`);
-        localStorage.clear(); // insurance no. 2
         console.log(">> logging out...success");
         return response.data;
     } catch (error) {
@@ -57,10 +54,28 @@ export async function logout() {
     }
 }
 
+export async function requestPasswordReset(userEmail) {
+    try {
+        const response = await axios.post(`${apiUrl}/passwordResetRequest`, userEmail);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export async function resetPasswordWithPIN(credentials) {
+    try {
+        const response = await axios.post(`${apiUrl}/passwordReset`, credentials);
+        return response.data;
+    } catch (error) {
+        console.error('Password reset error', error.message);
+        throw error;
+    }
+}
+
 export async function updateProfile(user) {
     try {
-        console.log(">> profile update: ", user);
-        const response = await axios.put(`${apiUrl}/profile`, user)
+        const response = await axios.put(`${apiUrl}/profile`, user);
         return response.data;
     } catch (error) {
         throw error;
@@ -83,6 +98,16 @@ export async function verifyEmail(code) {
         return response.data;
     } catch (error) {
         console.error('Error verifying email:', error);
+        throw error;
+    }
+}
+
+export async function requestNewToken(userEmail) {
+    try {
+        const response = await axios.post(`${apiUrl}/requestNewToken`, userEmail);
+        return response.data;
+    } catch (error) {
+        console.error('Error requesting new token:', error);
         throw error;
     }
 }

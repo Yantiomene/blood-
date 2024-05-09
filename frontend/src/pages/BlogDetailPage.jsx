@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getBlogById } from '../api/blog';
-import WithHeader from '../layouts/withHeader';
 
 const BlogDetailPage = () => {
   const { blogID } = useParams();
@@ -22,18 +21,16 @@ const BlogDetailPage = () => {
 
   if (!blog) {
     return (
-      <WithHeader>
         <div
           className="rounded-lg mb-10 mx-auto bg-white text-center w-[80vw] h-[60vh] flex items-center justify-center"
         >
           Loading...
-        </div>;
-      </WithHeader>
+        </div>
     );
   }
 
   return (
-    <WithHeader>
+    <>
       <div className='pt-10'>
         <section
           className="rounded-lg mb-10 mx-auto border-2 border-gray-300 w-[80vw] h-[60vh] bg-red-100 bg-cover bg-center bg-no-repeat"
@@ -62,7 +59,7 @@ const BlogDetailPage = () => {
         </div>
 
       </section>
-    </WithHeader>
+    </>
   );
 };
 

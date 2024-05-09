@@ -1,18 +1,21 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { selectUser } from "../redux/userSlice";
-import WithoutHeader from "../layouts/withoutHeader";
-import { verifyEmail } from "../api/user";
+import { useDispatch, useSelector } from "react-redux";
+import { showMessage } from "../redux/globalComponentSlice";
+import { requestNewToken, verifyEmail } from "../api/user";
 import { HOMEROUTE } from "../api";
-import withCurrentUser from "../layouts/withCurrentUser";
+import AuthRequired from "../layouts/authRequired";
+import { fetchCurrentUser, selectUser } from "../redux/userSlice";
+import Logo from "../components/logo";
+import Loader from "../components/loader";
+
 
 const VerifyAccount = () => {
+    const user = useSelector(selectUser);
     const [codes, setCodes] = useState(['', '', '', '', '']);
-    const [verificationMessage, setVerificationMessage] = useState('');
 	const [isLoading, setLoading] = useState(false);
     const router = useNavigate();
-	const user = useSelector(selectUser);
+    const dispatch = useDispatch();
 
     const handleCodeChange = (index, value) => {
         // Ensure only digits are entered
@@ -22,10 +25,23 @@ const VerifyAccount = () => {
         setCodes(newCodes);
     };
 
+    const handleRequestNewToken = async () => {
+        setLoading(true)
+        try {
+            const response = await requestNewToken({email: user.email});
+            if (response.success) {
+                dispatch(showMessage({heading: "Success", text: 'New verification email sent!'}));
+            }
+        } catch (error) {
+            console.error('Error requesting new token:', error.message);
+        }
+        setLoading(false);
+    }
+
     const handleVerify = async () => {
 		const code = codes.join('');
         if (code.length !== 5) {
-			setVerificationMessage('Please enter a 5-digit PIN.');
+            dispatch(showMessage({heading: "Error", text: 'Please enter a 5-digit PIN.'}));
             return;
         }
         
@@ -33,22 +49,24 @@ const VerifyAccount = () => {
         try {
             const response = await verifyEmail(code);
 			if (response.success){
-				setVerificationMessage('PIN verified successfully!');
+                dispatch(showMessage({heading: "Success", text: 'PIN verified successfully'}));
+                dispatch(fetchCurrentUser());
 				router(HOMEROUTE);
 			}
         } catch (error) {
-			setVerificationMessage('PIN verification failed. Please try again.');
+            dispatch(showMessage({heading: "Error", text: 'PIN verification failed. Please try again'}));
             console.log("Error verifying user:", error.message);
-			setLoading(false);
         }
+        setLoading(false);
     };
 
     return (
-      <WithoutHeader>
-        <div className="w-[90vw] md:w-[40vw] mt-[10%] bg-white shadow-md rounded px-8 py-8 mb-4">
+      <div className="mt-[10%]">
+        <Logo/>
+        <div className="w-[90vw] md:w-[40vw] my-4 bg-white shadow-md rounded px-8 py-8 mb-4">
             <h2 className="text-2xl font-semibold mb-4">PIN Verification</h2>
             <p className="my-4">
-                A verification pin to your email <span className="italic text-red-500">@{user?.email}</span>.
+                A verification pin was sent to your email <span className="italic text-red-500">@{user?.email}</span>.
             </p>
             <div className="flex mb-4">
                 {codes.map((code, index) => (
@@ -70,14 +88,16 @@ const VerifyAccount = () => {
                 disabled={isLoading}
                 onClick={handleVerify}
             >
-                {isLoading ? 'Loading...' : 'Verify'}
+                {isLoading ? <Loader/> : 'Verify'}
             </button>
-            {verificationMessage && (
-                <p className="mt-4 text-sm text-gray-700">{verificationMessage}</p>
-            )}
         </div>
-      </WithoutHeader>
+        <div>
+            <p className="text-center text-gray-500 text-sm">
+                Didn't receive the email? <button onClick={handleRequestNewToken} className="text-red-500">Resend</button>
+            </p>
+        </div>
+      </div>
   );
 };
 
-export default withCurrentUser(VerifyAccount);
+export default AuthRequired(VerifyAccount);
