@@ -1,9 +1,11 @@
 import React from 'react';
 import Header from '../components/Header';
+import VerifyAlert from '../components/VerifyAlert';
 
 const WithHeader = ({ children }) => {
     return (
         <>
+            <VerifyAlert />
             <Header />
             <main className='bg-gray-100'>
                 {children}

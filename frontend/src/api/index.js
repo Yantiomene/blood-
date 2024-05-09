@@ -9,4 +9,5 @@ export const REGISTERROUTE = "/register";
 export const HOMEROUTE = "/";
 export const BLOGROUTE = "/site/blog";
 export const ABOUTROUTE = "/site/about";
-export const BLOGDETAILROUTE = "/site/blog/post"
+export const BLOGDETAILROUTE = "/site/blog/post";
+export const VERIFYACCOUNT = "/verify/account";

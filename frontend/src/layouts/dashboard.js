@@ -1,20 +1,24 @@
 import React, { useState, useEffect } from 'react';
 // redux
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { selectUser } from '../redux/userSlice';
 import { getDonationRequest, findMatchingDonors } from '../api/donation';
+import { displayOverlayContainer } from '../redux/globalComponentSlice';
 // layouts
 import withCurrentUser from './withCurrentUser';
 // components
 import Overlay from './overlayContainer';
 import DonationCard from '../components/DonorCard';
+import DonationRequestForm from '../components/donationRequestForm';
 
 const Dashboard = () => {
 
     const userData = useSelector(selectUser);
     const [requestList, setRequestList] = useState([]);
-    const [showOverlay, setShowOverlay] = useState(false);
     const [matchingDonors, setMatchingDonors] = useState([]);
+
+    const dispatch = useDispatch();
+    const showOverlay = useSelector((state) => state.globalComponent.displayOverlay);
 
     useEffect(() => {
         const fetchDonationReqeusts = async () => {
@@ -28,30 +32,21 @@ const Dashboard = () => {
         fetchDonationReqeusts();
     }, [])
 
-    useEffect(() => {
-        const fetchMatchingDonors = async () => {
-            try {
-                const data = await findMatchingDonors({ bloodType: userData?.bloodType });
-                console.log(">> matching donors: ", data.donors, data.hospitals);
-                setMatchingDonors(data.donors);
-            } catch (error) {
-                console.log("Error occurred while fetching matching donors: ", error.message)
-            }
-        }
-        fetchMatchingDonors();
-    }, [userData])
+    // useEffect(() => {
+    //     const fetchMatchingDonors = async () => {
+    //         try {
+    //             const data = await findMatchingDonors({ bloodType: userData?.bloodType });
+    //             console.log(">> matching donors: ", data.donors, data.hospitals);
+    //             setMatchingDonors(data.donors);
+    //         } catch (error) {
+    //             console.log("Error occurred while fetching matching donors: ", error.message)
+    //         }
+    //     }
+    //     fetchMatchingDonors();
+    // }, [userData])
 
     const handleDisplayOverlay = () => {
-        setShowOverlay(!showOverlay);
-        const bodyElem = document.querySelector('body');
-        // console.log("body element", bodyElem);
-        if (showOverlay) {
-            console.log("body element is showing", showOverlay);
-            bodyElem?.classList.add('overflow-hidden');
-        } else {
-            console.log("body element is closed", showOverlay);
-            bodyElem?.classList.remove('overflow-hidden');
-        }
+        dispatch(displayOverlayContainer());
     }
 
     return (
@@ -60,16 +55,18 @@ const Dashboard = () => {
                 <nav className="container mx-auto px-4 py-2 flex items-center justify-between">
                     <h1 className="text-xl font-bold">Welcome, {userData?.username}!</h1>
                     {
-                        userData?.isDonor &&
+                        !userData?.isDonor &&
                         <button
                             onClick={handleDisplayOverlay}
-                            className="bg-red-500 hover:bg-red-800 text-white px-4 py-2 rounded">
+                            className="bg-red-500 hover:bg-red-800 text-white px-4 py-2 rounded-full">
                             + request donation
                         </button>
                     }
                 </nav>
             </header>
-            {showOverlay && <Overlay closeOverlay={setShowOverlay} />}
+            {
+                showOverlay && <Overlay><DonationRequestForm /></Overlay>
+            }
             <div className="container mx-auto px-4 py-8">
                 <h2 className="text-2xl font-bold mb-4">Blood Donation Requests</h2>
 
@@ -98,5 +95,4 @@ const Dashboard = () => {
     );
 };
 
-// export default Dashboard;
 export default withCurrentUser(Dashboard);

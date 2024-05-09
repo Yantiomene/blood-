@@ -67,5 +67,6 @@ In many African hospitals, the availability of blood for patients in need is a c
 
 - Yaninthé Tiomene - ([@Yantiomene](https://github.com/Yantiomene), [LinkedIn](https://www.linkedin.com/in/yaninthe-tiomene), [X](https://twitter.com/YanTiomene))
 
-- Esmond Adjei - 
+- Esmond Adjei - ([@esmond-adjei](https://github.com/esmond-adjei), [LinkedIn](https://www.linkedin.com/in/esmond-adjei), [X](https://twitter.com/x_jei))
+
 - Gregory Slippi-Mensah - ([@Greg_Pro77](https://github.com/Greg-Pro77), [LinkedIn](#), [GHMatrix](#))

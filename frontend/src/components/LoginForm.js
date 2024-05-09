@@ -6,21 +6,13 @@ import { useDispatch } from 'react-redux';
 import { authenticateUser } from "../redux/authSlice";
 
 const LoginForm = () => {
-    const [email, setemail] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loginError, setLoginError] = useState('');
     const [isLoading, setIsLoading] = useState(false); // New state variable
 
     const router = useNavigate();
     const dispatch = useDispatch();
-
-    const handleemailChange = (event) => {
-        setemail(event.target.value);
-    };
-
-    const handlePasswordChange = (event) => {
-        setPassword(event.target.value);
-    };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -37,7 +29,7 @@ const LoginForm = () => {
             setLoginError('Invalid email or password');
         }
 
-        setIsLoading(false); // Set isLoading back to false after login attempt
+        setIsLoading(false);
     };
 
     const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
@@ -48,7 +40,7 @@ const LoginForm = () => {
                 {loginError && <p className="text-red-500 mb-4">{loginError}</p>}
                 <div className="mb-4">
                     <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-                        email:
+                        Email:
                     </label>
                     <input
                         className={inputStyles}
@@ -56,7 +48,7 @@ const LoginForm = () => {
                         type="text"
                         placeholder="Enter your email"
                         value={email}
-                        onChange={handleemailChange}
+                        onChange={(event)=> setEmail(event.target.value)}
                     />
                 </div>
                 <div className="mb-4">
@@ -69,25 +61,23 @@ const LoginForm = () => {
                         type="password"
                         placeholder="Enter your password"
                         value={password}
-                        onChange={handlePasswordChange}
+                        onChange={(event)=> setPassword(event.target.value)}
                     />
                     <small className="text-gray-500 italic text-sm">
                         Forgot password?
                         <a href="/forgot-password"> Click here</a>
                     </small>
                 </div>
-                <div className="">
-                    <button
-                        className="bg-red-500 inline-block w-full hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                        type="submit"
-                        disabled={isLoading} // Disable the button when isLoading is true
-                    >
-                        {isLoading ? 'Loading...' : 'Login'} {/* Show 'Loading...' when isLoading is true */}
-                    </button>
-                    <p className="text-gray-500 text-center mt-4 text-sm">
-                        Don't have an account? <a className='text-red-500 hover:text-red-400' href={REGISTERROUTE}>Register</a>
-                    </p>
-                </div>
+                <button
+                    className={`inline-block w-full text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isLoading ? " bg-gray-500" : " bg-red-500 hover:bg-red-700"}`}
+                    type="submit"
+                    disabled={isLoading}
+                >
+                    {isLoading ? 'Loading...' : 'Login'}
+                </button>
+                <p className="text-gray-500 text-center mt-4 text-sm">
+                    Don't have an account? <a className='text-red-500 hover:text-red-400' href={REGISTERROUTE}>Register</a>
+                </p>
             </form>
         </>
     );

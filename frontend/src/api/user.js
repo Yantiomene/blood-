@@ -16,9 +16,7 @@ export async function getUsers() {
 export async function getCurrentUser() {
     try {
         console.log(">> getting current user...");
-        const response = await axios.get(`${apiUrl}/profile`, {
-            withCredentials: true,
-        });
+        const response = await axios.get(`${apiUrl}/profile`);
         console.log(">> recieved current user: ", response.data);
         return response.data;
     } catch (error) {
@@ -50,9 +48,11 @@ export async function register(user) {
 export async function logout() {
     try {
         const response = await axios.get(`${apiUrl}/logout`);
+        localStorage.clear(); // insurance no. 2
+        console.log(">> logging out...success");
         return response.data;
     } catch (error) {
-        console.error('Logout error:', error);
+        console.error('Logout error:', error.message);
         throw error;
     }
 }
@@ -72,7 +72,17 @@ export async function checkProtected() {
         const response = await axios.get(`${apiUrl}/protected`);
         return response.data;
     } catch (error) {
-        console.error('Protected route error:', error);
+        console.error('Protected route error:', error.message);
+        throw error;
+    }
+}
+
+export async function verifyEmail(code) {
+    try {
+        const response = await axios.get(`${apiUrl}/verifyEmail/${code}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error verifying email:', error);
         throw error;
     }
 }

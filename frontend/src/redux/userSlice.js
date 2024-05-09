@@ -8,10 +8,14 @@ export const fetchCurrentUser = createAsyncThunk(
     console.log(">> fetching current user from store...");
     const response = await getCurrentUser();
     console.log(">> after fetching currrent user", response.user);
+
     if (response.user) {
-      response.user.location = convertGeoToPoint(response.user.location);
+        response.user.location = convertGeoToPoint(response.user.location);
+        console.log(">> after process user", response.user);
+    } else {
+        console.log(">> after fetching current user ERROR", response.user);
     }
-    console.log(">> after process user", response.user);
+
     return response.user;
   }
 );
@@ -33,7 +37,8 @@ const userSlice = createSlice({
       bloodType: '',
       isDonor: false,
       location: [0, 0],
-      contactNumber: ''
+      contactNumber: '',
+      isVerified: false,
     },
     loading: false,
     error: null,
