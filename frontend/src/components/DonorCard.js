@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { calculateTimeDelta } from "../util/datetime";
 import { getDonationRequestByUserId, deleteDonationRequest, updateDonationRequest } from "../api/donation";
@@ -44,6 +44,12 @@ const DonationCard = (props) => {
             showMessage({ heading: 'Error', text: `${error.error}` });
         }
     }
+
+    useEffect(()=>{
+        if (showDeleteMenu === false || showUpdateMenu === false) {
+            document.body.style.overflow = 'auto';
+        }
+    }, [showDeleteMenu, showUpdateMenu])
 
     const {
         id,
@@ -151,9 +157,9 @@ const DonationCard = (props) => {
                             <p>Ghana</p>
                         </div>
                         <div className="card__date text-xs text-slate-400 flex gap-2">
-                            <p>Requested {calculateTimeDelta(created_at)}</p>
+                            { created_at && <p>Requested {calculateTimeDelta(created_at)}</p> }
                             {
-                                updated_at !== created_at &&
+                                updated_at && (updated_at !== created_at) &&
                                 <>
                                     <p>•</p>
                                     <p>Updated {calculateTimeDelta(updated_at)}</p>

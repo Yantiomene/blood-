@@ -572,7 +572,8 @@ const findRequestByBloodType = async (req, res) => {
                 "views_count",
                 ST_X(location::geometry) as latitude, 
                 ST_Y(location::geometry) as longitude,
-                "updated_at"
+                "updated_at",
+                "created_at"
             FROM 
                 donation_requests
             WHERE 
@@ -605,7 +606,7 @@ const findRequestByDate = async (req, res) => {
     if(!isDonor) {
         return res.status(403).json({ success: false, error: 'Update your donor status' });
     }
-
+    console.log(">> ", isDonor, bloodType, startDate, endDate);
     try {
         // validate startDate and endDate
         if (!startDate || !endDate) {
@@ -638,7 +639,8 @@ const findRequestByDate = async (req, res) => {
                 "views_count",
                 ST_X(location::geometry) as latitude, 
                 ST_Y(location::geometry) as longitude,
-                "updated_at"
+                "updated_at",
+                "created_at"
             FROM 
                 donation_requests
             WHERE 
@@ -649,6 +651,8 @@ const findRequestByDate = async (req, res) => {
         `, [...compatibleBloodTypes, startDate, endDate]);
 
         req.logger.info('Fetched donation requests successfully');
+
+        console.log(">> results", result.rows);
         return res.status(200).json({
             success: true,
             donationRequests: result.rows || [],
@@ -705,7 +709,8 @@ const findRequestByPriority = async (req, res) => {
                 "views_count",
                 ST_X(location::geometry) as latitude,
                 ST_Y(location::geometry) as longitude,
-                "updated_at"
+                "updated_at",
+                "created_at"
             FROM
                 donation_requests
             WHERE
@@ -781,7 +786,8 @@ const findRequestByLocation = async (req, res) => {
                 ST_X(location::geometry) as latitude,
                 ST_Y(location::geometry) as longitude,
                 ST_Distance(public.ST_SetSRID(location::geometry, 4326), public.ST_SetSRID($1::geometry, 4326)) as distance,
-                "updated_at"
+                "updated_at",
+                "created_at"
             FROM
                 donation_requests
             WHERE

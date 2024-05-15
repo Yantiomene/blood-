@@ -130,7 +130,7 @@ const Dashboard = () => {
                         <button
                             onClick={() => setShowCreateRequest(true)}
                             className="bg-red-500 hover:bg-red-800 text-white px-4 py-2 rounded-full">
-                            + request donation
+                            + make a request
                         </button>
                     }
                 </nav>
@@ -161,10 +161,13 @@ const Dashboard = () => {
                         }
                     </ul>
                     <ul className='flex flex-col w-fit bg-white overflow-hidden rounded-md shadow-md absolute top-0 right-0'>
-                        <span
-                            className="text-slate-600 px-3 py-2 cursor-pointer"
-                            onClick={() => setShowDateFilterList(!showDateFilterList)}
-                        >Filter by date {showDateFilterList ? '↓' : '↑'}</span>
+                        {
+                            userData.isDonor &&
+                            <span
+                                className="text-slate-600 px-3 py-2 cursor-pointer"
+                                onClick={() => setShowDateFilterList(!showDateFilterList)}
+                            >Filter by date {showDateFilterList ? '↓' : '↑'}</span>
+                        }
                         {
                             showDateFilterList &&
                             <div className='bg-white p-2 flex flex-col border-t border-t-slate-200'>
