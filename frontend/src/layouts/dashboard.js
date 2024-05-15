@@ -3,18 +3,18 @@ import { useLocation } from 'react-router-dom';
 import { DASHBOARDROUTE } from '../api';
 import { getDateFromToday } from '../util/datetime';
 // redux
-import { useSelector } from 'react-redux';
-import { findDonationRequestByLocation, findRequestByBloodType, getDonationRequests, getDonationRequestByUserId, findDonationRequestByDate, findDonationRequestByPriority } from '../api/donation';
+import { useSelector, useDispatch } from 'react-redux';
 import { showMessage } from '../redux/globalComponentSlice';
-// layouts
-import AuthRequired from './authRequired';
+import { selectUser } from '../redux/userSlice';
+import { fetchDonationRequests } from '../redux/donationSlice';
 // components
+import AuthRequired from './authRequired';
 import Overlay from './overlayContainer';
 import DonationCard from '../components/DonorCard';
 import DonationRequestForm from '../components/donationRequestForm';
-import Loader from '../components/loader';
-import { selectUser } from '../redux/userSlice';
 import NavItem from '../components/navItem';
+import Loader from '../components/loader';
+
 
 const buttonStyle = "block text-slate-600 border border-slate-300 hover:text-red-600 px-3 py-2 hover:bg-slate-200 active:bg-slate-300 rounded-md transition duration-100";
 const buttonActiveStyle = "bg-slate-300";
@@ -23,12 +23,14 @@ const Dashboard = () => {
     const query = useLocation().search;
     const queryKey = query.split('=')[0];
     const queryValue = query.split('=')[1];
-    const [requestList, setRequestList] = useState([]);
+
+    const dispatch = useDispatch();
+    const userData = useSelector(selectUser);
+    const requestList = useSelector((state) => state.donationRequestList);
+
     const [isLoading, setIsLoading] = useState(false);
     const [showCreateRequest, setShowCreateRequest] = useState(false);
     const [showDateFilterList, setShowDateFilterList] = useState(false);
-
-    const userData = useSelector(selectUser);
 
     const filterItems = [
         {
@@ -67,53 +69,50 @@ const Dashboard = () => {
             href: '?days=30'
         },
     ]
-    
 
     useEffect(() => {
         const handleFilterMyRequests = async () => {
-            let data = { donationRequests: [] };
-            console.log("queryKey", queryKey);
-            console.log("queryValue", queryValue);
             setIsLoading(true);
-
             try {
                 if (queryKey && queryValue) {
+                    let actionPayload = {};
                     if (queryKey === '?days') {
-                        const days = parseInt(queryValue);
-                        console.log("days", days);
-                        data = await findDonationRequestByDate(getDateFromToday(days), getDateFromToday(0));
-                    }
-                    else if (queryKey === '?q') {
+                        actionPayload = { type: 'byDate', fromDate: getDateFromToday(queryValue), toDate: getDateFromToday(0) };
+                    } else if (queryKey === '?q') {
                         switch (queryValue) {
                             case 'mine':
-                                data = await getDonationRequestByUserId(userData.id);
+                                actionPayload = { type: 'byUserId', userId: userData.id };
                                 break;
                             case 'matches':
-                                data = await findRequestByBloodType();
+                                actionPayload = { type: 'byBloodType', bloodType: userData.bloodType };
                                 break;
                             case 'zone':
-                                data = await findDonationRequestByLocation(userData.location);
+                                actionPayload = { type: 'byLocation', location: userData.location };
                                 break;
                             case 'urgent':
-                                data = await findDonationRequestByPriority(true);
+                                actionPayload = { type: 'urgent' };
                                 break;
                             default:
-                                data = await getDonationRequests();
+                                actionPayload = { type: 'all' };
                                 break;
                         }
                     }
+                    await dispatch(fetchDonationRequests(actionPayload));
                 } else {
-                    data = await getDonationRequests();
+                    await dispatch(fetchDonationRequests({ type: 'all' }));
                 }
-                setRequestList(data.donationRequests.reverse());
                 setIsLoading(false);
-
             } catch (error) {
                 showMessage({ heading: 'Error', text: `${error.error}` })
             }
-        }
+        };
         handleFilterMyRequests();
-    }, [queryKey, queryValue, userData.id, userData.location]);
+    }, [queryKey, queryValue, userData, dispatch]);
+
+    useEffect(() => {
+        console.log(">> donation requests received: ", requestList);
+    }, [requestList]);
+
 
     return (
         <>
@@ -139,7 +138,7 @@ const Dashboard = () => {
             {
                 showCreateRequest && <Overlay showWindow={setShowCreateRequest}><DonationRequestForm /></Overlay>
             }
-            <div className="container md:w-[60vw] md:m-auto mx-auto px-4 py-8">
+            <div className="container md:w-[80vw] lg:w-[60vw] mx-auto px-4 py-8">
                 <nav className="flex justify-between items-center relative">
                     <ul className='flex flex-wrap gap-x-2 gap-y-4'>
                         <NavItem
@@ -184,38 +183,45 @@ const Dashboard = () => {
                         }
                     </ul>
                 </nav>
-                <small className="text-sm italic text-gray-400 ">Displaying ({`${requestList.length}`}) blood donation requests </small>
+                {
+                    requestList.status === 'succeeded' &&
+                    <small className="text-sm italic text-gray-400 ">Displaying ({`${requestList.data.length}`}) blood donation requests </small>
+                }
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
                     {
-                        isLoading ?
+                        requestList.status === 'loading' ?
                             <Loader size="40px" />
-                            :
-                            requestList.length === 0 ?
-                                <div>empty</div>
-                                :
-                                requestList.map((data) =>
-                                    <DonationCard
-                                        key={data.id}
-                                        id={data.id}
-                                        bloodType={data.bloodType}
-                                        quantity={data.quantity}
-                                        isFulfilled={data.isFulfilled}
-                                        created_at={data.created_at}
-                                        updated_at={data.updated_at}
-                                        location={data.location}
-                                        userId={data.userId}
-                                        message={data.message}
-                                        viewsCount={data.views_count}
-                                        urgent={data.urgent}
-                                        editable={data.userId === userData.id}
-                                    />
-                                )
+                            : requestList.status === 'failed' ?
+                                <div>
+                                    <h1>Failed to load donation requests</h1>
+                                    {requestList.error}
+                                </div>
+                                : requestList.data.length === 0 ?
+                                    <div>empty</div>
+                                    :
+                                    requestList.data.map((data) => (
+                                        <DonationCard
+                                            key={data.id}
+                                            id={data.id}
+                                            bloodType={data.bloodType}
+                                            quantity={data.quantity}
+                                            isFulfilled={data.isFulfilled}
+                                            created_at={data.created_at}
+                                            updated_at={data.updated_at}
+                                            location={data.location}
+                                            userId={data.userId}
+                                            message={data.message}
+                                            viewsCount={data.views_count}
+                                            urgent={data.urgent}
+                                            editable={data.userId === userData.id}
+                                        />
+                                    ))
                     }
                 </div>
 
                 <div className="bg-slate-200 h-[600px] my-10 p-4 rounded">
                     <h1 className="mt-20 text-5xl text-center text-slate-400 font-bold">say something</h1>
-                    {/* <Loader size="50px" /> */}
+                    <Loader size="50px" />
                 </div>
             </div>
         </>

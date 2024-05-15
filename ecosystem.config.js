@@ -4,9 +4,9 @@ module.exports = {
     apps: [
       {
         name: 'backend',
+        cwd: './backend/',
         script: 'yarn',
         args: 'run dev',
-        cwd: './backend/',
         watch: true,
         env: {
           NODE_ENV: 'development',
@@ -17,9 +17,9 @@ module.exports = {
       },
       {
         name: 'frontend',
+        cwd: './frontend/',
         script: 'npm',
         args: 'start',
-        cwd: './frontend/',
         watch: true,
         env: {
           // environment variables
@@ -27,8 +27,8 @@ module.exports = {
       },
       {
         name: 'redis cache',
-        script: 'redis-server',
         cwd: './backend/',
+        script: 'redis-server',
         watch: true,
       }
     ]

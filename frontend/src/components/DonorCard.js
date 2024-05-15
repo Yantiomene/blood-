@@ -63,7 +63,7 @@ const DonationCard = (props) => {
     return (
         <>
             <div
-                className="card flex flex-col w-96 h-48 p-4 bg-white transition-all duration-100 hover:shadow-md hover:border-red-100 outline outline-transparent active:outline-red-100 rounded-lg"
+                className="card flex flex-col lg:max-w-96 h-48 p-4 bg-white transition-all duration-100 hover:shadow-md hover:border-red-100 outline outline-transparent active:outline-red-100 rounded-lg"
             >
                 <div className="card__top flex items-center justify-between">
                     <div className="top-left flex items-center gap-2 cursor-pointer group"
