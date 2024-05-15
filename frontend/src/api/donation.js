@@ -49,8 +49,8 @@ export async function updateDonationRequest(requestData) {
 
 export async function deleteDonationRequest(requestId) {
     try {
-        console.log(">> delete donation request: ", requestId);
         const response = await axios.delete(`${apiUrl}/donationRequest/${requestId}`);
+        console.log(">> success delete: ", response);
         return response.data;
     } catch (error) {
         throw error;

@@ -25,7 +25,7 @@ const DonationCard = (props) => {
             const response = await deleteDonationRequest(cardId);
             if (response.success) {
                 setShowDeleteMenu(false);
-                dispatch(showMessage({ heading: 'Success', text: `${response.messasge}` }));
+                dispatch(showMessage({ heading: 'Success', text: `${response.message}` }));
             }
         } catch (error) {
             dispatch(showMessage({ heading: 'Error', text: `${error}` }));

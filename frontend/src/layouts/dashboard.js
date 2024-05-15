@@ -27,6 +27,8 @@ const Dashboard = () => {
     const dispatch = useDispatch();
     const userData = useSelector(selectUser);
     const requestList = useSelector((state) => state.donationRequestList);
+    
+    const requestListData = [...requestList.data].reverse();
 
     const [isLoading, setIsLoading] = useState(false);
     const [showCreateRequest, setShowCreateRequest] = useState(false);
@@ -109,10 +111,9 @@ const Dashboard = () => {
         handleFilterMyRequests();
     }, [queryKey, queryValue, userData, dispatch]);
 
-    useEffect(() => {
-        console.log(">> donation requests received: ", requestList);
-    }, [requestList]);
-
+    // useEffect(() => {
+    //     console.log(">> donation requests received: ", requestList);
+    // }, [requestList]);
 
     return (
         <>
@@ -192,17 +193,17 @@ const Dashboard = () => {
                 }
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
                     {
-                        requestList.status === 'loading' ?
+                        requestList.status === 'loading' || isLoading ?
                             <Loader size="40px" />
                             : requestList.status === 'failed' ?
                                 <div>
                                     <h1>Failed to load donation requests</h1>
                                     {requestList.error}
                                 </div>
-                                : requestList.data.length === 0 ?
+                                : requestListData.length === 0 ?
                                     <div>empty</div>
                                     :
-                                    requestList.data.map((data) => (
+                                    requestListData.map((data) => (
                                         <DonationCard
                                             key={data.id}
                                             id={data.id}
