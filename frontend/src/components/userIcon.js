@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import clsx from 'clsx';
 // redux
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCurrentUser } from '../redux/userSlice';
@@ -39,13 +40,15 @@ const UserProfileIcon = () => {
         }
     }, []);
 
+    const profilePictureClasses = clsx('w-10 h-10 rounded-full cursor-pointer outline outline-transparent', {
+        ' hover:outline-green-300': userData.isDonor,
+        'hover:outline-red-300': !userData.isDonor,
+    });
 
     return (
-        <div className="relative"
-            onClick={handleDropdownToggle}
-        >
+        <div className="relative" onClick={handleDropdownToggle}>
             <img
-                className="w-10 h-10 rounded-full cursor-pointer outline outline-transparent hover:outline-slate-300"
+                className={profilePictureClasses}
                 src={profilepic}
                 width={40}
                 height={40}
@@ -57,7 +60,10 @@ const UserProfileIcon = () => {
                     {isLoggedin && (
                         <ul ref={ref} className="p-2 relative">
                             <li>
-                                <span className="mb-2 px-3 py-2 bg-red-100 rounded-full block text-nowrap">
+                                <span className={clsx("mb-2 px-3 py-2 rounded-full block text-nowrap", {
+                                    'text-green-600 bg-green-100 ': userData.isDonor,
+                                    'text-red-600 bg-red-100 ': !userData.isDonor,
+                                })}>
                                     {userData.username}
                                     <span className='ml-2 px-1 rounded-full text-white bg-red-500 text-center text-xs'>
                                         {userData.bloodType}
@@ -71,9 +77,9 @@ const UserProfileIcon = () => {
                                 </Link>
                             </li>
                             <li>
-                                <Link to={LOGOUTROUTE}
-                                    className={dropdownItemStyles}
-                                >Logout</Link>
+                                <Link to={LOGOUTROUTE} className={dropdownItemStyles}>
+                                    Logout
+                                </Link>
                             </li>
                         </ul>
                     )}

@@ -58,7 +58,7 @@ const UpdateUserProfile = () => {
         try {
             dispatch(updateProfile(formData));
             dispatch(showMessage({heading: "Success", text: "Successfully updated profile info"}));
-            dispatch(fetchCurrentUser());
+            await dispatch(fetchCurrentUser());
             router(DASHBOARDROUTE);
         } catch (error) {
             dispatch(showMessage({heading: "Error", text: "An error occurred while updating profile info"}));

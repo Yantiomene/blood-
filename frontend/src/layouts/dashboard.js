@@ -41,6 +41,11 @@ const Dashboard = () => {
             accessible: userData.isDonor,
         },
         {
+            title: 'created by me',
+            href: '?q=mine',
+            accessible: userData.isDonor,
+        },
+        {
             title: 'best matches',
             href: '?q=matches',
             accessible: userData.isDonor,
@@ -99,6 +104,9 @@ const Dashboard = () => {
                         switch (queryValue) {
                             case 'matches':
                                 actionPayload = { type: 'byBloodType', bloodType: userData.bloodType };
+                                break;
+                            case 'mine':
+                                actionPayload = { type: 'byUserId', userId: userData.id };
                                 break;
                             case 'zone':
                                 actionPayload = { type: 'byLocation', location: userData.location };
