@@ -12,10 +12,8 @@ export const appMessage = createSlice({
     reducers: {
         showMessage: (state, action) => {
             state.displayMessage = true;
-            console.log(">>action", action.payload)
             state.heading = action.payload.heading;
             state.text = action.payload.text;
-            console.log("after action", state.heading, state.text);
         },
         exitMessage: (state) => {
             state.displayMessage = false;

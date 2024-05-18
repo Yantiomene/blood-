@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { exitMessage } from '../redux/globalComponentSlice';
 
-const COUNTDOWN = 5;
+const COUNTDOWN = 3;
 const SPEED = 100;
 const MessageAlert = () => {
     const message = useSelector((state) => state.appMessage);
@@ -37,7 +37,7 @@ const MessageAlert = () => {
                 ''
         }`;
 
-    const progressWidth = `${(timeLeft / COUNTDOWN) * 100}%`; // Calculate width based on timeLeft
+    const progressWidth = `${(timeLeft / COUNTDOWN) * 100}%`;
 
     return (
         <div className={alertClasses}>

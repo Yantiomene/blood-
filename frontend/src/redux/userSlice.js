@@ -22,6 +22,7 @@ export const updateUserProfile = createAsyncThunk(
 );
 
 const anonymousUser = {
+  id: '',
   username: '',
   email: '',
   bloodType: '',
@@ -49,6 +50,9 @@ const userSlice = createSlice({
     },
     setSessionExpireDate: (state, action) => {
       state.sessionExpireDate = action.payload;
+    },
+    setLoginStatus: (state, action) => {
+      state.authStatus = action.payload;
     }
   },
   extraReducers: (builder) => {
@@ -72,6 +76,7 @@ const userSlice = createSlice({
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.loading = false;
         state.authStatus = true;
+        state.data = action.payload;
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;
@@ -83,5 +88,5 @@ const userSlice = createSlice({
 export const selectUser = (state) => state.user.data;
 export const validateAuthStatus = (state) => state.user.authStatus;
 
-export const { unAuthenticateUser, setSessionExpireDate } = userSlice.actions;
+export const { unAuthenticateUser, setSessionExpireDate, setLoginStatus } = userSlice.actions;
 export default userSlice.reducer;

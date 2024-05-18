@@ -166,7 +166,7 @@ const updateDonationRequest = async (req, res) => {
         res.status(200).json({
             success: true,
             message: 'Donation request updated successfully',
-            updatedRequest,
+            donationRequest: updatedRequest,
         });
     } catch (error) {
         req.logger.error('Error updating donation request:', error.message);

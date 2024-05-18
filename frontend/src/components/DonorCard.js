@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { calculateTimeDelta } from "../util/datetime";
-import { getDonationRequestByUserId, deleteDonationRequest, updateDonationRequest } from "../api/donation";
-import { showMessage } from "../redux/globalComponentSlice";
+import { getDonationRequestByUserId } from "../api/donation";
+
 import Overlay from '../layouts/overlayContainer';
+import DonationRequestForm from './donationRequestForm';
+import { selectUser } from '../redux/userSlice';
+import { DeleteDonationRequestModal } from './donationRequestDeleteModal';
 
 
 const menuButtonStyle = "card__action-btn p-1 w-8 h-8 cursor-pointer border rounded-full text-sm flex items-center justify-around";
@@ -11,41 +14,18 @@ const menuButtonStyle = "card__action-btn p-1 w-8 h-8 cursor-pointer border roun
 const DonationCard = (props) => {
 
     const dispatch = useDispatch();
+    const user = useSelector(selectUser);
+
     const [showDeleteMenu, setShowDeleteMenu] = useState(false);
     const [showUpdateMenu, setShowUpdateMenu] = useState(false);
+
     // view card details
     const handleViewCard = async (cardId) => {
         const cardDetail = await getDonationRequestByUserId(cardId);
         console.log("card clicked", cardDetail);
     }
 
-    // delete card
-    const handleDeleteCard = async (cardId) => {
-        try {
-            const response = await deleteDonationRequest(cardId);
-            if (response.success) {
-                setShowDeleteMenu(false);
-                dispatch(showMessage({ heading: 'Success', text: `${response.message}` }));
-            }
-        } catch (error) {
-            dispatch(showMessage({ heading: 'Error', text: `${error}` }));
-        }
-    }
-
-    // update card
-    const handleUpdateCard = async (cardId) => {
-        try {
-            const response = await updateDonationRequest(cardId); // will upate later to use same as create request form
-            if (response.success) {
-                showMessage({ heading: 'Success', text: 'Request updated' });
-            }
-        }
-        catch (error) {
-            showMessage({ heading: 'Error', text: `${error.error}` });
-        }
-    }
-
-    useEffect(()=>{
+    useEffect(() => {
         if (showDeleteMenu === false || showUpdateMenu === false) {
             document.body.style.overflow = 'auto';
         }
@@ -59,12 +39,12 @@ const DonationCard = (props) => {
         updated_at,
         userId,
         message,
-        location,
-        isFulfilled, // not yet
-        viewsCount, // not yet
-        urgent, // not yet
-        editable = false,
-    } = props;
+        // location,
+        // isFulfilled, // not yet
+        // viewsCount, // not yet
+        // urgent, // not yet
+        editable = user.id === userId,
+    } = props.data;
 
     return (
         <>
@@ -102,44 +82,16 @@ const DonationCard = (props) => {
                     {
                         showDeleteMenu ?
                             <Overlay showWindow={setShowDeleteMenu}>
-                                <div className='p-4 md:w-[30vw] bg-white'>
-                                    <h2 className='text-2xl text-red-400 mb-2'>Delete request for <b>{quantity}ml of {bloodType}</b></h2>
-                                    <p className='leading-4 mb-4'>
-                                        Are you sure you want to delete this request?
-                                    </p>
-                                    <div className='flex gap-2 flex-row-reverse'>
-                                        <button
-                                            className='px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg'
-                                            onClick={() => handleDeleteCard(id)}
-                                        >Confirm</button>
-                                        <button
-                                            className='px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-500 rounded-lg'
-                                            onClick={() => setShowDeleteMenu(false)}
-                                        >Cancel</button>
-                                    </div>
-                                </div>
+                                <DeleteDonationRequestModal
+                                    donationRequest={props.data}
+                                    closeModal={setShowDeleteMenu}
+                                />
                             </Overlay>
                             :
-                            showUpdateMenu ?
-                                <Overlay showWindow={setShowUpdateMenu}>
-                                    <div className='p-4 md:w-[30vw] bg-white'>
-                                        <h2 className='text-2xl text-blue-400 mb-2'>Update request for <b>{quantity}ml of {bloodType}</b></h2>
-                                        <p className='leading-4 mb-4'>
-                                            update the request details
-                                        </p>
-                                        <div className='flex gap-2 flex-row-reverse'>
-                                            <button
-                                                className='px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg'
-                                                onClick={() => handleUpdateCard(id)}
-                                            >Update</button>
-                                            <button
-                                                className='px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-500 rounded-lg'
-                                                onClick={() => setShowUpdateMenu(false)}
-                                            >Cancel</button>
-                                        </div>
-                                    </div>
-                                </Overlay>
-                                : null
+                            showUpdateMenu &&
+                            <Overlay showWindow={setShowUpdateMenu}>
+                                <DonationRequestForm initialFormData={props.data} />
+                            </Overlay>
                     }
                 </div>
                 <div className="card__middle">
@@ -157,7 +109,7 @@ const DonationCard = (props) => {
                             <p>Ghana</p>
                         </div>
                         <div className="card__date text-xs text-slate-400 flex gap-2">
-                            { created_at && <p>Requested {calculateTimeDelta(created_at)}</p> }
+                            {created_at && <p>Requested {calculateTimeDelta(created_at)}</p>}
                             {
                                 updated_at && (updated_at !== created_at) &&
                                 <>

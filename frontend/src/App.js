@@ -12,6 +12,7 @@ import WithHeader from './layouts/withHeader';
 import WithoutHeader from './layouts/withoutHeader';
 import VerifyAccount from './pages/VerifyAccountPage';
 import LogoutPage from './pages/Logout';
+import ResetPasswordForm from './components/ResetPassword';
 import {
   LOGINROUTE,
   REGISTERROUTE,
@@ -28,14 +29,14 @@ import {
   ACCOUNTROUTE,
   PREFERENCES,
 } from './api';
-import ResetPasswordForm from './components/ResetPassword';
+
 
 const App = () => (
   <Router>
     <Routes>
       {/* pages with headers */}
       <Route path={HOMEROUTE} element={<WithHeader><Home /></WithHeader>} />
-      <Route path={DASHBOARDROUTE} element={<WithHeader><DashboardPage /></WithHeader>} />
+      <Route path={DASHBOARDROUTE} element={<WithHeader><DashboardPage /></WithHeader>} /> // auth required
       <Route path={ABOUTROUTE} element={<WithHeader><AboutPage /></WithHeader>} />
       <Route path={BLOGROUTE} element={<WithHeader><BlogPage /></WithHeader>} />
       <Route path={`${BLOGDETAILROUTE}/:blogID`} element={<WithHeader><BlogDetailPage /></WithHeader>} />
@@ -46,10 +47,10 @@ const App = () => (
       <Route path={REGISTERROUTE} element={<WithoutHeader><RegisterPage /></WithoutHeader>} />
       <Route path={VERIFYACCOUNT} element={<WithoutHeader><VerifyAccount /></WithoutHeader>} />
 
-      <Route path={PROFILEROUTE} element={<WithoutHeader><ProfilePage /></WithoutHeader>} />
-      <Route path={HISTORYROUTE} element={<WithoutHeader><ProfilePage /></WithoutHeader>} />
-      <Route path={ACCOUNTROUTE} element={<WithoutHeader><ProfilePage /></WithoutHeader>} />
-      <Route path={PREFERENCES} element={<WithoutHeader><ProfilePage /></WithoutHeader>} />
+      <Route path={PROFILEROUTE} element={<WithoutHeader><ProfilePage /></WithoutHeader>} /> // auth required
+      <Route path={HISTORYROUTE} element={<WithoutHeader><ProfilePage /></WithoutHeader>} /> // auth required
+      <Route path={ACCOUNTROUTE} element={<WithoutHeader><ProfilePage /></WithoutHeader>} /> // auth required
+      <Route path={PREFERENCES} element={<WithoutHeader><ProfilePage /></WithoutHeader>} /> // auth required
       
     </Routes>
   </Router>

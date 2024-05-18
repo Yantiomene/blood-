@@ -6,7 +6,6 @@ axios.defaults.withCredentials = true;
 // DONATION REQUESTS
 export async function makeDonationRequest(requestData) {
     try {
-        console.log("making donation request: ", requestData);
         const response = await axios.post(`${apiUrl}/donationRequest`, requestData);
         return response.data;
     } catch (error) {
@@ -17,12 +16,9 @@ export async function makeDonationRequest(requestData) {
 
 export async function getDonationRequests() {
     try {
-        const response = await axios.get(`${apiUrl}/donationRequest`, {
-            withCredentials: true,
-        });
+        const response = await axios.get(`${apiUrl}/donationRequest`);
         return response.data;
     } catch (error) {
-        console.error('Error getting user donation:', error.message);
         throw error;
     }
 }
@@ -32,15 +28,13 @@ export async function getDonationRequestByUserId(userId) {
         const response = await axios.get(`${apiUrl}/donationRequest/${userId}`);
         return response.data;
     } catch (error) {
-        console.error('Error getting user donation:', error.message);
         throw error;
     }
 }
 
 export async function updateDonationRequest(requestData) {
     try {
-        console.log(">> update donation request: ", requestData);
-        const response = await axios.put(`${apiUrl}/donationRequest/${requestData}`);
+        const response = await axios.put(`${apiUrl}/donationRequest/${requestData.id}`, requestData);
         return response.data;
     } catch (error) {
         throw error;
@@ -50,7 +44,6 @@ export async function updateDonationRequest(requestData) {
 export async function deleteDonationRequest(requestId) {
     try {
         const response = await axios.delete(`${apiUrl}/donationRequest/${requestId}`);
-        console.log(">> success delete: ", response);
         return response.data;
     } catch (error) {
         throw error;
@@ -90,7 +83,6 @@ export async function findDonationRequestByPriority(urgent) {
 
 export async function findDonationRequestByLocation(location) {
     try {
-        console.log(">> find donation request by location: ", location);
         const response = await axios.post(`${apiUrl}/donationReqByLocation`, {location: location});
         return response.data;
     } catch (error) {

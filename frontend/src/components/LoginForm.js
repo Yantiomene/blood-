@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { DASHBOARDROUTE, REGISTERROUTE, RESETPASSWORD } from '../api';
 import { login } from '../api/user';
 import { useDispatch } from 'react-redux';
-import { fetchCurrentUser, setSessionExpireDate } from "../redux/userSlice";
+import { setSessionExpireDate, setLoginStatus } from "../redux/userSlice";
 import { showMessage } from "../redux/globalComponentSlice";
 import Loader from './loader';
 
@@ -17,14 +17,15 @@ const LoginForm = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        setIsLoading(true); // Set isLoading to true on submit
+        setIsLoading(true);
 
         try {
             const response = await login({ email, password });
+            console.log(response);
             if (response.success) {
+                dispatch(setLoginStatus(true));
                 const expireDate = new Date() + 60 * 60 * 1000;
-                dispatch(setSessionExpireDate(expireDate))
-                dispatch(fetchCurrentUser());
+                dispatch(setSessionExpireDate(expireDate));
                 dispatch(showMessage({ heading: "Success", text: "Login Successful" }));
                 router(DASHBOARDROUTE);
             }

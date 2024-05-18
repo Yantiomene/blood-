@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { DASHBOARDROUTE } from '../api';
 import { getDateFromToday } from '../util/datetime';
@@ -36,9 +36,9 @@ const Dashboard = () => {
 
     const filterItems = [
         {
-            title: 'my requests',
-            href: '?q=mine',
-            accessible: !userData.isDonor,
+            title: 'all requests',
+            href: '',
+            accessible: userData.isDonor,
         },
         {
             title: 'best matches',
@@ -72,6 +72,21 @@ const Dashboard = () => {
         },
     ]
 
+    const filterListRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (filterListRef.current && !filterListRef.current.contains(event.target)) {
+                setShowDateFilterList(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
     useEffect(() => {
         const handleFilterMyRequests = async () => {
             setIsLoading(true);
@@ -82,9 +97,6 @@ const Dashboard = () => {
                         actionPayload = { type: 'byDate', fromDate: getDateFromToday(queryValue), toDate: getDateFromToday(0) };
                     } else if (queryKey === '?q') {
                         switch (queryValue) {
-                            case 'mine':
-                                actionPayload = { type: 'byUserId', userId: userData.id };
-                                break;
                             case 'matches':
                                 actionPayload = { type: 'byBloodType', bloodType: userData.bloodType };
                                 break;
@@ -101,7 +113,11 @@ const Dashboard = () => {
                     }
                     await dispatch(fetchDonationRequests(actionPayload));
                 } else {
-                    await dispatch(fetchDonationRequests({ type: 'all' }));
+                    if (userData.isDonor) {
+                        await dispatch(fetchDonationRequests({ type: 'all' }));
+                    } else {
+                        await dispatch(fetchDonationRequests({ type: 'byUserId', userId: userData.id }));
+                    }
                 }
                 setIsLoading(false);
             } catch (error) {
@@ -110,10 +126,6 @@ const Dashboard = () => {
         };
         handleFilterMyRequests();
     }, [queryKey, queryValue, userData, dispatch]);
-
-    // useEffect(() => {
-    //     console.log(">> donation requests received: ", requestList);
-    // }, [requestList]);
 
     return (
         <>
@@ -142,12 +154,6 @@ const Dashboard = () => {
             <div className="container md:w-[80vw] lg:w-[60vw] mx-auto px-4 py-8">
                 <nav className="flex justify-between items-center relative">
                     <ul className='flex flex-wrap gap-x-2 gap-y-4'>
-                        <NavItem
-                            href={DASHBOARDROUTE}
-                            isActive={!query}
-                            className={buttonStyle}
-                            activeStyle={buttonActiveStyle}
-                        >View All</NavItem>
                         {
                             filterItems.map((item, index) => (
                                 item.accessible &&
@@ -171,7 +177,7 @@ const Dashboard = () => {
                         }
                         {
                             showDateFilterList &&
-                            <div className='bg-white p-2 flex flex-col border-t border-t-slate-200'>
+                            <div ref={filterListRef} className='bg-white p-2 flex flex-col border-t border-t-slate-200'>
                                 {
                                     DateFilterItems.map((item, index) => (
                                         <NavItem
@@ -191,6 +197,7 @@ const Dashboard = () => {
                     requestList.status === 'succeeded' &&
                     <small className="text-sm italic text-gray-400 ">Displaying ({`${requestList.data.length}`}) blood donation requests </small>
                 }
+                {!userData.isDonor && <h2 className='text-2xl text-gray-600 font-bold'>Your Requests</h2>}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
                     {
                         requestList.status === 'loading' || isLoading ?
@@ -206,18 +213,7 @@ const Dashboard = () => {
                                     requestListData.map((data) => (
                                         <DonationCard
                                             key={data.id}
-                                            id={data.id}
-                                            bloodType={data.bloodType}
-                                            quantity={data.quantity}
-                                            isFulfilled={data.isFulfilled}
-                                            created_at={data.created_at}
-                                            updated_at={data.updated_at}
-                                            location={data.location}
-                                            userId={data.userId}
-                                            message={data.message}
-                                            viewsCount={data.views_count}
-                                            urgent={data.urgent}
-                                            editable={data.userId === userData.id}
+                                            data={data}
                                         />
                                     ))
                     }

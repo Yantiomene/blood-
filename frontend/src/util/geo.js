@@ -8,5 +8,5 @@ export const convertGeoToPoint = (geo) => {
         return [0, 0];
     }
     const point = wkx.Geometry.parse(Buffer.from(geo, 'hex'));
-    return [point.y, point.x]; // { longitude: y, latitude: x }
+    return [point.x, point.y]; // { longitude: y, latitude: x }
 }

@@ -29,7 +29,7 @@ const Overlay = ({ showWindow, children }) => {
         <div
             id="overlay-container"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.33)" }}
-            className="fixed top-0 left-0 z-50 w-screen h-screen flex justify-center items-center"
+            className="fixed top-0 left-0 z-40 w-screen h-screen flex justify-center items-center"
         >
             <div ref={ref}
                 className="overlay-window bg-white rounded-lg shadow-md overflow-hidden"
