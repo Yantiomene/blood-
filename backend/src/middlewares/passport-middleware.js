@@ -30,7 +30,9 @@ passport.use(
                 username: rows[0].username, 
                 email: rows[0].email, 
                 location: rows[0].location,
-                contactNumber: rows[0].contactNumber
+                contactNumber: rows[0].contactNumber,
+                bloodType: rows[0].bloodType,
+                isDonor: rows[0].isDonor,
             };
             return await done(null, user);
         } catch (error) {

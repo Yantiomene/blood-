@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DASHBOARDROUTE, REGISTERROUTE } from '../api';
+import { DASHBOARDROUTE, REGISTERROUTE, RESETPASSWORD } from '../api';
 import { login } from '../api/user';
 import { useDispatch } from 'react-redux';
-import { authenticateUser } from "../redux/authSlice";
+import { fetchCurrentUser, setSessionExpireDate } from "../redux/userSlice";
+import { showMessage } from "../redux/globalComponentSlice";
+import Loader from './loader';
 
 const LoginForm = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [loginError, setLoginError] = useState('');
-    const [isLoading, setIsLoading] = useState(false); // New state variable
-
+    const [isLoading, setIsLoading] = useState(false);
     const router = useNavigate();
     const dispatch = useDispatch();
 
@@ -22,38 +22,42 @@ const LoginForm = () => {
         try {
             const response = await login({ email, password });
             if (response.success) {
-                dispatch(authenticateUser());
+                const expireDate = new Date() + 60 * 60 * 1000;
+                dispatch(setSessionExpireDate(expireDate))
+                dispatch(fetchCurrentUser());
+                dispatch(showMessage({ heading: "Success", text: "Login Successful" }));
                 router(DASHBOARDROUTE);
             }
         } catch (error) {
-            setLoginError('Invalid email or password');
+            dispatch(showMessage({ heading: "Error", text: "Invalid email or password" }));
         }
 
         setIsLoading(false);
     };
 
-    const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
+    const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-slate-700 leading-tight focus:outline-none focus:shadow-outline";
 
     return (
         <>
             <form onSubmit={handleSubmit} className="w-[90vw] md:w-[40vw] bg-white shadow-md rounded px-8 py-8 mb-4">
-                {loginError && <p className="text-red-500 mb-4">{loginError}</p>}
                 <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-                        Email:
+                    <label className="block text-slate-700 text-sm font-bold mb-2" htmlFor="email">
+                        Email
                     </label>
+                    
                     <input
                         className={inputStyles}
                         id="email"
-                        type="text"
+                        type="email"
                         placeholder="Enter your email"
                         value={email}
-                        onChange={(event)=> setEmail(event.target.value)}
+                        onChange={(event) => setEmail(event.target.value)}
+                        required={true}
                     />
                 </div>
                 <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-                        Password:
+                    <label className="block text-slate-700 text-sm font-bold mb-2" htmlFor="password">
+                        Password
                     </label>
                     <input
                         className={inputStyles}
@@ -61,21 +65,22 @@ const LoginForm = () => {
                         type="password"
                         placeholder="Enter your password"
                         value={password}
-                        onChange={(event)=> setPassword(event.target.value)}
+                        onChange={(event) => setPassword(event.target.value)}
+                        required={true}
                     />
-                    <small className="text-gray-500 italic text-sm">
+                    <small className="text-slate-500 italic text-sm">
                         Forgot password?
-                        <a href="/forgot-password"> Click here</a>
+                        <a href={RESETPASSWORD} className="text-red-500"> Click here</a>
                     </small>
                 </div>
                 <button
-                    className={`inline-block w-full text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isLoading ? " bg-gray-500" : " bg-red-500 hover:bg-red-700"}`}
+                    className={`inline-block w-full text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isLoading ? " bg-red-200" : " bg-red-500 hover:bg-red-700"}`}
                     type="submit"
                     disabled={isLoading}
                 >
-                    {isLoading ? 'Loading...' : 'Login'}
+                    {isLoading ? <Loader /> : 'Login'}
                 </button>
-                <p className="text-gray-500 text-center mt-4 text-sm">
+                <p className="text-slate-500 text-center mt-4 text-sm">
                     Don't have an account? <a className='text-red-500 hover:text-red-400' href={REGISTERROUTE}>Register</a>
                 </p>
             </form>

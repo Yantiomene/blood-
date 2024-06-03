@@ -2,23 +2,23 @@ import React, { useState } from 'react';
 import { makeDonationRequest } from '../api/donation';
 
 
-const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
+const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-slate-700 leading-tight focus:outline-none focus:shadow-outline";
 const fieldStyles = "mb-4 flex items-center gap-4"
-const labelStyles = "block text-gray-700 text-sm font-bold mb-2"
+const labelStyles = "block text-slate-700 text-sm font-bold mb-2"
 const buttonStyles = "inline-block w-full text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
 
 const DonationRequestForm = () => {
     const [formData, setFormData] = useState({
         bloodType: 'A+',
-        quantity: 0.0,
-        location: [0, 0]
+        quantity: 10.0,
+        location: [0, 0],
+        message: '',
     })
     const [requestError, setRequestError] = useState('');
     const [requestSuccess, setRequestSuccess] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        console.log("name, value:", name, value);
         setFormData({ ...formData, [name]: value });
     };
     
@@ -27,13 +27,14 @@ const DonationRequestForm = () => {
         const [longitude, latitude] = value.split(',').map(parseFloat);
         setFormData({ ...formData, location: [longitude, latitude] });
     };
-    
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
             const response = await makeDonationRequest(formData);
             setRequestError('');
-            setRequestSuccess(response.message)
+            setRequestSuccess(response.message);
+            
         } catch (error) {
             setRequestSuccess('');
             setRequestError('Invalid Donation Request Format');
@@ -42,7 +43,7 @@ const DonationRequestForm = () => {
 
     return (
         <>
-            <form onSubmit={handleSubmit} className="w-[90vw] md:w-[40vw] h-fit bg-white shadow-md rounded px-8 py-8 mb-4">
+            <form onSubmit={handleSubmit} className="w-[90vw] md:w-[40vw] h-fit bg-white px-8 py-8 mb-4">
                 {requestError && <p className="text-red-500 mb-4">{requestError}</p>}
                 {requestError && <p className="text-green-500 mb-4">{requestSuccess}</p>}
                 <div className={fieldStyles}>
@@ -96,6 +97,17 @@ const DonationRequestForm = () => {
                         placeholder='latitude, longitude'
                         required={true}
                     />
+                </div>
+
+                <div className={fieldStyles}>
+                    <label className={labelStyles}>Message</label>
+                    <textarea
+                        id="message"
+                        name="message"
+                        onChange={handleChange}
+                        className={inputStyles}
+                        placeholder='touch the heart of your donors. start writing...'
+                    ></textarea>
                 </div>
 
                 <div className="">

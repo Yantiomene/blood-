@@ -1,22 +1,28 @@
 const { validateLocationFormat, getNearbyHospitals } = require('../utils/geoUtils');
-const { sendNotificationEmail } = require('../utils/email');
+const { sendNotificationEmail, sendDenyEmail, sendAcceptEmail } = require('../utils/email');
 const db = require('../db');
 const wkx = require('wkx');
 const fs = require('fs');
 
 const createDonationRequest = async (req, res) => {
-    const { bloodType, quantity, location } = req.body;
+    const { bloodType, quantity, location, message } = req.body;
     const userId = req.user.id;
 
     try {
+        if (!bloodType || !quantity || !location || !message) {
+            return res.status(400).json({
+                success: false,
+                error: 'Blood type, quantity, message and location are required',
+            });
+        }
         validateLocationFormat(location);
 
         const locationPoint = await db.query('SELECT ST_SetSRID(ST_MakePoint($1, $2), 4326) AS location', [location[0], location[1]]);
 
         // Insert the donation request into the database
         const result = await db.query(
-            'INSERT INTO donation_requests ("userId", "bloodType", quantity, location, "isFulfilled", "requestingEntity", "requestingEntityId") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-            [userId, bloodType, quantity, locationPoint.rows[0].location, false, 'User', userId]
+            'INSERT INTO donation_requests ("userId", "bloodType", quantity, location, "isFulfilled", "requestingEntity", "requestingEntityId", "message") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+            [userId, bloodType, quantity, locationPoint.rows[0].location, false, 'User', userId, message]
         );
 
         const createdDonationRequest = result.rows[0];
@@ -98,7 +104,7 @@ const getDonationRequestByUserId = async (req, res) => {
 
 const updateDonationRequest = async (req, res) => {
     const { requestId } = req.params;
-    const { quantity, bloodType, location, isFulfilled } = req.body;
+    const { quantity, bloodType, location, isFulfilled, message, urgent } = req.body;
 
     try {
         // Check if the donation request exists
@@ -135,6 +141,16 @@ const updateDonationRequest = async (req, res) => {
         if (isFulfilled !== undefined) {
             updateFields.push('"isFulfilled"');
             updateValues.push(isFulfilled);
+        }
+
+        if (message !== undefined) {
+            updateFields.push('"message"');
+            updateValues.push(message);
+        }
+
+        if (urgent !== undefined) {
+            updateFields.push('"urgent"');
+            updateValues.push(urgent);
         }
 
         updateFields.push('"updated_at"');
@@ -500,7 +516,6 @@ const deleteRequest = async (req, res) => {
 
 
 const findRequestByBloodType = async (req, res) => {
-    console.log('req.user:', req.user)
     const { isDonor, bloodType } = req.user;
 
     if(!isDonor) {
@@ -544,7 +559,6 @@ const findRequestByBloodType = async (req, res) => {
                 });
         }
 
-        console.log('compatibleBloodTypes:', compatibleBloodTypes)
         // Find donation requests with compatible blood types
         const result = await db.query(`
             SELECT 
@@ -553,6 +567,9 @@ const findRequestByBloodType = async (req, res) => {
                 quantity,
                 "userId",
                 "isFulfilled",
+                "message",
+                "urgent",
+                "views_count",
                 ST_X(location::geometry) as latitude, 
                 ST_Y(location::geometry) as longitude,
                 "updated_at"
@@ -581,6 +598,393 @@ const findRequestByBloodType = async (req, res) => {
     }
 }
 
+const findRequestByDate = async (req, res) => {
+    const { isDonor, bloodType } = req.user;
+    const { startDate, endDate } = req.body;
+
+    if(!isDonor) {
+        return res.status(403).json({ success: false, error: 'Update your donor status' });
+    }
+
+    try {
+        // validate startDate and endDate
+        if (!startDate || !endDate) {
+            return res.status(400).json({
+                success: false,
+                error: 'Start date and end date are required',
+            });
+        }
+
+        // validate startDate and endDate format
+        if (!startDate.match(/^\d{4}-\d{2}-\d{2}$/) || !endDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid date format. Use YYYY-MM-DD',
+            });
+        }
+
+        const compatibleBloodTypes = getCompatibleBloodTypes(bloodType);
+
+        // Find donation requests with compatible blood types
+        const result = await db.query(`
+            SELECT 
+                id,
+                "bloodType", 
+                quantity,
+                "userId",
+                "isFulfilled",
+                "message",
+                "urgent",
+                "views_count",
+                ST_X(location::geometry) as latitude, 
+                ST_Y(location::geometry) as longitude,
+                "updated_at"
+            FROM 
+                donation_requests
+            WHERE 
+                "bloodType" IN (${compatibleBloodTypes.map((_, index) => `$${index + 1}`).join(', ')}) AND
+                "updated_at" BETWEEN $${compatibleBloodTypes.length + 1} AND $${compatibleBloodTypes.length + 2}
+            ORDER BY 
+                "updated_at" DESC;
+        `, [...compatibleBloodTypes, startDate, endDate]);
+
+        req.logger.info('Fetched donation requests successfully');
+        return res.status(200).json({
+            success: true,
+            donationRequests: result.rows || [],
+        });
+    } catch (error) {
+        req.logger.error('Error finding donation requests:', error.message);
+        console.error('Error finding donation requests:', error.message);
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+        });
+    }
+}
+
+
+// function to filter request by priority
+const findRequestByPriority = async (req, res) => {
+    const { isDonor, bloodType } = req.user;
+    const { urgent } = req.params;
+
+    if(!isDonor) {
+        return res.status(403).json({ success: false, error: 'Update your donor status' });
+    }
+
+    try {
+        // validate urgent
+        if (urgent === undefined) {
+            return res.status(400).json({
+                success: false,
+                error: 'Urgent field is required',
+            });
+        }
+
+        // validate urgent format
+        if (!['true', 'false'].includes(urgent)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid urgent format. Use true or false',
+            });
+        }
+
+        const compatibleBloodTypes = getCompatibleBloodTypes(bloodType);
+
+        // Find donation requests with compatible blood types
+        const result = await db.query(`
+            SELECT
+                id,
+                "bloodType",
+                quantity,
+                "userId",
+                "isFulfilled",
+                "message",
+                "urgent",
+                "views_count",
+                ST_X(location::geometry) as latitude,
+                ST_Y(location::geometry) as longitude,
+                "updated_at"
+            FROM
+                donation_requests
+            WHERE
+                "bloodType" IN (${compatibleBloodTypes.map((_, index) => `$${index + 1}`).join(', ')}) AND
+                "urgent" = $${compatibleBloodTypes.length + 1}
+            ORDER BY
+                "updated_at" DESC;
+        `, [...compatibleBloodTypes, urgent]);
+
+        req.logger.info('Fetched donation requests successfully');
+        return res.status(200).json({
+            success: true,
+            donationRequests: result.rows || [],
+        });
+    } catch (error) {
+        req.logger.error('Error finding donation requests:', error.message);
+        console.error('Error finding donation requests:', error.message);
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+        });
+    }
+}
+
+
+// function to filter request by location
+const findRequestByLocation = async (req, res) => {
+    const { isDonor, bloodType } = req.user;
+    const { location } = req.body;
+
+    if(!isDonor) {
+        return res.status(403).json({ success: false, error: 'Update your donor status' });
+    }
+
+    try {
+        // validate location
+        if (!location) {
+            return res.status(400).json({
+                success: false,
+                error: 'Location is required',
+            });
+        }
+
+        // validate location format
+        if (!Array.isArray(location) || location.length !== 2 || !location.every((coord) => typeof coord === 'number')) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid location format. Use [latitude, longitude]',
+            });
+        }
+
+        const compatibleBloodTypes = getCompatibleBloodTypes(bloodType);
+
+        // Create a point geometry with SRID 4326
+        const point = new wkx.Point(location[1], location[0], 4326);
+
+        // Convert the point geometry to a buffer
+        const buffer = point.toWkb();
+
+        console.log('buffer:', buffer);
+
+        // Find donation requests with compatible blood types by distance
+        const result = await db.query(`
+            SELECT
+                id,
+                "bloodType",
+                quantity,
+                "userId",
+                "isFulfilled",
+                "message",
+                "urgent",
+                "views_count",
+                ST_X(location::geometry) as latitude,
+                ST_Y(location::geometry) as longitude,
+                ST_Distance(public.ST_SetSRID(location::geometry, 4326), public.ST_SetSRID($1::geometry, 4326)) as distance,
+                "updated_at"
+            FROM
+                donation_requests
+            WHERE
+                "bloodType" IN (${compatibleBloodTypes.map((_, index) => `$${index + 2}`).join(', ')})
+            ORDER BY
+                distance;
+        `, [buffer, ...compatibleBloodTypes]);
+
+        req.logger.info('Fetched donation requests successfully');
+        return res.status(200).json({
+            success: true,
+            donationRequests: result.rows || [],
+        });
+    } catch (error) {
+        req.logger.error('Error finding donation requests:', error.message);
+        console.error('Error finding donation requests:', error.message);
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+        });
+    }
+}
+
+
+// function to handle deny request
+const denyRequest = async (req, res) => {
+    const { requestId, reason } = req.body;
+    const userId = req.user.id;
+
+    try {
+        if (!requestId || !reason) {
+            return res.status(400).json({
+                success: false,
+                error: 'Request ID and reason are required',
+            });
+        }
+
+        const result = await db.query('SELECT * FROM donation_requests WHERE id = $1', [requestId]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'Invalid request ID',
+            });
+        }
+
+        const request = result.rows[0];
+
+        const requestor = await db.query('SELECT * FROM users WHERE id = $1', [request.userId]);
+
+        if (requestor.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'Requestor not found',
+            });
+        }
+
+        const requestorEmail = requestor.rows[0].email;
+
+        // Send denial email to requestor
+        await sendDenyEmail(requestorEmail, reason);
+
+        // insert denial reason into the database
+        await db.query('INSERT INTO denial_reasons ("userId", "requestId", "reason") VALUES ($1, $2, $3)', [userId, requestId, reason]);
+
+        req.logger.info('Request denied successfully');
+        res.status(200).json({
+            success: true,
+            message: 'Request denied successfully',
+        });
+    } catch (error) {
+        req.logger.error('Error denying request:', error.message);
+        console.error('Error denying request:', error.message);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+        });
+    }
+}
+
+const acceptRequest = async (req, res) => {
+    const { requestId } = req.params;
+
+    try {
+
+        if (!requestId) {
+            return res.status(400).json({
+                success: false,
+                error: 'Request ID is required'
+            });
+        }
+
+        // Fetch request details
+        const request = await db.query('SELECT * FROM donation_requests WHERE id = $1', [requestId]);
+
+        if (request.rows.length === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'Invalid request ID' 
+            });
+        }
+
+        const requestor = await db.query('SELECT * FROM users WHERE id = $1', [request.rows[0].userId]);
+
+        // Send email to requestor
+        await sendAcceptEmail(requestor.rows[0].email, request.rows[0].bloodType, req.user);
+
+        req.logger.info('Request accepted successfuly');
+        return res.status(200).json({
+            success: true,
+            message: 'Request accepted successfuly'
+        });
+    } catch (error) {
+        req.logger.error('Error Accepting request:', error.message);
+        console.error('Error accepting request:', error.message);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+        });
+    }
+
+}
+
+
+// function to increment the view count
+const incrementViewCount = async (req, res) => {
+    const { requestId } = req.params;
+
+    try {
+        if (!requestId) {
+            return res.status(400).json({
+                success: false,
+                error: 'Request ID is required'
+            });
+        }
+
+        // Fetch request details
+        const existingRequest = await db.query('SELECT * FROM donation_requests WHERE id = $1', [requestId]);
+
+        if (existingRequest.rows.length === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'Invalid request ID' 
+            });
+        }
+
+        // increment the view count
+        const request = await db.query('UPDATE donation_requests SET views_count=$1 WHERE id=$2 RETURNING *', [existingRequest.rows[0].views_count + 1, requestId]);
+
+        req.logger.info('View count incremented successfuly');
+        return res.status(200).json({
+            success: true,
+            message: 'View count incremented successfuly',
+            Donation_request: request.rows[0]
+        });
+
+    } catch (error) {
+        req.logger.error('Error incrementing view count:', error.message);
+        console.error('Error incrementing view count:', error.message);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+        });
+    }
+}
+
+// Function to get Compatible blood types from a donor blood type
+const getCompatibleBloodTypes = (bloodType) => {
+    let compatibleBloodTypes = [];
+
+    switch (bloodType) {
+        case 'AB+':
+            compatibleBloodTypes = ['AB+'];
+            break;
+        case 'AB-':
+            compatibleBloodTypes = ['AB-', 'AB+'];
+            break;
+        case 'B+':
+            compatibleBloodTypes = ['B+', 'AB+'];
+            break;
+        case 'B-':
+            compatibleBloodTypes = ['B-', 'B+', 'AB-', 'AB+'];
+            break;
+        case 'A+':
+            compatibleBloodTypes = ['A+', 'AB+'];
+            break;
+        case 'A-':
+            compatibleBloodTypes = ['A-', 'A+', 'AB-', 'AB+'];
+            break;
+        case 'O+':
+            compatibleBloodTypes = ['O+', 'A+', 'B+', 'AB+'];
+            break;
+        case 'O-':
+            compatibleBloodTypes = ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'];
+            break;
+        default:
+            break;
+    }
+
+    return compatibleBloodTypes;
+}
+
+
 module.exports = {
     getDonationRequests,
     createDonationRequest,
@@ -590,4 +994,10 @@ module.exports = {
     getDonors,
     deleteRequest,
     findRequestByBloodType,
+    denyRequest,
+    acceptRequest,
+    findRequestByDate,
+    findRequestByPriority,
+    findRequestByLocation,
+    incrementViewCount,
 };

@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-const { EMAIL, PASSWORD } = require('../constants');
+const { EMAIL, PASSWORD, SERVER_URL } = require('../constants');
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -189,4 +189,165 @@ const sendPasswordResetEmail = (email, resetToken) => {
   });
 };
 
-module.exports = { sendNotificationEmail, sendVerificationEmail, sendPasswordResetEmail }; 
+
+const sendDenyEmail = async (requestorEmail, reason) => {
+  if (!requestorEmail || !reason) {
+    throw new Error('Missing required parameters');
+  }
+
+  const emailContent = `<!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Denied</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: auto;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+  
+      h1 {
+        color: #d9534f;
+      }
+  
+      p {
+        color: #333;
+      }
+  
+      .reason {
+        font-size: 24px;
+        font-weight: bold;
+        color: #d9534f;
+      }
+  
+      .thank-you {
+        margin-top: 20px;
+        text-align: center;
+        color: #5cb85c;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Request Denied</h1>
+      <p>Your request has been denied. Donor Reason: <span class="reason">${reason}</span></p>
+      <div class="thank-you">Thank you, the Blood+ team</div>
+    </div>
+  </body>
+  </html>
+  `;
+
+  const mailOptions = {
+    from: EMAIL,
+    to: requestorEmail,
+    subject: 'Request Denied',
+    html: emailContent,
+  };
+
+  // Send email
+  await transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+        console.log('Error sending email:', error.message);
+    } else {
+        console.log('Email sent:', info.response);
+    }
+  });
+}
+
+const sendAcceptEmail = async (requestorEmail, requestBloodType, donor) => {
+  if (!requestorEmail || !requestBloodType || !donor) {
+    throw new Error('Missing required parameters');
+  }
+
+  const emailContent = `<!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Accepted</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: auto;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+  
+      h1 {
+        color: #b21f2d;
+      }
+  
+      p {
+        color: #333;
+      }
+  
+      .reason {
+        font-size: 20px;
+        font-weight: bold;
+        color: #green;
+      }
+  
+      .thank-you {
+        margin-top: 20px;
+        text-align: center;
+        color: #5cb85c;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Request Accepted</h1>
+      <p>Your request of blood type ${requestBloodType} has been accepted. </br> Donor details: </br><span class="reason">Email: ${donor.email}</span></p>
+      <p class="reason">Contact: ${donor.contactNumber}</p>
+      <p class="reason">Name: ${donor.username}</p>
+      <div class="thank-you">Thank you, the Blood+ team</div>
+    </div>
+  </body>
+  </html>
+  `;
+
+  const mailOptions = {
+    from: EMAIL,
+    to: requestorEmail,
+    subject: 'Request Accepted',
+    html: emailContent,
+  };
+
+  // Send email
+  await transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+        console.log('Error sending email:', error.message);
+    } else {
+        console.log('Email sent:', info.response);
+    }
+  });
+}
+
+module.exports = { 
+  sendNotificationEmail, 
+  sendVerificationEmail, 
+  sendPasswordResetEmail,
+  sendDenyEmail,
+  sendAcceptEmail,
+ }; 

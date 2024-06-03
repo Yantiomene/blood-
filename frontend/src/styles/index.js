@@ -1,0 +1,1 @@
+export const menuButtonStyle = "bg-white p-1 w-8 h-8 cursor-pointer border rounded-full text-sm flex items-center justify-around";

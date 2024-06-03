@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-// layouts
-import WithHeader from "../layouts/withHeader";
 // components
 import BlogPostCard from "../components/blogCard";
 // assets
@@ -28,7 +26,7 @@ const BlogPage = () => {
     };
 
     return (
-        <WithHeader>
+        <>
             <section
                 className="py-10 px-[10%] h-[80vh] bg-red-100 bg-cover bg-center bg-no-repeat bg-fixed relative flex items-center justify-center"
                 style={{ backgroundImage: `url(${blogImage})` }}
@@ -53,7 +51,7 @@ const BlogPage = () => {
                 )}
                 </div>
             </section>
-        </WithHeader>
+        </>
     );
 };
 

@@ -1,21 +1,20 @@
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { updateUserProfile as updateProfile, selectUser } from '../redux/userSlice';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCurrentUser, selectUser, updateUserProfile as updateProfile } from '../redux/userSlice';
+import { showMessage } from '../redux/globalComponentSlice';
 import { DASHBOARDROUTE } from '../api';
 // layouts
-import withCurrentUser from '../layouts/withCurrentUser';
+import Loader from './loader';
 
 
 const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
 const editStyles = "bg-blue-500 text-white rounded-md px-2 py-1 focus:outline-none focus:bg-blue-600"
 const fieldStyles = "mb-4 flex items-center gap-4"
 const labelStyles = "block mb-1"
-const messageStyles = "text-center mt-4 text-gray-600 italic"
 
 const UpdateUserProfile = () => {
-    const [Message, setMessage] = useState('');
-    const user = useSelector(selectUser);
+    const user = useSelector(selectUser)
     const [formData, setFormData] = useState(user);
     const [isLoading, setLoading] = useState(false);
     const [editableFields, setEditableFields] = useState({
@@ -26,7 +25,7 @@ const UpdateUserProfile = () => {
         location: false,
         contactNumber: false
     });
-    
+
     const router = useNavigate();
     const dispatch = useDispatch();
 
@@ -43,10 +42,8 @@ const UpdateUserProfile = () => {
     const handleLocationChange = (e) => {
         const { name, value } = e.target;
         if (name === 'longitude') {
-            console.log("longitude, value", name, value);
             setFormData({ ...formData, location: [value, formData.location[1]] });
         } else if (name === 'latitude') {
-            console.log("latitude, value", name, value);
             setFormData({ ...formData, location: [formData.location[0], value] });
         }
     };
@@ -60,18 +57,18 @@ const UpdateUserProfile = () => {
         event.preventDefault();
         try {
             dispatch(updateProfile(formData));
+            dispatch(showMessage({heading: "Success", text: "Successfully updated profile info"}));
+            dispatch(fetchCurrentUser());
             router(DASHBOARDROUTE);
-            setMessage('successfully updated info');
         } catch (error) {
-            setMessage('an error occurred');
+            dispatch(showMessage({heading: "Error", text: "An error occurred while updating profile info"}));
         }
         setLoading(false);
     };
 
     return (
         <>
-            <form onSubmit={handleSubmit} className="w-[90vw] md:w-[40vw] bg-white rounded px-8 py-8 mb-4">
-                {Message && <p className={messageStyles}>{Message}</p>}
+            <form onSubmit={handleSubmit} className="w-[90vw] md:w-[40vw] bg-white rounded-md p-8">
                 <div className={fieldStyles}>
                     <label className={labelStyles}>Username</label>
                     <input
@@ -214,15 +211,15 @@ const UpdateUserProfile = () => {
                 </div>
 
                 <button
-                    className="bg-red-500 inline-block w-full hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    className={`inline-block w-full text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isLoading ? " bg-red-200" : " bg-red-500 hover:bg-red-700"}`}
                     type="submit"
                     disabled={isLoading}
                 >
-                    {isLoading ? 'Loading...' : 'Update'}
+                    {isLoading ? <Loader/> : 'Update'}
                 </button>
             </form>
         </>
     );
 };
 
-export default withCurrentUser(UpdateUserProfile);
+export default UpdateUserProfile;

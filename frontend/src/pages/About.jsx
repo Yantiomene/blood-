@@ -1,12 +1,10 @@
-// layouts
-import WithHeader from "../layouts/withHeader";
 // assets
 import { holdDonor } from "../assets";
 import ProfileCard from "../components/profileCard";
 
 const AboutPage = () => {
     return(
-      <WithHeader>
+      <>
         <section 
           className="py-10 px-[10%] h-[80vh] bg-red-100 bg-cover bg-center bg-no-repeat bg-fixed relative flex items-center justify-center"
           style={{ backgroundImage: `url(${holdDonor})` }}
@@ -77,7 +75,7 @@ const AboutPage = () => {
           </div>
         </section>
 
-      </WithHeader>
+      </>
       );
 };
   
