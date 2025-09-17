@@ -396,6 +396,7 @@ exports.passwordResetRequest = async (req, res) => {
 
     // Check if there's an existing token for the email
     const existingCode = await redisClient.get(email);
+    console.log("existing code: ", existingCode);
 
     // If there's an existing code, delete it
     if (existingCode) {

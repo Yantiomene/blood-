@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Application</title>
+</head>
+<body>
+    <h1>Chat Application</h1>
+  <div id="messages"></div>
+  <input type="text" id="messageInput" placeholder="Type your message">
+  <button id="sendButton">Send</button>
+  <br>
+
+  <script>
+    const ws = new WebSocket('ws://localhost:8080'); // Replace with your WebSocket server URL
+
+    ws.onopen = () => {
+      console.log('Connected to WebSocket server');
+    };
+
+    ws.onmessage = (event) => {
+      const message = event.data;
+      displayMessage(message, 'Recieved');
+    };
+
+    ws.onclose = () => {
+      console.log('Disconnected from WebSocket server');
+    };
+
+    const sendButton = document.getElementById('sendButton');
+    const messageInput = document.getElementById('messageInput');
+    const messagesDiv = document.getElementById('messages');
+
+    // Handle sending messages
+    sendButton.addEventListener('click', () => {
+        const message = messageInput.value;
+        console.log('Sending message: ' + message);
+        messageInput.value = ''; // Clear the input field
+        ws.send(message + '\n');
+        displayMessage(message, 'Sent');
+    });
+
+    function displayMessage(message, type) {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message', type);
+      messageElement.textContent = message;
+      messagesDiv.appendChild(messageElement);
+    }
+  </script>
+
+  <style>
+    #messages {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .message {
+      margin-bottom: 10px;
+      padding: 5px 10px;
+      border-radius: 5px;
+      max-width: 50%;
+    }
+
+    .Sent {
+      align-self: flex-end;
+      background-color: lightgreen;
+    }
+
+    .Recieved {
+      align-self: flex-start;
+      background-color: lightblue;
+    }
+
+  </style>
+
+
+</body>
+</html>
