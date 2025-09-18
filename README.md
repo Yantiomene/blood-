@@ -99,6 +99,34 @@ This plan aims to refactor the entire codebase (backend and frontend) while pres
 
 ---
 
+## Testing Gates After Each Step
+
+To ensure reliability and prevent regressions, every step within each phase must be validated by tests before advancing to the next step.
+- For each deliverable implemented, add or update unit tests and integration tests that verify the behavior.
+- Characterization tests should be added when refactoring legacy areas without existing coverage.
+- No step is considered complete until its tests pass locally and in CI, and coverage does not regress on critical paths.
+- Where applicable, include minimal E2E smoke tests for cross-cutting flows.
+
+---
+
+## Phase 0 — Baseline Audit & Current-State Tests
+
+Deliverables
+- Run existing backend tests and document pass/fail results; fix broken test harness or environment issues if needed.
+- Create baseline characterization tests for core flows: authentication, donation requests, blogs, messaging/conversations.
+- Database readiness: run migrations on a fresh database; prepare/dev seeds where appropriate.
+- Spin up the Next.js client; exercise primary flows manually; log API/CSR/SSR issues (CORS/cookies/auth redirects).
+- Generate baseline coverage report and a short status document summarizing what works/what doesn’t.
+
+Acceptance Criteria
+- A baseline test matrix (pass/fail) and coverage summary are recorded in the repo (e.g., docs/ or README appendix).
+- The app boots locally with documented envs; migrations succeed on a fresh DB.
+- Known blockers are captured as issues/tasks with prioritization.
+- CI runs and reports the baseline tests.
+- Testing Gate: Baseline tests for working features are established and passing before Phase 1 begins.
+
+---
+
 ## Phase 1 — Foundations and Safety Nets
 
 Deliverables
@@ -111,6 +139,7 @@ Acceptance Criteria
 - CI runs on PR and main; failing lint/tests block merges.
 - All packages install without peer/engine conflicts.
 - App boots locally with documented envs.
+- Testing Gate: Unit and integration tests for Phase 1 changes exist and pass locally and in CI.
 
 ---
 
@@ -133,6 +162,7 @@ Acceptance Criteria
 - Auth flows pass with cookies configured securely and/or Bearer tokens.
 - CSRF protection verified on mutating endpoints.
 - Rate-limited login/verification/reset endpoints with friendly error responses.
+- Testing Gate: Unit and integration tests for Phase 2 security changes exist and pass locally and in CI.
 
 ---
 
@@ -152,6 +182,7 @@ Operational
 Acceptance Criteria
 - Migration up/down works cleanly on a fresh DB.
 - Key queries show improved performance; no full scans on hot paths.
+- Testing Gate: Unit and integration tests for DB constraints/indexes/transactions exist and pass locally and in CI.
 
 ---
 
@@ -169,6 +200,7 @@ Acceptance Criteria
 - Controllers become thin; business logic covered by services with tests.
 - Global error shape and logging format consistent across endpoints.
 - WebSocket connects only with valid auth and dispatches to proper handlers.
+- Testing Gate: Unit and integration tests for refactored services/controllers/middlewares exist and pass locally and in CI.
 
 ---
 
@@ -189,6 +221,7 @@ UX & Accessibility
 Acceptance Criteria
 - All current user flows work in the Next app (login, profile, donation requests, blogs, messaging).
 - No reliance on app/pages; route protection via middleware verified.
+- Testing Gate: Unit and integration tests (and smoke E2E where needed) for frontend flows exist and pass locally and in CI.
 
 ---
 
@@ -202,6 +235,7 @@ Acceptance Criteria
 Acceptance Criteria
 - Coverage thresholds agreed and met (e.g., 70%+ critical paths).
 - CI runs test matrix and reports coverage.
+- Testing Gate: Test suites and coverage thresholds enforced in CI with no regressions.
 
 ---
 
@@ -213,6 +247,7 @@ Acceptance Criteria
 
 Acceptance Criteria
 - Key dashboards/logs available; p95 latency improves on hot endpoints.
+- Testing Gate: Performance tests/metrics baselines established with measurable improvements.
 
 ---
 
@@ -224,6 +259,7 @@ Acceptance Criteria
 
 Acceptance Criteria
 - New contributors can set up and run the app with minimal friction.
+- Testing Gate: Docs lint/build checks pass; example scripts verified by CI where applicable.
 
 ---
 
@@ -251,9 +287,10 @@ Acceptance Criteria
 ---
 
 ## Proposed Timeline (Indicative)
-- Weeks 1–2: Phase 1–2 (Foundations, Security)
-- Weeks 3–4: Phase 3–4 (DB, Backend Architecture)
-- Weeks 5–6: Phase 5 (Frontend Refactor)
+- Week 0: Phase 0 (Baseline audit and current-state tests)
+- Weeks 1–2: Phase 1–2 (Foundations, Security) with step-by-step testing gates
+- Weeks 3–4: Phase 3–4 (DB, Backend Architecture) with testing gates
+- Weeks 5–6: Phase 5 (Frontend Refactor) with testing gates
 - Weeks 7–8: Phase 6–7 (Testing, Observability), decommission legacy
 
 ---
