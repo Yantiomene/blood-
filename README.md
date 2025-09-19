@@ -356,43 +356,43 @@ G1. Login flow
 - Steps: Submit valid credentials in client/app/components/LoginForm
 - Expected: Redirect to dashboard; auth state stored; cookie/token behavior correct
 - Test Type: Frontend Integration/E2E
-- Status:
-- Notes/Issue:
+- Status: ⛔
+- Notes/Issue: Forms render, but flow blocked pending backend API server envs; cannot verify redirect/cookies.
 
 G2. Protected route guard
 - Steps: Navigate to dashboard when unauthenticated
 - Expected: Redirect to login or show restricted access
 - Test Type: Frontend Integration/E2E
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: Visiting /dashboard triggers withAuth guard and navigates to /login when isAuth=false.
 
 G3. Donation: create/list/update/delete via UI
 - Steps: Perform CRUD via UI
 - Expected: Reflects API results; validation errors surfaced clearly
 - Test Type: Frontend Integration/E2E
-- Status:
-- Notes/Issue:
+- Status: ⛔
+- Notes/Issue: UI renders and overlay opens; API calls blocked until backend is running.
 
 G4. Blogs: list/create/update/delete (if permitted)
 - Steps: Perform respective actions in UI
 - Expected: Displays updates; handles errors gracefully
 - Test Type: Frontend Integration/E2E
-- Status:
-- Notes/Issue:
+- Status: ⛔
+- Notes/Issue: Blocked pending backend.
 
 G5. Messaging UI
 - Steps: Send message; view conversation
 - Expected: Real-time updates or polling; correct rendering
 - Test Type: Frontend Integration/E2E
-- Status:
-- Notes/Issue:
+- Status: ⛔
+- Notes/Issue: Blocked pending backend and WebSocket server.
 
 G6. SSR/CSR/hydration sanity
 - Steps: Load pages with/without auth
 - Expected: No hydration warnings; correct SSR/CSR behavior
 - Test Type: Frontend Integration
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: Home, login, and dashboard (guarded) render without hydration warnings; hot reload works.
 
 Section H — Cross-Cutting & Security
 H1. CORS policy
@@ -438,13 +438,13 @@ Known Blockers (to be captured during Phase 0)
   - Impact: Spec mismatch; clients may rely on 401 for auth flows
   - Owner: Backend
   - Issue Link: TODO (create ticket)
-- Blocker: CI PR run not yet verified
-  - Impact: Cannot gate merges on CI; Phase 0 acceptance pending
-  - Owner: DevOps/Backend
-  - Issue Link: Open PR chore/test-backend-ci -> backend
 - Blocker: CSRF/CORS behavior not validated yet
   - Impact: Potential security gaps; to be validated in Phase 2
   - Owner: Backend/Frontend
+  - Issue Link: TODO (create ticket)
+- Blocker: Backend dev server requires several envs to boot (SERVER_URL, CLIENT_URL, SECRET, EMAIL, PASSWORD, GOOGLE_MAPS_API_KEY, DB_*)
+  - Impact: Frontend smoke tests for authenticated flows blocked until backend is up; unauth flows render
+  - Owner: DevOps/Backend
   - Issue Link: TODO (create ticket)
 
 ---

@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../api/user';
 import { useRouter } from 'next/navigation';
-import { unAuthenticateUser } from '../../../frontend/src/redux/authSlice';
-import { fetchCurrentUser } from '../../../frontend/src/redux/userSlice';
+import { unAuthenticateUser } from '../redux/authSlice';
+import { fetchCurrentUser } from '../redux/userSlice';
 
 const dropdownItemStyles = "px-4 py-2 hover:bg-gray-100 rounded cursor-pointer";
 

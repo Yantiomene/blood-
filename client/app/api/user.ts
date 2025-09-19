@@ -94,3 +94,12 @@ export async function verifyEmail(token: string): Promise<any> {
     }
   }
   
+export async function checkProtected(): Promise<boolean> {
+  try {
+    await getCurrentUser();
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+  

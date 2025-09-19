@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
-import { initializeAuthStatus, selectAuthStatus } from '../../../frontend/src/redux/authSlice';
+import { initializeAuthStatus, selectAuthStatus } from '../redux/authSlice';
 
 const withAuth = (WrappedComponent: React.FC) => {
   const WrapperComponent: React.FC = (props) => {
