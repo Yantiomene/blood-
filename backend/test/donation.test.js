@@ -96,6 +96,30 @@ describe('Donation Routes', () => {
     expect(response.body.success).toBe(false);
   });
 
+  it('should return 401 when creating donation request without auth cookie', async () => {
+    const res = await request(app)
+      .post('/api/donationRequest')
+      .send({ bloodType: 'A+', quantity: 1, location: [0, 0] });
+    expect(res.statusCode).toBe(401);
+  });
+
+  it('should return 401 when listing donation requests without auth cookie', async () => {
+    const res = await request(app).get('/api/donationRequest');
+    expect(res.statusCode).toBe(401);
+  });
+
+  it('should return 401 when updating donation request without auth cookie', async () => {
+    const res = await request(app)
+      .put('/api/donationRequest/1')
+      .send({ quantity: 2 });
+    expect(res.statusCode).toBe(401);
+  });
+
+  it('should return 401 when deleting donation request without auth cookie', async () => {
+    const res = await request(app).delete('/api/donationRequest/1');
+    expect(res.statusCode).toBe(401);
+  });
+
   it('should delete a donation request', async () => {
     const createRes = await request(app)
       .post('/api/donationRequest')

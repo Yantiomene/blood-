@@ -92,4 +92,14 @@ describe('Authentication Routes', () => {
     expect(logoutResponse.statusCode).toBe(200);
     expect(logoutResponse.body.success).toBe(true);
   });
+
+  it('should return 401 for profile without auth cookie', async () => {
+    const res = await request(app).get('/api/profile');
+    expect(res.statusCode).toBe(401);
+  });
+
+  it('should return 401 for logout without auth cookie', async () => {
+    const res = await request(app).get('/api/logout');
+    expect(res.statusCode).toBe(401);
+  });
 });
