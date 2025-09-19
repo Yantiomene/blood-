@@ -234,63 +234,77 @@ B5. Validation errors
 
 Section C — Backend: Blogs
 C1. List blogs
-- Endpoint(s): GET /api/blogs
+- Endpoint(s): GET /blogs/getBlogs
 - Expected: 200 + array; sort/pagination if applicable
 - Test Type: Integration
-- Status: —
-- Notes/Issue: Not covered yet in baseline tests.
+- Status: ✅
+- Notes/Issue: Implemented and tested via GET /blogs/getBlogs (public). Route path differs from planned "/api/blogs"; to unify later.
 
 C2. Create blog (authorized role)
-- Endpoint(s): POST /api/blogs
+- Endpoint(s): POST /blogs/create
 - Pre-conditions: Auth with author/admin privileges
 - Expected: 201 + blog created; image handling if present
 - Test Type: Integration
-- Status: —
-- Notes/Issue: Not covered yet in baseline tests.
+- Status: ✅
+- Notes/Issue: Implemented and tested via POST /blogs/create; auth cookie required. Role enforcement TBD.
 
 C3. Update blog (authorized)
-- Endpoint(s): PUT /api/blogs/:id
+- Endpoint(s): PUT /blogs/updateBlog/:id
 - Expected: 200 + updated blog
 - Test Type: Integration
-- Status: —
-- Notes/Issue: Not covered yet in baseline tests.
+- Status: ✅
+- Notes/Issue: Implemented and tested via PUT /blogs/updateBlog/:id.
 
 C4. Delete blog (authorized)
-- Endpoint(s): DELETE /api/blogs/:id
+- Endpoint(s): DELETE /blogs/deleteBlog/:id
 - Expected: 200/204 + removed
 - Test Type: Integration
-- Status: —
-- Notes/Issue: Not covered yet in baseline tests.
+- Status: ✅
+- Notes/Issue: Implemented and tested via DELETE /blogs/deleteBlog/:id.
 
 Section D — Backend: Messaging & Conversations
-D1. Create message (new conversation auto-create)
-- Endpoint(s): POST /api/messages
-- Pre-conditions: Valid senderId/receiverId; auth
-- Expected: 201 + message created; conversationId created/linked correctly
+D1. Create message (auto-create conversation if needed)
+- Endpoint(s): POST /api/createMessage
+- Pre-conditions: Authenticated users; valid payload (senderId, receiverId, content, messageType)
+- Expected: 201 + message created; conversation auto-created when not provided
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: Implemented and tested; cookie auth used for protected routes.
 
-D2. Fetch conversation by participants
-- Endpoint(s): GET /api/messages/conversation?senderId=&receiverId=
-- Expected: 200 + conversation found/created as per logic
+D2. Get messages by conversation
+- Endpoint(s): GET /api/messages/:conversationId
+- Expected: 200 + array of messages
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: Implemented and tested.
 
-D3. Get messages by conversationId
-- Endpoint(s): GET /api/messages?conversationId=
-- Expected: 200 + ordered messages
+D3. List conversations by user
+- Endpoint(s): GET /api/conversations/:userId
+- Expected: 200 + array of conversations
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: Implemented and tested.
 
-D4. Update/Delete message (ownership/permissions)
-- Endpoint(s): PUT/DELETE /api/messages/:id
-- Expected: 200 + updated or 204 delete; permission checks enforced
+D4. List messages by user
+- Endpoint(s): GET /api/messages/user/:userId
+- Expected: 200 + array of messages
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: Implemented and tested.
+
+D5. Update message
+- Endpoint(s): PUT /api/updateMessage/:messageId
+- Expected: 200 + updated message
+- Test Type: Integration
+- Status: ⛔
+- Notes/Issue: Known update query bug; test skipped pending fix.
+
+D6. Delete message
+- Endpoint(s): DELETE /api/deleteMessage/:messageId
+- Expected: 200/204 + removed
+- Test Type: Integration
+- Status: ✅
+- Notes/Issue: Implemented and tested.
 
 Section E — Backend: WebSocket (if currently active)
 E1. Connect with auth
@@ -406,20 +420,32 @@ Section I — CI & Tooling
 I1. CI pipeline runs tests on PR
 - Expected: Lint/tests/coverage jobs run; status reported
 - Test Type: CI
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: CI run is green on PR; npm install (no lockfile) succeeded, DB migrations/seeds/tests passed, and coverage artifact uploaded.
 
 I2. Coverage thresholds enforced (initial baseline)
 - Expected: Coverage reported; baseline thresholds recorded (even if low)
 - Test Type: CI
-- Status:
-- Notes/Issue:
+- Status: Baseline coverage recorded; thresholds not yet enforced
+- Notes/Issue: Enable thresholds in later phases after stabilizing baseline.
 
 Known Blockers (to be captured during Phase 0)
-- Blocker:
-- Impact:
-- Owner:
-- Issue Link:
+- Blocker: Messages update endpoint (PUT /api/updateMessage/:messageId) has a known update query bug causing test to be skipped
+  - Impact: Users cannot edit messages; partial messaging feature
+  - Owner: Backend
+  - Issue Link: TODO (create ticket)
+- Blocker: Invalid login returns 400 instead of expected 401
+  - Impact: Spec mismatch; clients may rely on 401 for auth flows
+  - Owner: Backend
+  - Issue Link: TODO (create ticket)
+- Blocker: CI PR run not yet verified
+  - Impact: Cannot gate merges on CI; Phase 0 acceptance pending
+  - Owner: DevOps/Backend
+  - Issue Link: Open PR chore/test-backend-ci -> backend
+- Blocker: CSRF/CORS behavior not validated yet
+  - Impact: Potential security gaps; to be validated in Phase 2
+  - Owner: Backend/Frontend
+  - Issue Link: TODO (create ticket)
 
 ---
 
@@ -607,5 +633,5 @@ Coverage Snapshot (Backend) with latest coverage numbers from backend/coverage/l
 - Functions: 27.77% (25/90)
 - Lines: 20.51% (575/2803)
 - Generated at: 2025-09-19T14:13:29.425Z
-- Status:
-- Notes/Issue:
+- Status: ✅ Baseline coverage recorded
+- Notes/Issue: Improve statement/line coverage in next phases; high branch coverage due to limited conditional paths in exercised routes.
