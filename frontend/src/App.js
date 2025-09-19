@@ -46,10 +46,10 @@ const App = () => (
       <Route path={REGISTERROUTE} element={<WithoutHeader><RegisterPage /></WithoutHeader>} />
       <Route path={VERIFYACCOUNT} element={<WithoutHeader><VerifyAccount /></WithoutHeader>} />
 
-      <Route path={PROFILEROUTE} element={<WithoutHeader><ProfilePage /></WithoutHeader>} />
-      <Route path={HISTORYROUTE} element={<WithoutHeader><ProfilePage /></WithoutHeader>} />
-      <Route path={ACCOUNTROUTE} element={<WithoutHeader><ProfilePage /></WithoutHeader>} />
-      <Route path={PREFERENCES} element={<WithoutHeader><ProfilePage /></WithoutHeader>} />
+      <Route path={PROFILEROUTE} element={<WithoutHeader><ProfilePage section="profile" /></WithoutHeader>} />
+      <Route path={HISTORYROUTE} element={<WithoutHeader><ProfilePage section="history" /></WithoutHeader>} />
+      <Route path={ACCOUNTROUTE} element={<WithoutHeader><ProfilePage section="account" /></WithoutHeader>} />
+      <Route path={PREFERENCES} element={<WithoutHeader><ProfilePage section="preferences" /></WithoutHeader>} />
       
     </Routes>
   </Router>

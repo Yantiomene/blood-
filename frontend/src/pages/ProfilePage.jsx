@@ -60,16 +60,22 @@ const ProfilePage = () => {
                 </ul>
             </nav>
             <div className="w-[90vw] md:w-[40vw] min-h-[80vh]">
-            {
-                // will add more components here
-                routes.includes(params) && (
-                    params === PROFILEROUTE ? <UpdateProfileForm/> :
-                    params === ACCOUNTROUTE ? <h1 className="bg-blue-400">Account</h1> :
-                    params === PREFERENCES ? <h1 className="bg-blue-400">preferences</h1> :
-                    params === HISTORYROUTE ? <h1 className="bg-blue-400">History</h1> :
-                    <UpdateProfileForm/>
-                )
-            }
+{
+  routes.includes(params) && (() => {
+    switch (params) {
+      case PROFILEROUTE:
+        return <UpdateProfileForm/>;
+      case ACCOUNTROUTE:
+        return <h1 className="bg-blue-400">Account</h1>;
+      case PREFERENCES:
+        return <h1 className="bg-blue-400">Preferences</h1>;
+      case HISTORYROUTE:
+        return <h1 className="bg-blue-400">History</h1>;
+      default:
+        return null; // This shouldn't happen due to routes.includes check
+    }
+  })()
+}
             </div>
         </div>
         </>

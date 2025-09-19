@@ -48,8 +48,9 @@ export async function register(user) {
     const response = await axios.post(`${apiUrl}/register`, user);
     return response.data;
   } catch (error) {
-    console.error(">> Registration error:", error.response.data.errors[0]);
-    throw error.response.data.errors[0];
+    const errorMessage = error.response?.data?.errors?.[0] || error.message || "Registration failed";
+    console.error(">> Registration error:", errorMessage);
+    throw errorMessage;
   }
 }
 

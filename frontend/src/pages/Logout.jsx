@@ -13,20 +13,23 @@ export default function LogoutPage() {
     const [secondsLeft, setSecondsLeft] = useState(3);
 
     useEffect(() => {
+        let interval;
+        let redirectTimeout;
+    
         if (isLoggedIn) {
-            setTimeout(async () => {
+            // Execute logout immediately without unnecessary setTimeout
+            (async () => {
                 try {
                     const response = await logout();
                     if (response.success) {
                         dispatch(unAuthenticateUser());
                         setTimeoutMessage("Logout successful. Redirecting...");
-                        const interval = setInterval(() => {
+                        interval = setInterval(() => {
                             setSecondsLeft((prevSeconds) => (prevSeconds > 0 ? prevSeconds - 1 : 0));
                         }, 1000);
-                        setTimeout(() => {
+                        redirectTimeout = setTimeout(() => {
                             clearInterval(interval);
                             router(HOMEROUTE);
-                            return;
                         }, 3000);
                     } else {
                         setTimeoutMessage("Logout request failed.");
@@ -35,11 +38,17 @@ export default function LogoutPage() {
                     console.error("Error logging out:", error);
                     setTimeoutMessage("An error occurred while logging out.");
                 }
-            }, 0);
+            })();
         } else {
             // will handle more cases where user is not logged in
-            setTimeoutMessage("You're already logged");
+            setTimeoutMessage("You're already logged out");
         }
+    
+        // Cleanup function to prevent memory leaks
+        return () => {
+            if (interval) clearInterval(interval);
+            if (redirectTimeout) clearTimeout(redirectTimeout);
+        };
     }, [dispatch, isLoggedIn, router]);
 
     return (

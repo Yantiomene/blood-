@@ -39,13 +39,9 @@ exports.register = async (req, res) => {
       throw new Error("Redis client not connected");
     }
 
-    // Check if there's an existing verification code for the email
-    const existingCode = await redisClient.get(email);
-
-    // If there's an existing code, delete it
-    if (existingCode) {
-      await redisClient.del(existingCode);
-    }
+    // Delete any existing verification codes for this email
+    // This would require scanning Redis keys or maintaining a reverse mapping
+    // For now, the new code will override when the user requests verification
 
     // Store the new verification code in Redis
     await redisClient.set(verificationCode, email, 60 * 60); // Expire in 1h (3600 seconds)
@@ -57,7 +53,7 @@ exports.register = async (req, res) => {
 
     // Send verification email with the short code
     sendVerificationEmail(email, verificationCode);
-    console.log(">> VERIFICATION CODE: ", verificationCode);
+
 
     req.logger.info("Created user successfully");
     return res.status(201).json({
@@ -279,20 +275,16 @@ exports.requestNewToken = async (req, res) => {
       throw new Error("Redis client not connected");
     }
 
-    // Check if there's an existing verification code for the email
-    const existingCode = await redisClient.get(email);
-
-    // If there's an existing code, delete it
-    if (existingCode) {
-      await redisClient.del(existingCode);
-    }
+    // Note: Cannot easily delete existing codes for this email without
+    // maintaining a reverse mapping or scanning all keys.
+    // The new code will work, and old codes will expire after 1 hour.
 
     // Store the new verification code in Redis
     await redisClient.set(verificationCode, email, 60 * 60); // Expire in 1h (3600 seconds)
 
     // Send verification email with the short code
     sendVerificationEmail(email, verificationCode);
-    console.log(">> NEW VERIFICATION CODE: ", verificationCode);
+
 
     req.logger.info("New verification code sent successfully");
     return res.status(200).json({
@@ -352,8 +344,8 @@ exports.updateUserLocation = async (req, res) => {
 
     // Update user's location in the database
     await db.query(
-      "UPDATE users SET location = ST_GeomFromText($1, 4326) WHERE id = $2",
-      [`POINT(${longitude} ${latitude})`, userId]
+      "UPDATE users SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326) WHERE id = $3",
+      [longitude, latitude, userId]
     );
 
     req.logger.info("User location updated successfully");
@@ -386,7 +378,7 @@ exports.passwordResetRequest = async (req, res) => {
       });
     }
 
-    // Store verification code in Redis
+    // Ensure redis client is connected
     if (!redisClient.isAlive()) {
       throw new Error("Redis client not connected");
     }
@@ -394,22 +386,11 @@ exports.passwordResetRequest = async (req, res) => {
     // Generate and store a reset token in Redis
     const resetToken = generateShortCode();
 
-    // Check if there's an existing token for the email
-    const existingCode = await redisClient.get(email);
-    console.log("existing code: ", existingCode);
-
-    // If there's an existing code, delete it
-    if (existingCode) {
-      await redisClient.del(existingCode);
-    }
-
-    // Store the new reset token in Redis
-    await redisClient.set(resetToken, email, 60 * 60); // Expire in 1h (3600 seconds)
+    // Store the reset token in Redis with email as value (expires in 1h)
+    await redisClient.set(resetToken, email, 60 * 60);
 
     // Send password reset email with the short code
     sendPasswordResetEmail(email, resetToken);
-
-    console.log(">> SENT PASSWORD RESET TOKEN: ", resetToken);
 
     req.logger.info("Password reset email sent successfully");
     return res.status(200).json({
@@ -429,17 +410,21 @@ exports.passwordResetRequest = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   const { code, password } = req.body;
 
-  console.log(
-    ">> RESET PASSWORD",
-    req.body,
-    "\nCODE: ",
-    code,
-    "\nPASSWORD: ",
-    password
-  );
-
   try {
-    // Retrieve verification code from Redis
+    if (!code) {
+      return res.status(400).json({
+        success: false,
+        error: "Reset code is required",
+      });
+    }
+
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        error: "New password is required",
+      });
+    }
+
     const email = await redisClient.get(code);
     if (!email) {
       return res.status(404).json({
@@ -473,8 +458,10 @@ exports.resetPassword = async (req, res) => {
 };
 
 // Function to generate a random short code (5 digits)
+const crypto = require('crypto');
+
 const generateShortCode = () => {
   const min = 10000; // Minimum 5-digit number
   const max = 99999; // Maximum 5-digit number
-  return Math.floor(min + Math.random() * (max - min + 1)).toString();
+  return crypto.randomInt(min, max + 1).toString();
 };

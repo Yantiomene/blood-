@@ -34,3 +34,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# presentation
+*.pptx
+
+#testing
+#/backend/coverage
+
+#test artifact
+/backend/test-results-messages.json

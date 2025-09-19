@@ -72,7 +72,7 @@ router.get("/donationReqByPriority/:urgent", userAuth, findRequestByPriority);
 router.post("/donationReqByLocation", userAuth, findRequestByLocation);
 // request interactions
 router.post("/denyRequest", userAuth, denyRequest);
-router.get("/acceptRequest/:requestId", userAuth, acceptRequest);
+router.post("/acceptRequest/:requestId", userAuth, acceptRequest);
 router.get("/incrementView/:requestId", userAuth, incrementViewCount);
 
 // donors

@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { DASHBOARDROUTE } from "../api";
 import { getDateFromToday } from "../util/datetime";
 // redux
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
   findDonationRequestByLocation,
   findRequestByBloodType,
@@ -79,15 +79,12 @@ const Dashboard = () => {
   useEffect(() => {
     const handleFilterMyRequests = async () => {
       let data = { donationRequests: [] };
-      console.log("queryKey", queryKey);
-      console.log("queryValue", queryValue);
       setIsLoading(true);
 
       try {
         if (queryKey && queryValue) {
           if (queryKey === "?days") {
             const days = parseInt(queryValue);
-            console.log("days", days);
             data = await findDonationRequestByDate(
               getDateFromToday(days),
               getDateFromToday(0)
@@ -115,9 +112,15 @@ const Dashboard = () => {
           data = await getDonationRequests();
         }
         setRequestList(data.donationRequests.reverse());
-        setIsLoading(false);
       } catch (error) {
-        showMessage({ heading: "Error", text: `${error.error}` });
+        console.error("Failed to fetch donation requests:", error);
+        dispatch(showMessage({
+          heading: "Error",
+          text: "Failed to load donation requests"
+        }));
+        setRequestList([]);
+      } finally {
+        setIsLoading(false);
       }
     };
     handleFilterMyRequests();

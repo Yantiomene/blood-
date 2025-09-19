@@ -15,7 +15,7 @@ exports.up = function(knex) {
         table.boolean('isHospital').defaultTo(false);
         table.boolean('isBloodBank').defaultTo(false);
         table.boolean('isBloodCamp').defaultTo(false);
-        table.integer('associatedEntityId').unsigned().references('id').inTable('hospitals').onDelete('SET NULL');
+        table.integer('associatedEntityId').unsigned().references('id').inTable('hospitals').onDelete('SET NULL').nullable();
         table.boolean('isVerified').defaultTo(false);
         table.timestamps(true, true);
     });

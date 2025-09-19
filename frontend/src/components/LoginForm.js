@@ -22,7 +22,7 @@ const LoginForm = () => {
         try {
             const response = await login({ email, password });
             if (response.success) {
-                const expireDate = new Date() + 60 * 60 * 1000;
+                const expireDate = new Date(Date.now() + 60 * 60 * 1000);
                 dispatch(setSessionExpireDate(expireDate))
                 dispatch(fetchCurrentUser());
                 dispatch(showMessage({ heading: "Success", text: "Login Successful" }));

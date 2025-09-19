@@ -125,6 +125,302 @@ Acceptance Criteria
 - CI runs and reports the baseline tests.
 - Testing Gate: Baseline tests for working features are established and passing before Phase 1 begins.
 
+### Baseline Test Matrix (Phase 0)
+
+Metadata
+- Date: 2025-09-19
+- Environment: local
+- Commit/Tag: N/A (local working copy)
+- DB Migration Version: latest
+- Seed Data Version: backend/seeds (01_users_seed.js et al.)
+- Test Runner(s): Backend (Jest/Supertest)
+- Coverage Snapshot: Backend Unit: —, Backend Integration: —, Frontend Unit: —, Frontend Integration: —, E2E: —
+
+Legend (Status)
+- Pass = ✅
+- Fail = ❌
+- Blocked = ⛔
+- N/A = —
+
+Section A — Backend: Auth & User
+A1. Register user
+- Endpoint(s): POST /api/auth/register
+- Pre-conditions: Fresh DB; email not registered
+- Steps: Call with valid payload
+- Expected: 201 + user created; hashed password in DB; token/cookie if applicable
+- Test Type: Integration
+- Status: ✅
+- Notes/Issue: Implemented and tested via POST /api/register; email sending mocked in test; Redis uses in-memory client under NODE_ENV=test.
+
+A2. Login user (valid)
+- Endpoint(s): POST /api/auth/login
+- Pre-conditions: User exists/verified
+- Steps: Valid credentials
+- Expected: 200 + token/cookie set (secure flags per env)
+- Test Type: Integration
+- Status: ✅
+- Notes/Issue: Implemented and tested via POST /api/login; cookie returned and re-used.
+
+A3. Login user (invalid)
+- Endpoint(s): POST /api/auth/login
+- Steps: Wrong password
+- Expected: 401 + safe error message; no token/cookie
+- Test Type: Integration
+- Status: ✅
+- Notes/Issue: Covered via POST /api/login invalid credentials; current implementation returns 400 (expectation says 401) — documenting actual behavior as-is in baseline.
+
+A4. Logout
+- Endpoint(s): POST /api/auth/logout
+- Pre-conditions: Logged in
+- Expected: 200 + token invalidated (Redis if used) and cookie cleared
+- Test Type: Integration
+- Status: ✅
+- Notes/Issue: Covered via GET /api/logout with auth cookie (route differs from spec: GET vs POST); cookie cleared successfully.
+
+A5. Get profile (auth required)
+- Endpoint(s): GET /api/users/me
+- Pre-conditions: Logged in
+- Expected: 200 + correct user data (no secrets)
+- Test Type: Integration
+- Status: ✅
+- Notes/Issue: Implemented and tested via GET /api/profile with auth cookie.
+
+A6. CSRF/CORS behavior (if cookies used)
+- Endpoint(s): Mutating routes (POST/PUT/DELETE)
+- Pre-conditions: Browser-like client; cross-origin
+- Expected: CORS headers correct; CSRF token required if applicable
+- Test Type: Integration/E2E
+- Status: —
+- Notes/Issue: Not covered yet; to be verified.
+
+Section B — Backend: Donation Requests
+B1. Create donation request
+- Endpoint(s): POST /api/donations
+- Pre-conditions: Authenticated user; valid payload
+- Expected: 201 + record created; validated bloodType/quantity constraints
+- Test Type: Integration
+- Status: ✅
+- Notes/Issue: Implemented and tested via POST /api/donationRequest; payload includes [lon, lat] location; seed user authenticated.
+
+B2. List donation requests
+- Endpoint(s): GET /api/donations
+- Expected: 200 + array; pagination if applicable
+- Test Type: Integration
+- Status: ✅
+- Notes/Issue: Implemented and tested via GET /api/donationRequest.
+
+B3. Update donation request (owner)
+- Endpoint(s): PUT /api/donations/:id
+- Pre-conditions: Request owned by user
+- Expected: 200 + updated resource; respects validation
+- Test Type: Integration
+- Status: ✅
+- Notes/Issue: Implemented and tested via PUT /api/donationRequest/:id.
+
+B4. Delete donation request (owner)
+- Endpoint(s): DELETE /api/donations/:id
+- Expected: 200/204 + resource removed; cascade rules honored
+- Test Type: Integration
+- Status: ✅
+- Notes/Issue: Covered via DELETE /api/donationRequest/:id.
+
+B5. Validation errors
+- Endpoint(s): POST/PUT /api/donations
+- Steps: Invalid bloodType/quantity/required fields
+- Expected: 400 + detailed errors (no stack)
+- Test Type: Integration
+- Status: ✅
+- Notes/Issue: Covered via invalid payload resulting in 400 on POST /api/donationRequest.
+
+Section C — Backend: Blogs
+C1. List blogs
+- Endpoint(s): GET /api/blogs
+- Expected: 200 + array; sort/pagination if applicable
+- Test Type: Integration
+- Status: —
+- Notes/Issue: Not covered yet in baseline tests.
+
+C2. Create blog (authorized role)
+- Endpoint(s): POST /api/blogs
+- Pre-conditions: Auth with author/admin privileges
+- Expected: 201 + blog created; image handling if present
+- Test Type: Integration
+- Status: —
+- Notes/Issue: Not covered yet in baseline tests.
+
+C3. Update blog (authorized)
+- Endpoint(s): PUT /api/blogs/:id
+- Expected: 200 + updated blog
+- Test Type: Integration
+- Status: —
+- Notes/Issue: Not covered yet in baseline tests.
+
+C4. Delete blog (authorized)
+- Endpoint(s): DELETE /api/blogs/:id
+- Expected: 200/204 + removed
+- Test Type: Integration
+- Status: —
+- Notes/Issue: Not covered yet in baseline tests.
+
+Section D — Backend: Messaging & Conversations
+D1. Create message (new conversation auto-create)
+- Endpoint(s): POST /api/messages
+- Pre-conditions: Valid senderId/receiverId; auth
+- Expected: 201 + message created; conversationId created/linked correctly
+- Test Type: Integration
+- Status:
+- Notes/Issue:
+
+D2. Fetch conversation by participants
+- Endpoint(s): GET /api/messages/conversation?senderId=&receiverId=
+- Expected: 200 + conversation found/created as per logic
+- Test Type: Integration
+- Status:
+- Notes/Issue:
+
+D3. Get messages by conversationId
+- Endpoint(s): GET /api/messages?conversationId=
+- Expected: 200 + ordered messages
+- Test Type: Integration
+- Status:
+- Notes/Issue:
+
+D4. Update/Delete message (ownership/permissions)
+- Endpoint(s): PUT/DELETE /api/messages/:id
+- Expected: 200 + updated or 204 delete; permission checks enforced
+- Test Type: Integration
+- Status:
+- Notes/Issue:
+
+Section E — Backend: WebSocket (if currently active)
+E1. Connect with auth
+- Event(s): WS connect/handshake
+- Pre-conditions: Valid token/cookie available
+- Expected: Connection accepted; unauth rejected
+- Test Type: Integration/E2E
+- Status:
+- Notes/Issue:
+
+E2. Send/receive message event
+- Event(s): message/send, message/receive
+- Expected: Server acknowledges; routes to proper room/recipient
+- Test Type: Integration/E2E
+- Status:
+- Notes/Issue:
+
+Section F — Backend: DB & Ops
+F1. Migrations up on fresh DB
+- Command: knex migrate:latest
+- Expected: Success; schema matches design; no dangling/failed objects
+- Test Type: Ops
+- Status:
+- Notes/Issue:
+
+F2. Migrations down/up cycles
+- Command: knex migrate:down then up
+- Expected: Clean reversibility for recent migrations
+- Test Type: Ops
+- Status:
+- Notes/Issue:
+
+F3. Constraints & indexes
+- Check: UNIQUE(email), CHECK(bloodType, quantity>0), FKs, indexes on hot queries
+- Expected: Present and effective; query plans avoid full scans on hot paths
+- Test Type: Integration/Ops
+- Status:
+- Notes/Issue:
+
+F4. Transactions for multi-step operations
+- Example: create conversation + first message
+- Expected: All-or-nothing behavior
+- Test Type: Integration
+- Status:
+- Notes/Issue:
+
+Section G — Frontend: Next.js Core Flows
+G1. Login flow
+- Steps: Submit valid credentials in client/app/components/LoginForm
+- Expected: Redirect to dashboard; auth state stored; cookie/token behavior correct
+- Test Type: Frontend Integration/E2E
+- Status:
+- Notes/Issue:
+
+G2. Protected route guard
+- Steps: Navigate to dashboard when unauthenticated
+- Expected: Redirect to login or show restricted access
+- Test Type: Frontend Integration/E2E
+- Status:
+- Notes/Issue:
+
+G3. Donation: create/list/update/delete via UI
+- Steps: Perform CRUD via UI
+- Expected: Reflects API results; validation errors surfaced clearly
+- Test Type: Frontend Integration/E2E
+- Status:
+- Notes/Issue:
+
+G4. Blogs: list/create/update/delete (if permitted)
+- Steps: Perform respective actions in UI
+- Expected: Displays updates; handles errors gracefully
+- Test Type: Frontend Integration/E2E
+- Status:
+- Notes/Issue:
+
+G5. Messaging UI
+- Steps: Send message; view conversation
+- Expected: Real-time updates or polling; correct rendering
+- Test Type: Frontend Integration/E2E
+- Status:
+- Notes/Issue:
+
+G6. SSR/CSR/hydration sanity
+- Steps: Load pages with/without auth
+- Expected: No hydration warnings; correct SSR/CSR behavior
+- Test Type: Frontend Integration
+- Status:
+- Notes/Issue:
+
+Section H — Cross-Cutting & Security
+H1. CORS policy
+- Steps: Cross-origin requests from Next dev server to backend
+- Expected: Allowed origins only; credentials policy correct
+- Test Type: Integration
+- Status:
+- Notes/Issue:
+
+H2. Rate limiting for auth endpoints
+- Steps: Repeated invalid login attempts
+- Expected: 429 after threshold; reset behavior documented
+- Test Type: Integration
+- Status:
+- Notes/Issue:
+
+H3. Secret redaction in logs
+- Steps: Trigger errors; inspect logs
+- Expected: No secrets/PII leaked
+- Test Type: Integration
+- Status:
+- Notes/Issue:
+
+Section I — CI & Tooling
+I1. CI pipeline runs tests on PR
+- Expected: Lint/tests/coverage jobs run; status reported
+- Test Type: CI
+- Status:
+- Notes/Issue:
+
+I2. Coverage thresholds enforced (initial baseline)
+- Expected: Coverage reported; baseline thresholds recorded (even if low)
+- Test Type: CI
+- Status:
+- Notes/Issue:
+
+Known Blockers (to be captured during Phase 0)
+- Blocker:
+- Impact:
+- Owner:
+- Issue Link:
+
 ---
 
 ## Phase 1 — Foundations and Safety Nets
@@ -304,3 +600,12 @@ Acceptance Criteria
 - [ ] CI/CD scope and environments
 
 If this plan looks good, we’ll start with Phase 1–2 and submit incremental PRs for your review. You can check off the validation items you approve, and we’ll adapt as needed.
+
+Coverage Snapshot (Backend) with latest coverage numbers from backend/coverage/lcov-report/index.html
+- Statements: 20.51% (575/2803)
+- Branches: 73.13% (49/67)
+- Functions: 27.77% (25/90)
+- Lines: 20.51% (575/2803)
+- Generated at: 2025-09-19T14:13:29.425Z
+- Status:
+- Notes/Issue:

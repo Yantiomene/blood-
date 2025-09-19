@@ -13,15 +13,16 @@ wss.on('connection', (ws) => {
   connectedClients.set(ws, {}); // Add the new client to the map
 
   ws.on('message', (message) => {
-    // Handle incoming messages
-    const b = Buffer.from(message);
-    //console.log('Received message:', b.message);
-    
+    const messageStr = message.toString().trim();
+    if (!messageStr) return; // Ignore empty messages
+
+    console.log('Received message:', messageStr);
+
     // Broadcast message to all connected clients
     wss.clients.forEach((client) => {
-      if (client !== ws && client.readyState === WebSocket.OPEN) {
-        client.send(b.message);
-        //console.log('Sent message:', b.message);
+      if (client !== ws && client.readyState === 1) { // 1 = OPEN
+        client.send(messageStr);
+        console.log('Sent message:', messageStr);
       }
     });
   });

@@ -59,6 +59,19 @@ const ResetPasswordForm = () => {
         const code = codes.join('');
         if (code.length !== 5) {
             dispatch(showMessage({ heading: "Error", text: 'Please enter a 5-digit PIN.' }));
+            setIsLoading(false);
+            return;
+        }
+
+        if (password.length < 8) {
+            dispatch(showMessage({ heading: "Error", text: 'Password must be at least 8 characters long.' }));
+            setIsLoading(false);
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            dispatch(showMessage({ heading: "Error", text: 'Passwords do not match.' }));
+            setIsLoading(false);
             return;
         }
 

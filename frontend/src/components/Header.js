@@ -14,8 +14,8 @@ import {
 import { useSelector } from "react-redux";
 import { validateAuthStatus } from "../redux/userSlice";
 // components
-import NavItem from './navItem';
-import UserProfileIcon from "./userIcon";
+import NavItem from './NavItem';
+import UserProfileIcon from "./UserIcon";
 import Logo from "./logo";
 import VerifyAlert from "./VerifyAlert";
 

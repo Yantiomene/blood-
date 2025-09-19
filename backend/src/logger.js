@@ -10,9 +10,19 @@ const excludeWebSocketPolling = winston.format((info, opts) => {
   return info;
 });
 
+// Add test-aware logger behavior: silence console and avoid file transport in test env
+const isTest = process.env.NODE_ENV === 'test';
+const transports = [
+  new winston.transports.Console({ silent: isTest })
+];
+
+if (!isTest) {
+  transports.push(new winston.transports.File({ filename: 'combined.log' }));
+}
+
 // Initialize Winston logger
 const logger = winston.createLogger({
-    level: 'info',
+    level: isTest ? 'warn' : 'info',
     format: winston.format.combine(
       excludeWebSocketPolling(), // Apply custom filter function
       winston.format.timestamp({
@@ -21,10 +31,7 @@ const logger = winston.createLogger({
       winston.format.json()
     ),
     defaultMeta: { service: 'Blood+_Backend' },
-    transports: [
-      new winston.transports.Console(),
-      new winston.transports.File({ filename: 'combined.log' }),
-    ],
+    transports
 });
 
 module.exports = logger;

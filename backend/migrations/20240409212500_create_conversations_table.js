@@ -8,6 +8,11 @@ exports.up = function(knex) {
         table.integer('senderId').unsigned().references('id').inTable('users').onDelete('CASCADE');
         table.integer('receiverId').unsigned().references('id').inTable('users').onDelete('CASCADE');
         table.timestamps(true, true);
+        // Add indexes for foreign keys
+        table.index(['senderId']);
+        table.index(['receiverId']);
+        // Add unique constraint to prevent duplicate conversations
+        table.unique(['senderId', 'receiverId']);
     });
 };
 

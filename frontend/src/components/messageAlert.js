@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { exitMessage } from '../redux/globalComponentSlice';
+import { exitMessage } from '../redux/appMessageSlice';
 
 const COUNTDOWN = 5;
 const SPEED = 100;
@@ -10,11 +10,13 @@ const MessageAlert = () => {
     const [timeLeft, setTimeLeft] = useState(COUNTDOWN);
 
     useEffect(() => {
-        const timeout = setTimeout(() => {
-            dispatch(exitMessage());
-        }, timeLeft * 1000);
-        return () => clearTimeout(timeout);
-    }, [timeLeft, dispatch]);
+        if (message.displayMessage) {
+            const timeout = setTimeout(() => {
+                dispatch(exitMessage());
+            }, COUNTDOWN * 1000);
+            return () => clearTimeout(timeout);
+        }
+    }, [message.displayMessage, dispatch]);
 
     useEffect(() => {
         if (message.displayMessage) {
@@ -23,11 +25,13 @@ const MessageAlert = () => {
     }, [message.displayMessage]);
 
     useEffect(() => {
+        if (!message.displayMessage) return;
+        
         const interval = setInterval(() => {
             setTimeLeft(prevTimeLeft => Math.max(prevTimeLeft - 1/SPEED, 0));
         }, SPEED/10);
         return () => clearInterval(interval);
-    }, []);
+    }, [message.displayMessage]);
 
     if (!message.displayMessage) return null;
 

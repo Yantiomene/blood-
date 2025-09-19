@@ -21,8 +21,12 @@ const DonationCard = (props) => {
   const [showUpdateMenu, setShowUpdateMenu] = useState(false);
   // view card details
   const handleViewCard = async (cardId) => {
-    const cardDetail = await getDonationRequestByUserId(cardId);
-    console.log("card clicked", cardDetail);
+    try {
+      const cardDetail = await getDonationRequestByUserId(cardId);
+      // Handle the cardDetail appropriately
+    } catch (error) {
+      dispatch(showMessage({ heading: "Error", text: "Failed to fetch donation details" }));
+    }
   };
 
   // delete card
@@ -32,7 +36,7 @@ const DonationCard = (props) => {
       if (response.success) {
         setShowDeleteMenu(false);
         dispatch(
-          showMessage({ heading: "Success", text: `${response.messasge}` })
+showMessage({ heading: "Success", text: `${response.message}` })
         );
       }
     } catch (error) {
@@ -43,12 +47,13 @@ const DonationCard = (props) => {
   // update card
   const handleUpdateCard = async (cardId) => {
     try {
-      const response = await updateDonationRequest(cardId); // will upate later to use same as create request form
+      const response = await updateDonationRequest(cardId); // will update later to use same as create request form
       if (response.success) {
-        showMessage({ heading: "Success", text: "Request updated" });
+        dispatch(showMessage({ heading: "Success", text: "Request updated" }));
+        setShowUpdateMenu(false);
       }
     } catch (error) {
-      showMessage({ heading: "Error", text: `${error.error}` });
+      dispatch(showMessage({ heading: "Error", text: `${error.error || error.message}` }));
     }
   };
 
@@ -68,16 +73,26 @@ const DonationCard = (props) => {
   } = props;
 
   useEffect(() => {
+    let isCancelled = false;
     const getUsername = async () => {
       try {
         const user = await getUserById(props.userId);
-        setUsername(user.user.username);
+        if (!isCancelled) {
+          setUsername(user.user.username);
+          setUsernameError(null); // Clear any previous errors
+        }
       } catch (err) {
-        setUsernameError(err);
+        if (!isCancelled) {
+          setUsernameError(err.message || 'Failed to fetch user');
+          setUsername(null);
+        }
       }
     };
 
     getUsername();
+    return () => {
+      isCancelled = true;
+    };
   }, [props.userId]); // Runs whenever userId changes
 
   console.log("Username: ", username);
