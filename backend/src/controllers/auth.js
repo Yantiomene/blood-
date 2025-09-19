@@ -351,10 +351,10 @@ exports.updateUserLocation = async (req, res) => {
       "UPDATE users SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326) WHERE id = $3",
       [longitude, latitude, userId]
     );
-    await db.query(
-      "UPDATE users SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326) WHERE id = $3",
-      [longitude, latitude, userId]
-    );
+
+    req.logger.info("User location updated successfully");
+    return res.status(200).json({
+      success: true,
       message: "User location updated successfully",
     });
   } catch (error) {

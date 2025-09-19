@@ -110,9 +110,22 @@ describe('Authentication Routes', () => {
     expect(res.statusCode).toBe(401);
   });
 
-  it('should return 401 when fetching messages by conversation without auth cookie', async () => {
+  it('should return 401 when fetching conversations by user without auth cookie', async () => {
     const res = await request(app)
-      .get('/api/messages/1');
+      .get('/api/conversations/1');
+    expect(res.statusCode).toBe(401);
+  });
+
+  it('should return 401 when fetching messages by user without auth cookie', async () => {
+    const res = await request(app)
+      .get('/api/messages/user/1');
+    expect(res.statusCode).toBe(401);
+  });
+
+  it('should return 401 when updating a message without auth cookie', async () => {
+    const res = await request(app)
+      .put('/api/updateMessage/1')
+      .send({ text: 'Updated content' });
     expect(res.statusCode).toBe(401);
   });
 
