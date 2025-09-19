@@ -79,15 +79,12 @@ const Dashboard = () => {
   useEffect(() => {
     const handleFilterMyRequests = async () => {
       let data = { donationRequests: [] };
-      console.log("queryKey", queryKey);
-      console.log("queryValue", queryValue);
       setIsLoading(true);
 
       try {
         if (queryKey && queryValue) {
           if (queryKey === "?days") {
             const days = parseInt(queryValue);
-            console.log("days", days);
             data = await findDonationRequestByDate(
               getDateFromToday(days),
               getDateFromToday(0)
@@ -115,8 +112,19 @@ const Dashboard = () => {
           data = await getDonationRequests();
         }
         setRequestList(data.donationRequests.reverse());
+      } catch (error) {
+        console.error("Failed to fetch donation requests:", error);
+        dispatch(showMessage({
+          heading: "Error",
+          text: "Failed to load donation requests"
+        }));
+        setRequestList([]);
+      } finally {
         setIsLoading(false);
-
+      }
+    };
+    handleFilterMyRequests();
+  }, [queryKey, queryValue, userData.id, userData.location]);
     };
     handleFilterMyRequests();
   }, [queryKey, queryValue, userData.id, userData.location]);

@@ -45,7 +45,7 @@ const DonationRequestForm = () => {
         <>
             <form onSubmit={handleSubmit} className="w-[90vw] md:w-[40vw] h-fit bg-white px-8 py-8 mb-4">
                 {requestError && <p className="text-red-500 mb-4">{requestError}</p>}
-                {requestError && <p className="text-green-500 mb-4">{requestSuccess}</p>}
+                {requestSuccess && <p className="text-green-500 mb-4">{requestSuccess}</p>}
                 <div className={fieldStyles}>
                     <label className={labelStyles}>
                         Blood Type:

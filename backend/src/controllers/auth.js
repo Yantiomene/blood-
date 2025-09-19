@@ -275,13 +275,9 @@ exports.requestNewToken = async (req, res) => {
       throw new Error("Redis client not connected");
     }
 
-    // Check if there's an existing verification code for the email
-    const existingCode = await redisClient.get(email);
-
-    // If there's an existing code, delete it
-    if (existingCode) {
-      await redisClient.del(existingCode);
-    }
+    // Note: Cannot easily delete existing codes for this email without
+    // maintaining a reverse mapping or scanning all keys.
+    // The new code will work, and old codes will expire after 1 hour.
 
     // Store the new verification code in Redis
     await redisClient.set(verificationCode, email, 60 * 60); // Expire in 1h (3600 seconds)
@@ -371,6 +367,10 @@ exports.passwordResetRequest = async (req, res) => {
   const { email } = req.body;
 
   try {
+exports.passwordResetRequest = async (req, res) => {
+  const { email } = req.body;
+
+  try {
     // check if email exists in database
     const user = await db.query("SELECT * FROM users WHERE email = $1", [
       email,
@@ -390,13 +390,9 @@ exports.passwordResetRequest = async (req, res) => {
     // Generate and store a reset token in Redis
     const resetToken = generateShortCode();
 
-    // Check if there's an existing token for the email
-    const existingCode = await redisClient.get(email);
-    console.log("existing code: ", existingCode);
+    // Store the reset token in Redis with email as value
+    await redisClient.set(resetToken, email, 60 * 60); // Expire in 1h
 
-    // If there's an existing code, delete it
-    // Delete any existing reset tokens for this email
-    // This would require scanning Redis keys or maintaining a reverse mapping
     // Send password reset email with the short code
     sendPasswordResetEmail(email, resetToken);
 
@@ -416,14 +412,6 @@ exports.passwordResetRequest = async (req, res) => {
     });
   }
 };
-
-exports.resetPassword = async (req, res) => {
-  const { code, password } = req.body;
-
-
-
-  try {
-    // Retrieve verification code from Redis
     const email = await redisClient.get(code);
     if (!email) {
       return res.status(404).json({

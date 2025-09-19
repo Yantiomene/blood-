@@ -21,9 +21,9 @@ const saveState = (state) => {
         const sessionExpireDate = parsedState?.user?.sessionExpireDate;
         if (sessionExpireDate && new Date().getTime() > new Date(sessionExpireDate).getTime()) {
             console.log(">> session expired", new Date().getTime(), JSON.parse(serializedState).sessionExpireDate);
-    }
-};
-
+        }
+    } catch (error) {
+        console.error('Error saving state to localStorage:', error);
 const loadState = () => {
     try {
         const serializedState = localStorage.getItem('bplus');
@@ -38,7 +38,16 @@ const loadState = () => {
         return JSON.parse(serializedState);
     } catch (error) {
         console.error('Error loading state from localStorage:', error);
-import { throttle } from 'lodash'; // or implement your own throttle
+        return undefined;
+    }
+};
+        return JSON.parse(serializedState);
+    } catch (error) {
+        console.error('Error loading state from localStorage:', error);
+import { configureStore } from '@reduxjs/toolkit';
+import userSlice from './userSlice';
+import { appMessageReducer } from './globalComponentSlice';
+import { throttle } from 'lodash';
 
 // Throttle saves to at most once per second
 const throttledSaveState = throttle((state) => {

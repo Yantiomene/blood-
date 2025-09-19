@@ -63,6 +63,18 @@ const ResetPasswordForm = () => {
             return;
         }
 
+        if (password.length < 8) {
+            dispatch(showMessage({ heading: "Error", text: 'Password must be at least 8 characters long.' }));
+            setIsLoading(false);
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            dispatch(showMessage({ heading: "Error", text: 'Passwords do not match.' }));
+            setIsLoading(false);
+            return;
+        }
+
         try {
             const response = await resetPasswordWithPIN({ code, password })
             if (response.success) {

@@ -43,7 +43,12 @@ if (process.env.NODE_ENV === 'test') {
 
     async connect() {
       return new Promise((resolve, reject) => {
+        const errorHandler = (error) => {
+          reject(error);
+        };
+        this.client.once('error', errorHandler);
         this.client.on('ready', () => {
+          this.client.removeListener('error', errorHandler);
           console.log('Redis client connected.');
           resolve();
         });

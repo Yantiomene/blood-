@@ -50,6 +50,11 @@ const UserProfileIcon = () => {
                 width={40}
                 height={40}
                 alt="Profile Icon"
+                role="button"
+                tabIndex={0}
+                aria-expanded={isDropdownOpen}
+                aria-haspopup="true"
+                onKeyDown={(e) => e.key === 'Enter' && handleDropdownToggle()}
             />
             {isDropdownOpen && (
                 <div className="dropdown border border-slate-200 absolute top-14 right-0 z-50 bg-white rounded-md shadow">

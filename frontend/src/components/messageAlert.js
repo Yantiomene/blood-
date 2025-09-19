@@ -22,6 +22,8 @@ const MessageAlert = () => {
         if (message.displayMessage) {
             setTimeLeft(COUNTDOWN);
         }
+    }, [message.displayMessage]);
+
     useEffect(() => {
         if (!message.displayMessage) return;
         
@@ -30,8 +32,6 @@ const MessageAlert = () => {
         }, SPEED/10);
         return () => clearInterval(interval);
     }, [message.displayMessage]);
-        return () => clearInterval(interval);
-    }, []);
 
     if (!message.displayMessage) return null;
 

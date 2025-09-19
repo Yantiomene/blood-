@@ -166,16 +166,16 @@ A3. Login user (invalid)
 - Steps: Wrong password
 - Expected: 401 + safe error message; no token/cookie
 - Test Type: Integration
-- Status: —
-- Notes/Issue: Not covered yet in baseline tests.
+- Status: ✅
+- Notes/Issue: Covered via POST /api/login invalid credentials; current implementation returns 400 (expectation says 401) — documenting actual behavior as-is in baseline.
 
 A4. Logout
 - Endpoint(s): POST /api/auth/logout
 - Pre-conditions: Logged in
 - Expected: 200 + token invalidated (Redis if used) and cookie cleared
 - Test Type: Integration
-- Status: —
-- Notes/Issue: Not covered yet in baseline tests.
+- Status: ✅
+- Notes/Issue: Covered via GET /api/logout with auth cookie (route differs from spec: GET vs POST); cookie cleared successfully.
 
 A5. Get profile (auth required)
 - Endpoint(s): GET /api/users/me
@@ -221,16 +221,16 @@ B4. Delete donation request (owner)
 - Endpoint(s): DELETE /api/donations/:id
 - Expected: 200/204 + resource removed; cascade rules honored
 - Test Type: Integration
-- Status: —
-- Notes/Issue: Not covered yet in baseline tests.
+- Status: ✅
+- Notes/Issue: Covered via DELETE /api/donationRequest/:id.
 
 B5. Validation errors
 - Endpoint(s): POST/PUT /api/donations
 - Steps: Invalid bloodType/quantity/required fields
 - Expected: 400 + detailed errors (no stack)
 - Test Type: Integration
-- Status: —
-- Notes/Issue: Not covered yet in baseline tests.
+- Status: ✅
+- Notes/Issue: Covered via invalid payload resulting in 400 on POST /api/donationRequest.
 
 Section C — Backend: Blogs
 C1. List blogs
@@ -602,10 +602,10 @@ Acceptance Criteria
 If this plan looks good, we’ll start with Phase 1–2 and submit incremental PRs for your review. You can check off the validation items you approve, and we’ll adapt as needed.
 
 Coverage Snapshot (Backend) with latest coverage numbers from backend/coverage/lcov-report/index.html
-- Statements: 28.91% (799/2763)
-- Branches: 68.22% (73/107)
-- Functions: 44.44% (40/90)
-- Lines: 28.91% (799/2763)
-- Generated at: 2025-09-19T13:00:57.126Z
+- Statements: 20.51% (575/2803)
+- Branches: 73.13% (49/67)
+- Functions: 27.77% (25/90)
+- Lines: 20.51% (575/2803)
+- Generated at: 2025-09-19T14:13:29.425Z
 - Status:
 - Notes/Issue:

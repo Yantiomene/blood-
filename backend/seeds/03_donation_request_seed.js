@@ -13,11 +13,8 @@ exports.seed = function (knex) {
           isFulfilled: false,
           requestingEntity: 'Hospital',
           requestingEntityId: null,
-          message: 'Urgent blood donation needed for emergency surgery',
-          urgent: true,
         },
         // Add more donation request entries as needed
       ]);
     });
 };
-  

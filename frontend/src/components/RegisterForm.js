@@ -51,9 +51,18 @@ if (password !== confirmPassword) {
                 // successfully registered users should be logged in
                 // verification is not a priority at this moment. it's a necessary action
                 // preceeding the creation of an account
-                await login({ email, password });
-                router(VERIFYACCOUNT);
-                return;
+                try {
+                    await login({ email, password });
+                    router(VERIFYACCOUNT);
+                    return;
+                } catch (loginError) {
+                    dispatch(showMessage({
+                        heading: 'Warning',
+                        text: 'Account created but auto-login failed. Please login manually.'
+                    }));
+                    router('/login');
+                    return;
+                }
             } else {
                 console.log(`>> registration error: ${response}`);
             }

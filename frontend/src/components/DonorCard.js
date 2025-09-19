@@ -47,12 +47,13 @@ showMessage({ heading: "Success", text: `${response.message}` })
   // update card
   const handleUpdateCard = async (cardId) => {
     try {
-      const response = await updateDonationRequest(cardId); // will upate later to use same as create request form
+      const response = await updateDonationRequest(cardId); // will update later to use same as create request form
       if (response.success) {
-        showMessage({ heading: "Success", text: "Request updated" });
+        dispatch(showMessage({ heading: "Success", text: "Request updated" }));
+        setShowUpdateMenu(false);
       }
     } catch (error) {
-      showMessage({ heading: "Error", text: `${error.error}` });
+      dispatch(showMessage({ heading: "Error", text: `${error.error || error.message}` }));
     }
   };
 

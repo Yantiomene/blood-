@@ -118,13 +118,13 @@ if (process.env.NODE_ENV === 'test') {
     };
   
     // Send email
-    await transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-          console.log('Error sending email:', error.message);
-      } else {
-          console.log('Email sent:', info.response);
-      }
-    });
+    try {
+      const info = await transporter.sendMail(mailOptions);
+      console.log('Email sent:', info.response);
+    } catch (error) {
+      console.log('Error sending email:', error.message);
+      throw error;
+    }
   };
   
   

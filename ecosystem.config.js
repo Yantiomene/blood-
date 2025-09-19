@@ -28,8 +28,9 @@ module.exports = {
       {
         name: 'redis cache',
         script: 'redis-server',
-        cwd: './backend/',
-        watch: true,
+        cwd: './',
+        watch: false,
+        args: '--dir ./data/redis --appendonly yes',
       }
     ]
   };
