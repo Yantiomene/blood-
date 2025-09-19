@@ -458,8 +458,10 @@ exports.resetPassword = async (req, res) => {
 };
 
 // Function to generate a random short code (5 digits)
+const crypto = require('crypto');
+
 const generateShortCode = () => {
   const min = 10000; // Minimum 5-digit number
   const max = 99999; // Maximum 5-digit number
-  return Math.floor(min + Math.random() * (max - min + 1)).toString();
+  return crypto.randomInt(min, max + 1).toString();
 };

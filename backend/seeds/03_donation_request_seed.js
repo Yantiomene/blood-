@@ -5,7 +5,6 @@ exports.seed = function (knex) {
       // Inserts seed entries
       return knex('donation_requests').insert([
         {
-          id: 1,
           userId: 1, // User ID from the users table
           bloodType: 'B-',
           quantity: 2,

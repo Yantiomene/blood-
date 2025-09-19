@@ -1,0 +1,101 @@
+name: Backend CI
+
+on:
+  push:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    paths:
+      - 'backend/**'
+
+jobs:
+  test-and-migrate:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:15-3.4
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres" 
+          --health-interval=10s 
+          --health-timeout=5s 
+          --health-retries=5
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Wait for Postgres
+        env:
+          PGPASSWORD: postgres
+        run: |
+          for i in {1..15}; do
+            if pg_isready -h 127.0.0.1 -p 5432 -U postgres; then
+              echo "Postgres is ready"
+              break
+            fi
+            echo "Waiting for Postgres..."
+            sleep 2
+          done
+
+      - name: Provision database and PostGIS
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h 127.0.0.1 -U postgres -d postgres -c "CREATE USER blooduser WITH PASSWORD 'bloodpwd';" || true
+          psql -h 127.0.0.1 -U postgres -d postgres -c "CREATE DATABASE blooddb OWNER blooduser;" || true
+          psql -h 127.0.0.1 -U postgres -d blooddb -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create .env for backend
+        run: |
+          cat > .env << 'EOF'
+          PORT=2000
+          SERVER_URL=http://localhost:2000
+          CLIENT_URL=http://localhost:3000
+          SECRET=dev_secret
+          DB_USER=blooduser
+          DB_PASSWORD=bloodpwd
+          DB_HOST=127.0.0.1
+          DB_PORT=5432
+          DB_NAME=blooddb
+          REDIS_HOST=127.0.0.1
+          REDIS_PORT=6379
+          EOF
+
+      - name: Run migrations
+        run: npx knex migrate:latest --knexfile knexfile.js
+
+      - name: Run seeds
+        run: npx knex seed:run --knexfile knexfile.js
+
+      - name: Run tests with coverage
+        env:
+          NODE_ENV: test
+        run: npm test -- --runInBand --detectOpenHandles --verbose
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage

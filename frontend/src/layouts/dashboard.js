@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { DASHBOARDROUTE } from "../api";
 import { getDateFromToday } from "../util/datetime";
 // redux
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
   findDonationRequestByLocation,
   findRequestByBloodType,

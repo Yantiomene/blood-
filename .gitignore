@@ -40,3 +40,6 @@ next-env.d.ts
 
 #testing
 /backend/coverage
+
+#test artifact
+/backend/test-results-messages.json

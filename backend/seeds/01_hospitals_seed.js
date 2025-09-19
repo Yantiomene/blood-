@@ -5,7 +5,6 @@ exports.seed = function (knex) {
         // Inserts seed entries
         return knex('hospitals').insert([
           {
-            id: 1,
             name: 'City Hospital',
             location: knex.raw("ST_SetSRID(ST_MakePoint(0,0), 4326)"),
             contactNumber: '987654321',
