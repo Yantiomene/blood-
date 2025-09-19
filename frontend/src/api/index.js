@@ -1,4 +1,4 @@
-export const apiUrl = "http://localhost:8000/api";
+export const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:8000/api";
 export const blogUrl = "https://app.novanex.tech/blogs" //"http://localhost:2000/blogs";
 // route constants
 export const DASHBOARDROUTE = "/dashboard";

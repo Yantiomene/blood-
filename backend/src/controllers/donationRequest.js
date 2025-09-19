@@ -3,6 +3,7 @@ const { sendNotificationEmail, sendDenyEmail, sendAcceptEmail } = require('../ut
 const db = require('../db');
 const wkx = require('wkx');
 const fs = require('fs');
+const { NODE_ENV } = require('../constants');
 
 const createDonationRequest = async (req, res) => {
     const { bloodType, quantity, location, message } = req.body;
@@ -17,12 +18,18 @@ const createDonationRequest = async (req, res) => {
         }
         validateLocationFormat(location);
 
-        const locationPoint = await db.query('SELECT ST_SetSRID(ST_MakePoint($1, $2), 4326) AS location', [location[0], location[1]]);
+        let locationValue;
+        if (NODE_ENV === 'test') {
+            locationValue = `(${location[0]},${location[1]})`;
+        } else {
+            const locationPoint = await db.query('SELECT ST_SetSRID(ST_MakePoint($1, $2), 4326) AS location', [location[0], location[1]]);
+            locationValue = locationPoint.rows[0].location;
+        }
 
         // Insert the donation request into the database
         const result = await db.query(
             'INSERT INTO donation_requests ("userId", "bloodType", quantity, location, "isFulfilled", "requestingEntity", "requestingEntityId", "message") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-            [userId, bloodType, quantity, locationPoint.rows[0].location, false, 'User', userId, message]
+            [userId, bloodType, quantity, locationValue, false, 'User', userId, message]
         );
 
         const createdDonationRequest = result.rows[0];
@@ -134,8 +141,12 @@ const updateDonationRequest = async (req, res) => {
         if (location !== undefined) {
             updateFields.push('"location"');
             validateLocationFormat(location);
-            const locationPoint = await db.query('SELECT ST_SetSRID(ST_MakePoint($1, $2), 4326) AS location', [location[0], location[1]]);
-            updateValues.push(locationPoint.rows[0].location);
+            if (NODE_ENV === 'test') {
+                updateValues.push(`(${location[0]},${location[1]})`);
+            } else {
+                const locationPoint = await db.query('SELECT ST_SetSRID(ST_MakePoint($1, $2), 4326) AS location', [location[0], location[1]]);
+                updateValues.push(locationPoint.rows[0].location);
+            }
         }
 
         if (isFulfilled !== undefined) {

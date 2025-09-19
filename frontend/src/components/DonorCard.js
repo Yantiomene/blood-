@@ -73,16 +73,26 @@ showMessage({ heading: "Success", text: `${response.message}` })
   } = props;
 
   useEffect(() => {
+    let isCancelled = false;
     const getUsername = async () => {
       try {
         const user = await getUserById(props.userId);
-        setUsername(user.user.username);
+        if (!isCancelled) {
+          setUsername(user.user.username);
+          setUsernameError(null); // Clear any previous errors
+        }
       } catch (err) {
-        setUsernameError(err);
+        if (!isCancelled) {
+          setUsernameError(err.message || 'Failed to fetch user');
+          setUsername(null);
+        }
       }
     };
 
     getUsername();
+    return () => {
+      isCancelled = true;
+    };
   }, [props.userId]); // Runs whenever userId changes
 
   console.log("Username: ", username);

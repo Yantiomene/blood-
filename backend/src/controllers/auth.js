@@ -367,10 +367,6 @@ exports.passwordResetRequest = async (req, res) => {
   const { email } = req.body;
 
   try {
-exports.passwordResetRequest = async (req, res) => {
-  const { email } = req.body;
-
-  try {
     // check if email exists in database
     const user = await db.query("SELECT * FROM users WHERE email = $1", [
       email,
@@ -382,7 +378,7 @@ exports.passwordResetRequest = async (req, res) => {
       });
     }
 
-    // Store verification code in Redis
+    // Ensure redis client is connected
     if (!redisClient.isAlive()) {
       throw new Error("Redis client not connected");
     }
@@ -390,13 +386,11 @@ exports.passwordResetRequest = async (req, res) => {
     // Generate and store a reset token in Redis
     const resetToken = generateShortCode();
 
-    // Store the reset token in Redis with email as value
-    await redisClient.set(resetToken, email, 60 * 60); // Expire in 1h
+    // Store the reset token in Redis with email as value (expires in 1h)
+    await redisClient.set(resetToken, email, 60 * 60);
 
     // Send password reset email with the short code
     sendPasswordResetEmail(email, resetToken);
-
-
 
     req.logger.info("Password reset email sent successfully");
     return res.status(200).json({
@@ -412,6 +406,25 @@ exports.passwordResetRequest = async (req, res) => {
     });
   }
 };
+
+exports.resetPassword = async (req, res) => {
+  const { code, password } = req.body;
+
+  try {
+    if (!code) {
+      return res.status(400).json({
+        success: false,
+        error: "Reset code is required",
+      });
+    }
+
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        error: "New password is required",
+      });
+    }
+
     const email = await redisClient.get(code);
     if (!email) {
       return res.status(404).json({

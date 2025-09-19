@@ -13,24 +13,18 @@ wss.on('connection', (ws) => {
   connectedClients.set(ws, {}); // Add the new client to the map
 
   ws.on('message', (message) => {
-    try {
-      // Validate message format/content here
-      const parsedMessage = JSON.parse(message.toString());
-      
-      // Handle incoming messages
-      console.log('Received message:', message.toString());
-      
-      // Broadcast message to all connected clients
-      wss.clients.forEach((client) => {
-        if (client !== ws && client.readyState === WebSocket.OPEN) {
-          client.send(message);
-          console.log('Sent message:', message.toString());
-        }
-      });
-    } catch (error) {
-      console.error('Error handling WebSocket message:', error);
-      ws.send(JSON.stringify({ error: 'Invalid message format' }));
-    }
+    const messageStr = message.toString().trim();
+    if (!messageStr) return; // Ignore empty messages
+
+    console.log('Received message:', messageStr);
+
+    // Broadcast message to all connected clients
+    wss.clients.forEach((client) => {
+      if (client !== ws && client.readyState === 1) { // 1 = OPEN
+        client.send(messageStr);
+        console.log('Sent message:', messageStr);
+      }
+    });
   });
 
   ws.on('close', () => {

@@ -20,10 +20,10 @@ const Overlay = ({ showWindow, children }) => {
     document.body.style.overflow = "hidden";
     document.addEventListener("mousedown", handleClickAway);
     return () => {
+      document.body.style.overflow = "auto";
       document.removeEventListener("mousedown", handleClickAway);
     };
-  }, []);
-
+  }, [handleClickAway]);
   return (
     <div
       id="overlay-container"

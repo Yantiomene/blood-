@@ -7,11 +7,6 @@ exports.up = function(knex) {
         table.increments('id').primary();
         table.integer('senderId').unsigned().references('id').inTable('users').onDelete('CASCADE');
         table.integer('receiverId').unsigned().references('id').inTable('users').onDelete('CASCADE');
-    });
-};
-        table.increments('id').primary();
-        table.integer('senderId').unsigned().references('id').inTable('users').onDelete('CASCADE');
-        table.integer('receiverId').unsigned().references('id').inTable('users').onDelete('CASCADE');
         table.timestamps(true, true);
         // Add indexes for foreign keys
         table.index(['senderId']);

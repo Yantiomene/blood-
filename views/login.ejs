@@ -77,7 +77,9 @@
   
           <div class="card bg-glass">
             <div class="card-body px-4 py-5 px-md-5">
-              <form action="/login" method="POST">
+<form action="/login" method="POST">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <!-- 2 column grid layout with text inputs for the first and last names -->
                 <!-- 2 column grid layout with text inputs for the first and last names -->
                 <div class="row">
                   

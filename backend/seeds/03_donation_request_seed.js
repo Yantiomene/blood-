@@ -9,7 +9,7 @@ exports.seed = function (knex) {
           userId: 1, // User ID from the users table
           bloodType: 'B-',
           quantity: 2,
-          location: knex.raw("ST_SetSRID(ST_MakePoint(0,0), 4326)"),
+          location: knex.raw("ST_SetSRID(ST_MakePoint(-74.006, 40.7128), 4326)"), // Example: NYC
           isFulfilled: false,
           requestingEntity: 'Hospital',
           requestingEntityId: null,

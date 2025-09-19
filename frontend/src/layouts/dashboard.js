@@ -125,9 +125,6 @@ const Dashboard = () => {
     };
     handleFilterMyRequests();
   }, [queryKey, queryValue, userData.id, userData.location]);
-    };
-    handleFilterMyRequests();
-  }, [queryKey, queryValue, userData.id, userData.location]);
 
   return (
     <>

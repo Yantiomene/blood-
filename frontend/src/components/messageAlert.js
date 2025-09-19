@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { exitMessage } from '../redux/globalComponentSlice';
+import { exitMessage } from '../redux/appMessageSlice';
 
 const COUNTDOWN = 5;
 const SPEED = 100;

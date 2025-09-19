@@ -8,9 +8,16 @@ exports.handleWebSocketMessages = (ws) => {
     });
 
     ws.on('message', (message) => {
-        // Be careful logging messages - they might contain sensitive data
+        // Validate message size and content
+        if (message.length > 1024) {
+            logger.warn(`Message too large: ${message.length} bytes`);
+            ws.send('Error: Message too large');
+            return;
+        }
+        
         logger.info(`Received message from client (length: ${message.length})`);
-        ws.send(`Received message: ${message}`)
+        // Send acknowledgment instead of echoing raw content
+        ws.send('Message received successfully');
     });
 
     ws.on('close', () => {
