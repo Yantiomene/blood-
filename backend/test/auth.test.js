@@ -102,4 +102,23 @@ describe('Authentication Routes', () => {
     const res = await request(app).get('/api/logout');
     expect(res.statusCode).toBe(401);
   });
+
+  it('should return 401 when creating a message without auth cookie', async () => {
+    const res = await request(app)
+      .post('/api/createMessage')
+      .send({ text: 'Hello', conversationId: 1 });
+    expect(res.statusCode).toBe(401);
+  });
+
+  it('should return 401 when fetching messages by conversation without auth cookie', async () => {
+    const res = await request(app)
+      .get('/api/messages/1');
+    expect(res.statusCode).toBe(401);
+  });
+
+  it('should return 401 when deleting a message without auth cookie', async () => {
+    const res = await request(app)
+      .delete('/api/deleteMessage/1');
+    expect(res.statusCode).toBe(401);
+  });
 });

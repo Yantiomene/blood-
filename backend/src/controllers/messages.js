@@ -182,13 +182,20 @@ exports.updateMessage = async (req, res) => {
             updateValues.push(event);
         }
 
+        if (updateFields.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'No fields provided to update'
+            });
+        }
+
         updateValues.push(messageId);
 
         // Update the message
         const updatedMessage = await db.query(`
             UPDATE messages
-            SET ${updateFields.map((field, index) => `"${field}" = $${index + 1}`).join(', ')}
-            WHERE id = $${updateValues.length}
+            SET ${updateFields.map((field, index) => `"${field}" = ${index + 1}`).join(', ')}
+            WHERE id = ${updateValues.length}
             RETURNING *;
         `, updateValues);
 

@@ -24,9 +24,9 @@ if (process.env.NODE_ENV === 'test') {
         pass: PASSWORD, // Replace with your email app password
     },
     // For Gmail, use the following settings:
-    secure: true, 
+    secure: false,
     requireTLS: true,
-    port: 587, // or 465 for SSL
+    port: 587,
   });
 
   const sendVerificationEmail = (email, verificationCode) => {
@@ -83,7 +83,7 @@ if (process.env.NODE_ENV === 'test') {
         <div class="container">
           <h1>Email Verification</h1>
           <p>Your verification code is: <span class="verification-code">${verificationCode}</span></p>
-          <p>Or click the following link to verify your email: <a href="http://localhost:8000/api/verifyEmail/${verificationCode}" target="_blank">Verify Email</a></p>
+          <p>Or click the following link to verify your email: <a href="${SERVER_URL}/api/verifyEmail/${verificationCode}" target="_blank">Verify Email</a></p>
           <p class="expire-info">Note: This code will expire in 1 hour.</p>
           <div class="thank-you">Thank you, the Blood+ team</div>
         </div>
@@ -181,7 +181,7 @@ if (process.env.NODE_ENV === 'test') {
       <div class="container">
         <h1>Password Reset</h1>
         <p>Your password reset code is: <span class="reset-code">${resetToken}</span></p>
-        <p>Or click the following link to reset your password: <a href="http://localhost:8000/api/resetPassword/${resetToken}" target="_blank">Reset Password</a></p>
+        <p>Or click the following link to reset your password: <a href="${SERVER_URL}/api/resetPassword/${resetToken}" target="_blank">Reset Password</a></p>
         <p class="expire-info">Note: This code will expire in 1 hour.</p>
         <div class="thank-you">Thank you, the Blood+ team</div>
       </div>

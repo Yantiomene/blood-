@@ -47,10 +47,6 @@ if (process.env.NODE_ENV === 'test') {
           console.log('Redis client connected.');
           resolve();
         });
-        this.client.on('error', (error) => {
-          console.error(`Redis client error: ${error}`);
-          reject(error);
-        });
       });
     }
 
@@ -99,7 +95,9 @@ if (process.env.NODE_ENV === 'test') {
     }
   }
 
-  exportedClient = new RedisClient('127.0.0.1', 6379);
+  const redisHost = process.env.REDIS_HOST || '127.0.0.1';
+  const redisPortVal = process.env.REDIS_PORT || 6379;
+  exportedClient = new RedisClient(redisHost, redisPortVal);
 }
 
 module.exports = exportedClient;

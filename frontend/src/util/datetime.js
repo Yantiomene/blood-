@@ -1,6 +1,10 @@
 export const convertDateTime = (dateStr) => {
-    const date = new Date(dateStr).toDateString();
-    const time = new Date(dateStr).toLocaleTimeString();
+    const dateObj = new Date(dateStr);
+    if (isNaN(dateObj.getTime())) {
+        return 'Invalid date';
+    }
+    const date = dateObj.toDateString();
+    const time = dateObj.toLocaleTimeString();
     return `${date} at ${time}`;
 }
 
@@ -17,10 +21,9 @@ export const calculateTimeDelta = (dateStr) => {
     
     // Calculate months and years more accurately
     let diffMonths = (currentDate.getFullYear() - pastDate.getFullYear()) * 12;
-    diffMonths -= pastDate.getMonth();
-    diffMonths += currentDate.getMonth();
+    diffMonths += currentDate.getMonth() - pastDate.getMonth();
     const diffYears = Math.floor(diffMonths / 12);
-    diffMonths = Math.abs(diffMonths % 12);
+    diffMonths = diffMonths % 12;
 
     let output = "";
     if (diffYears > 0) {

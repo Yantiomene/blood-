@@ -10,22 +10,26 @@ const MessageAlert = () => {
     const [timeLeft, setTimeLeft] = useState(COUNTDOWN);
 
     useEffect(() => {
-        const timeout = setTimeout(() => {
-            dispatch(exitMessage());
-        }, timeLeft * 1000);
-        return () => clearTimeout(timeout);
-    }, [timeLeft, dispatch]);
+        if (message.displayMessage) {
+            const timeout = setTimeout(() => {
+                dispatch(exitMessage());
+            }, COUNTDOWN * 1000);
+            return () => clearTimeout(timeout);
+        }
+    }, [message.displayMessage, dispatch]);
 
     useEffect(() => {
         if (message.displayMessage) {
             setTimeLeft(COUNTDOWN);
         }
-    }, [message.displayMessage]);
-
     useEffect(() => {
+        if (!message.displayMessage) return;
+        
         const interval = setInterval(() => {
             setTimeLeft(prevTimeLeft => Math.max(prevTimeLeft - 1/SPEED, 0));
         }, SPEED/10);
+        return () => clearInterval(interval);
+    }, [message.displayMessage]);
         return () => clearInterval(interval);
     }, []);
 

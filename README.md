@@ -601,11 +601,11 @@ Acceptance Criteria
 
 If this plan looks good, we’ll start with Phase 1–2 and submit incremental PRs for your review. You can check off the validation items you approve, and we’ll adapt as needed.
 
-Coverage Snapshot (Backend)
-- Statements: 27.65% (764/2763)
-- Branches: 65.30% (64/98)
-- Functions: 42.22% (38/90)
-- Lines: 27.65% (764/2763)
-- Generated at: 2025-09-19T12:51:56Z
+Coverage Snapshot (Backend) with latest coverage numbers from backend/coverage/lcov-report/index.html
+- Statements: 28.91% (799/2763)
+- Branches: 68.22% (73/107)
+- Functions: 44.44% (40/90)
+- Lines: 28.91% (799/2763)
+- Generated at: 2025-09-19T13:00:57.126Z
 - Status:
 - Notes/Issue:

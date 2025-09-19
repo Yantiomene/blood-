@@ -22,10 +22,10 @@ const UserProfileIcon = () => {
     };
 
     useEffect(() => {
-        if (!isLoggedin) {
+        if (isLoggedin && !userData) {
             dispatch(fetchCurrentUser());
         }
-    }, [isLoggedin, dispatch]);
+    }, [isLoggedin, userData, dispatch]);
 
     const handleClickAway = (event) => {
         if (ref.current && !ref.current.contains(event.target))
@@ -58,9 +58,9 @@ const UserProfileIcon = () => {
                         <ul ref={ref} className="p-2 relative">
                             <li>
                                 <span className="mb-2 px-3 py-2 bg-red-100 rounded-full block text-nowrap">
-                                    {userData.username}
+                                    {userData?.username || 'Loading...'}
                                     <span className='ml-2 px-1 rounded-full text-white bg-red-500 text-center text-xs'>
-                                        {userData.bloodType}
+                                        {userData?.bloodType || '?'}
                                     </span>
                                 </span>
                                 <hr/>

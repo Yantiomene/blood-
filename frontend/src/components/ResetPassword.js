@@ -59,6 +59,7 @@ const ResetPasswordForm = () => {
         const code = codes.join('');
         if (code.length !== 5) {
             dispatch(showMessage({ heading: "Error", text: 'Please enter a 5-digit PIN.' }));
+            setIsLoading(false);
             return;
         }
 

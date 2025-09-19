@@ -4,10 +4,23 @@ import { appMessageReducer } from './globalComponentSlice';
 
 const saveState = (state) => {
     try {
-        const serializedState = JSON.stringify(state);
+        // Only persist non-sensitive data
+        const stateToPersist = {
+          user: {
+            username: state.user?.username,
+            email: state.user?.email,
+            isDonor: state.user?.isDonor,
+            sessionExpireDate: state.user?.sessionExpireDate,
+            // Exclude sensitive fields like tokens, passwords, etc.
+          },
+          // Don't persist appMessage as it's transient UI state
+        };
+        const serializedState = JSON.stringify(stateToPersist);
         localStorage.setItem('bplus', serializedState);
-    } catch (error) {
-        console.error('Error saving state to localStorage:', error);
+        const parsedState = JSON.parse(serializedState);
+        const sessionExpireDate = parsedState?.user?.sessionExpireDate;
+        if (sessionExpireDate && new Date().getTime() > new Date(sessionExpireDate).getTime()) {
+            console.log(">> session expired", new Date().getTime(), JSON.parse(serializedState).sessionExpireDate);
     }
 };
 
@@ -25,9 +38,16 @@ const loadState = () => {
         return JSON.parse(serializedState);
     } catch (error) {
         console.error('Error loading state from localStorage:', error);
-        return undefined;
-    }
-};
+import { throttle } from 'lodash'; // or implement your own throttle
+
+// Throttle saves to at most once per second
+const throttledSaveState = throttle((state) => {
+  saveState(state);
+}, 1000);
+
+store.subscribe(() => {
+    throttledSaveState(store.getState());
+});
 
 const persistedState = loadState();
 const store = configureStore({

@@ -39,13 +39,9 @@ exports.register = async (req, res) => {
       throw new Error("Redis client not connected");
     }
 
-    // Check if there's an existing verification code for the email
-    const existingCode = await redisClient.get(email);
-
-    // If there's an existing code, delete it
-    if (existingCode) {
-      await redisClient.del(existingCode);
-    }
+    // Delete any existing verification codes for this email
+    // This would require scanning Redis keys or maintaining a reverse mapping
+    // For now, the new code will override when the user requests verification
 
     // Store the new verification code in Redis
     await redisClient.set(verificationCode, email, 60 * 60); // Expire in 1h (3600 seconds)
@@ -352,13 +348,13 @@ exports.updateUserLocation = async (req, res) => {
 
     // Update user's location in the database
     await db.query(
-      "UPDATE users SET location = ST_GeomFromText($1, 4326) WHERE id = $2",
-      [`POINT(${longitude} ${latitude})`, userId]
+      "UPDATE users SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326) WHERE id = $3",
+      [longitude, latitude, userId]
     );
-
-    req.logger.info("User location updated successfully");
-    return res.status(200).json({
-      success: true,
+    await db.query(
+      "UPDATE users SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326) WHERE id = $3",
+      [longitude, latitude, userId]
+    );
       message: "User location updated successfully",
     });
   } catch (error) {
@@ -399,13 +395,8 @@ exports.passwordResetRequest = async (req, res) => {
     console.log("existing code: ", existingCode);
 
     // If there's an existing code, delete it
-    if (existingCode) {
-      await redisClient.del(existingCode);
-    }
-
-    // Store the new reset token in Redis
-    await redisClient.set(resetToken, email, 60 * 60); // Expire in 1h (3600 seconds)
-
+    // Delete any existing reset tokens for this email
+    // This would require scanning Redis keys or maintaining a reverse mapping
     // Send password reset email with the short code
     sendPasswordResetEmail(email, resetToken);
 

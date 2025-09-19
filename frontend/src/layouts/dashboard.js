@@ -116,16 +116,7 @@ const Dashboard = () => {
         }
         setRequestList(data.donationRequests.reverse());
         setIsLoading(false);
-import { useDispatch } from "react-redux";
 
-const Dashboard = () => {
-  const dispatch = useDispatch();
-  // ... other code ...
-  
-  } catch (error) {
-    dispatch(showMessage({ heading: "Error", text: error.error || error.message }));
-  }
-}
     };
     handleFilterMyRequests();
   }, [queryKey, queryValue, userData.id, userData.location]);
