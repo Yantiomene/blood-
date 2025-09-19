@@ -600,3 +600,12 @@ Acceptance Criteria
 - [ ] CI/CD scope and environments
 
 If this plan looks good, we’ll start with Phase 1–2 and submit incremental PRs for your review. You can check off the validation items you approve, and we’ll adapt as needed.
+
+Coverage Snapshot (Backend)
+- Statements: 27.65% (764/2763)
+- Branches: 65.30% (64/98)
+- Functions: 42.22% (38/90)
+- Lines: 27.65% (764/2763)
+- Generated at: 2025-09-19T12:51:56Z
+- Status:
+- Notes/Issue:

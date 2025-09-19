@@ -69,4 +69,27 @@ describe('Authentication Routes', () => {
     expect(profileResponse.body.user).toBeDefined();
   });
   
+  it('should reject invalid login with 400', async () => {
+    const response = await request(app)
+      .post('/api/login')
+      .send({ email: 'notfound@example.com', password: 'wrongpass' });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.success).toBe(false);
+  });
+
+  it('should logout and clear auth cookie', async () => {
+    const loginResponse = await request(app)
+      .post('/api/login')
+      .send({ email: testUser.email, password: testUser.password });
+
+    const cookies = loginResponse.headers['set-cookie'];
+
+    const logoutResponse = await request(app)
+      .get('/api/logout')
+      .set('Cookie', cookies);
+
+    expect(logoutResponse.statusCode).toBe(200);
+    expect(logoutResponse.body.success).toBe(true);
+  });
 });

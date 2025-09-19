@@ -81,4 +81,34 @@ describe('Donation Routes', () => {
     expect(response.statusCode).toBe(200);
     expect(response.body.success).toBe(true);
   });
+
+  it('should reject invalid donation request payload with 400', async () => {
+    const response = await request(app)
+      .post('/api/donationRequest')
+      .set('Cookie', authCookie)
+      .send({
+        bloodType: 'INVALID',
+        quantity: -1,
+        location: ['x', 'y'],
+      });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.success).toBe(false);
+  });
+
+  it('should delete a donation request', async () => {
+    const createRes = await request(app)
+      .post('/api/donationRequest')
+      .set('Cookie', authCookie)
+      .send(testDonationRequest);
+
+    const id = createRes.body.donationRequest.id;
+
+    const deleteRes = await request(app)
+      .delete(`/api/donationRequest/${id}`)
+      .set('Cookie', authCookie);
+
+    expect(deleteRes.statusCode).toBe(200);
+    expect(deleteRes.body.success).toBe(true);
+  });
 });
