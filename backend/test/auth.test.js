@@ -1,38 +1,38 @@
 const request = require('supertest');
 const app = require('../src');
+const db = require('../src/db');
 const { redisClient } = require('../src/utils/redis');
 
 describe('Authentication Routes', () => {
+  const uniqueEmail = `test+${Date.now()}@example.com`;
+  const uniqueUsername = `testuser_${Date.now()}`;
   const testUser = {
-    username: 'testuser',
-    email: 'test@example.com',
+    username: uniqueUsername,
+    email: uniqueEmail,
     password: 'testpassword',
     bloodType: 'A+',
   };
 
-  // Remove the beforeAll hook for starting the server
-
-  // Add an afterAll hook to close the server after tests
-  afterAll(async (done) => {
-    // Close the Redis client
-    await redisClient.quit();
-  
-    // Close the Express server
-    app.server.close(() => {
-      // Ensure the server is closed before calling done
-      done();
-    });
-  }, 10000); // Increase the timeout to 10 seconds  
+  afterAll(async () => {
+    try {
+      await redisClient.quit();
+      await db.close();
+      if (app.server && app.server.close) {
+        await new Promise((resolve) => app.server.close(resolve));
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, 10000);
 
   it('should register a new user', async () => {
     const response = await request(app)
       .post('/api/register')
       .send(testUser);
-  
-    // Update the expected status code to 400 (Bad Request)
+
     expect(response.statusCode).toBe(201);
     expect(response.body.success).toBe(true);
-    expect(response.body.error).toBeDefined();
+    expect(response.body.message).toBeDefined();
   });
   
 
@@ -46,6 +46,7 @@ describe('Authentication Routes', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.body.success).toBe(true);
+    expect(response.headers['set-cookie']).toBeDefined();
   });
 
   it('should return user profile information', async () => {
@@ -61,12 +62,11 @@ describe('Authentication Routes', () => {
   
     const profileResponse = await request(app)
       .get('/api/profile')
-      .set('token', cookies) // Set the cookie in the request headers
+      .set('Cookie', cookies); // Set the auth cookie
   
-    // Update the expected status code to 200 (OK)
     expect(profileResponse.statusCode).toBe(200);
     expect(profileResponse.body.success).toBe(true);
-    expect(profileResponse.body.data).toBeDefined();
+    expect(profileResponse.body.user).toBeDefined();
   });
   
 });

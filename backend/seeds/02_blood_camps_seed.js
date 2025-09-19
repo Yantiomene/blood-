@@ -7,7 +7,7 @@ exports.seed = function (knex) {
           {
             id: 1,
             name: 'Community Blood Camp',
-            location: knex.raw('POINT(0,0)'),
+            location: knex.raw("ST_SetSRID(ST_MakePoint(0,0), 4326)"),
             contactNumber: '567890123',
           },
           // Add more blood camp entries as needed

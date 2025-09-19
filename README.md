@@ -128,13 +128,13 @@ Acceptance Criteria
 ### Baseline Test Matrix (Phase 0)
 
 Metadata
-- Date:
-- Environment: local/staging
-- Commit/Tag:
-- DB Migration Version:
-- Seed Data Version:
-- Test Runner(s): Backend (Jest/Supertest), Frontend (Jest/RTL), E2E (Playwright/Cypress)
-- Coverage Snapshot: Backend Unit: %, Backend Integration: %, Frontend Unit: %, Frontend Integration: %, E2E: %
+- Date: 2025-09-19
+- Environment: local
+- Commit/Tag: N/A (local working copy)
+- DB Migration Version: latest
+- Seed Data Version: backend/seeds (01_users_seed.js et al.)
+- Test Runner(s): Backend (Jest/Supertest)
+- Coverage Snapshot: Backend Unit: —, Backend Integration: —, Frontend Unit: —, Frontend Integration: —, E2E: —
 
 Legend (Status)
 - Pass = ✅
@@ -149,8 +149,8 @@ A1. Register user
 - Steps: Call with valid payload
 - Expected: 201 + user created; hashed password in DB; token/cookie if applicable
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: Implemented and tested via POST /api/register; email sending mocked in test; Redis uses in-memory client under NODE_ENV=test.
 
 A2. Login user (valid)
 - Endpoint(s): POST /api/auth/login
@@ -158,40 +158,40 @@ A2. Login user (valid)
 - Steps: Valid credentials
 - Expected: 200 + token/cookie set (secure flags per env)
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: Implemented and tested via POST /api/login; cookie returned and re-used.
 
 A3. Login user (invalid)
 - Endpoint(s): POST /api/auth/login
 - Steps: Wrong password
 - Expected: 401 + safe error message; no token/cookie
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: —
+- Notes/Issue: Not covered yet in baseline tests.
 
 A4. Logout
 - Endpoint(s): POST /api/auth/logout
 - Pre-conditions: Logged in
 - Expected: 200 + token invalidated (Redis if used) and cookie cleared
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: —
+- Notes/Issue: Not covered yet in baseline tests.
 
 A5. Get profile (auth required)
 - Endpoint(s): GET /api/users/me
 - Pre-conditions: Logged in
 - Expected: 200 + correct user data (no secrets)
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: Implemented and tested via GET /api/profile with auth cookie.
 
 A6. CSRF/CORS behavior (if cookies used)
 - Endpoint(s): Mutating routes (POST/PUT/DELETE)
 - Pre-conditions: Browser-like client; cross-origin
 - Expected: CORS headers correct; CSRF token required if applicable
 - Test Type: Integration/E2E
-- Status:
-- Notes/Issue:
+- Status: —
+- Notes/Issue: Not covered yet; to be verified.
 
 Section B — Backend: Donation Requests
 B1. Create donation request
@@ -199,68 +199,68 @@ B1. Create donation request
 - Pre-conditions: Authenticated user; valid payload
 - Expected: 201 + record created; validated bloodType/quantity constraints
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: Implemented and tested via POST /api/donationRequest; payload includes [lon, lat] location; seed user authenticated.
 
 B2. List donation requests
 - Endpoint(s): GET /api/donations
 - Expected: 200 + array; pagination if applicable
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: Implemented and tested via GET /api/donationRequest.
 
 B3. Update donation request (owner)
 - Endpoint(s): PUT /api/donations/:id
 - Pre-conditions: Request owned by user
 - Expected: 200 + updated resource; respects validation
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: Implemented and tested via PUT /api/donationRequest/:id.
 
 B4. Delete donation request (owner)
 - Endpoint(s): DELETE /api/donations/:id
 - Expected: 200/204 + resource removed; cascade rules honored
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: —
+- Notes/Issue: Not covered yet in baseline tests.
 
 B5. Validation errors
 - Endpoint(s): POST/PUT /api/donations
 - Steps: Invalid bloodType/quantity/required fields
 - Expected: 400 + detailed errors (no stack)
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: —
+- Notes/Issue: Not covered yet in baseline tests.
 
 Section C — Backend: Blogs
 C1. List blogs
 - Endpoint(s): GET /api/blogs
 - Expected: 200 + array; sort/pagination if applicable
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: —
+- Notes/Issue: Not covered yet in baseline tests.
 
 C2. Create blog (authorized role)
 - Endpoint(s): POST /api/blogs
 - Pre-conditions: Auth with author/admin privileges
 - Expected: 201 + blog created; image handling if present
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: —
+- Notes/Issue: Not covered yet in baseline tests.
 
 C3. Update blog (authorized)
 - Endpoint(s): PUT /api/blogs/:id
 - Expected: 200 + updated blog
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: —
+- Notes/Issue: Not covered yet in baseline tests.
 
 C4. Delete blog (authorized)
 - Endpoint(s): DELETE /api/blogs/:id
 - Expected: 200/204 + removed
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: —
+- Notes/Issue: Not covered yet in baseline tests.
 
 Section D — Backend: Messaging & Conversations
 D1. Create message (new conversation auto-create)

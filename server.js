@@ -14,14 +14,13 @@ wss.on('connection', (ws) => {
 
   ws.on('message', (message) => {
     // Handle incoming messages
-    const b = Buffer.from(message);
-    //console.log('Received message:', b.message);
+    console.log('Received message:', message.toString());
     
     // Broadcast message to all connected clients
     wss.clients.forEach((client) => {
       if (client !== ws && client.readyState === WebSocket.OPEN) {
-        client.send(b.message);
-        //console.log('Sent message:', b.message);
+        client.send(message);
+        console.log('Sent message:', message.toString());
       }
     });
   });

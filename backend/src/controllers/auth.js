@@ -57,7 +57,7 @@ exports.register = async (req, res) => {
 
     // Send verification email with the short code
     sendVerificationEmail(email, verificationCode);
-    console.log(">> VERIFICATION CODE: ", verificationCode);
+
 
     req.logger.info("Created user successfully");
     return res.status(201).json({
@@ -292,7 +292,7 @@ exports.requestNewToken = async (req, res) => {
 
     // Send verification email with the short code
     sendVerificationEmail(email, verificationCode);
-    console.log(">> NEW VERIFICATION CODE: ", verificationCode);
+
 
     req.logger.info("New verification code sent successfully");
     return res.status(200).json({
@@ -409,7 +409,7 @@ exports.passwordResetRequest = async (req, res) => {
     // Send password reset email with the short code
     sendPasswordResetEmail(email, resetToken);
 
-    console.log(">> SENT PASSWORD RESET TOKEN: ", resetToken);
+
 
     req.logger.info("Password reset email sent successfully");
     return res.status(200).json({
@@ -429,14 +429,7 @@ exports.passwordResetRequest = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   const { code, password } = req.body;
 
-  console.log(
-    ">> RESET PASSWORD",
-    req.body,
-    "\nCODE: ",
-    code,
-    "\nPASSWORD: ",
-    password
-  );
+
 
   try {
     // Retrieve verification code from Redis

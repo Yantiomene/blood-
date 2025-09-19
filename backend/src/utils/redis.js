@@ -1,52 +1,106 @@
 const redis = require('redis');
 
-class RedisClient {
-  constructor(host, port) {
-    this.client = redis.createClient({host, port});
-    this.client.on('error', (error) => {
-      console.error(`Redis client not connected to the server: ${error}`);
-    });
-  }
+let exportedClient;
 
-  isAlive() {
-    return this.client.connected;
+if (process.env.NODE_ENV === 'test') {
+  class InMemoryRedisClient {
+    constructor() {
+      this.store = new Map();
+    }
+    isAlive() {
+      return true;
+    }
+    async connect() {
+      return; // no-op
+    }
+    async get(key) {
+      return this.store.get(key) || null;
+    }
+    async set(key, value, duration) {
+      this.store.set(key, value);
+      // ignore duration in test
+    }
+    async del(key) {
+      this.store.delete(key);
+    }
+    async quit() {
+      this.store.clear();
+    }
   }
-
-  async connect() {
-    return new Promise((resolve, reject) => {
-      this.client.on('ready', () => {
-        console.log('Redis client connected.');
-        resolve();
-      });
+  exportedClient = new InMemoryRedisClient();
+} else {
+  class RedisClient {
+    constructor(host, port) {
+      this.client = redis.createClient({ host, port });
       this.client.on('error', (error) => {
-        console.error(`Redis client error: ${error}`);
-        reject(error);
+        console.error(`Redis client not connected to the server: ${error}`);
       });
-    });
-  }
-  
+    }
 
-  async get(key) {
-    return new Promise((resolve, reject) => {
-      this.client.get(key, (error, value) => {
-        if (error) {
+    isAlive() {
+      return this.client.connected;
+    }
+
+    async connect() {
+      return new Promise((resolve, reject) => {
+        this.client.on('ready', () => {
+          console.log('Redis client connected.');
+          resolve();
+        });
+        this.client.on('error', (error) => {
+          console.error(`Redis client error: ${error}`);
           reject(error);
-        } else {
-          resolve(value);
-        }
+        });
       });
-    });
+    }
+
+    async get(key) {
+      return new Promise((resolve, reject) => {
+        this.client.get(key, (error, value) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(value);
+          }
+        });
+      });
+    }
+
+    async set(key, value, duration) {
+      return new Promise((resolve, reject) => {
+        this.client.set(key, value, (err) => {
+          if (err) return reject(err);
+          if (typeof duration === 'number' && duration > 0) {
+            this.client.expire(key, duration, (err2) => {
+              if (err2) return reject(err2);
+              resolve();
+            });
+          } else {
+            resolve();
+          }
+        });
+      });
+    }
+
+    async del(key) {
+      return new Promise((resolve, reject) => {
+        this.client.del(key, (err) => {
+          if (err) return reject(err);
+          resolve();
+        });
+      });
+    }
+
+    async quit() {
+      return new Promise((resolve) => {
+        // node_redis v2 uses callbacks for quit
+        this.client.quit(() => resolve());
+      });
+    }
   }
 
-  async set(key, value, duration) {
-    this.client.set(key, value);
-    this.client.expire(key, duration);
-  }
-
-  async del(key) {
-    this.client.del(key);
-  }
+  exportedClient = new RedisClient('127.0.0.1', 6379);
 }
 
-const redisClient = new RedisClient('127.0.0.1', 6379);
-module.exports = redisClient;
+module.exports = exportedClient;
+module.exports.redisClient = exportedClient;

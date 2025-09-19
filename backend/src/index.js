@@ -61,20 +61,37 @@ app.use((req, res) => {
 // Create HTTP server using Express app
 const server = http.createServer(app);
 
-// Initialize WebSocket server
-const wss = new WebSocketServer({ server });
+// Initialize WebSocket server (skip in test env)
+let wss = null;
+if (process.env.NODE_ENV !== 'test') {
+  wss = new WebSocketServer({ server });
+  
+  wss.on('error', (error) => {
+    logger.error('WebSocket Server error:', error);
+  });
+  
+  wss.on('connection', (ws) => {
+      logger.info('WebSocket Client connected');
+      
+      ws.on('error', (error) => {
+        logger.error('WebSocket connection error:', error);
+      });
 
-wss.on('connection', (ws) => {
-    logger.info('WebSocket Client connected');
+      // Handle WebSocket messages
+      handleWebSocketMessages(ws);
+  });
+}
 
-    // Handle WebSocket messages
-    handleWebSocketMessages(ws);
-});
+// Start the server (skip in test environment to avoid port conflicts)
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(PORT, () => {
+      console.log(`Server is running at http://localhost:${PORT}`);
+  });
+}
 
-// Start the server
-server.listen(PORT, () => {
-    console.log(`Server is running at http://localhost:${PORT}`);
-});
+// Expose server on app for tests and export app for supertest
+app.server = server;
+module.exports = app;
 
 /*const appStart = () => {
     try {

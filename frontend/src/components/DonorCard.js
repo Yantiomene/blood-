@@ -21,8 +21,12 @@ const DonationCard = (props) => {
   const [showUpdateMenu, setShowUpdateMenu] = useState(false);
   // view card details
   const handleViewCard = async (cardId) => {
-    const cardDetail = await getDonationRequestByUserId(cardId);
-    console.log("card clicked", cardDetail);
+    try {
+      const cardDetail = await getDonationRequestByUserId(cardId);
+      // Handle the cardDetail appropriately
+    } catch (error) {
+      dispatch(showMessage({ heading: "Error", text: "Failed to fetch donation details" }));
+    }
   };
 
   // delete card
@@ -32,7 +36,7 @@ const DonationCard = (props) => {
       if (response.success) {
         setShowDeleteMenu(false);
         dispatch(
-          showMessage({ heading: "Success", text: `${response.messasge}` })
+showMessage({ heading: "Success", text: `${response.message}` })
         );
       }
     } catch (error) {

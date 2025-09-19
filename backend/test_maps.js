@@ -7,6 +7,9 @@ async function getNearbyHospitals(apiKey, latitude, longitude) {
   try {
     // Step 1: Get human-readable address
     const geocodingResponse = await axios.get(geocodingUrl);
+    if (!geocodingResponse.data.results || geocodingResponse.data.results.length === 0) {
+      throw new Error('No geocoding results found for the provided coordinates');
+    }
     const address = geocodingResponse.data.results[0].formatted_address;
 
     // Step 2: Use Places API to find nearby hospitals

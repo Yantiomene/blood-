@@ -33,10 +33,11 @@ const RegisterForm = () => {
 
         setIsLoading(true);
 
-        if (password !== confirmPassword) {
-            dispatch(showMessage({heading: "Error", text: "Passwords do not match"}));
-            return;
-        }
+if (password !== confirmPassword) {
+    dispatch(showMessage({heading: "Error", text: "Passwords do not match"}));
+    setIsLoading(false);
+    return;
+}
 
         try {
             const user = {

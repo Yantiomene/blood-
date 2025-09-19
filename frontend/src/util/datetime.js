@@ -9,13 +9,18 @@ export const calculateTimeDelta = (dateStr) => {
     const pastDate = new Date(dateStr);
     const currentDate = new Date();
 
-    const diffMs = currentDate.getTime() - pastDate.getTime();
+    const diffMs = Math.abs(currentDate.getTime() - pastDate.getTime());
 
-    const diffYears = Math.abs(currentDate.getFullYear() - pastDate.getFullYear());
-    const diffMonths = Math.abs(currentDate.getMonth() - pastDate.getMonth());
-    const diffDays = Math.abs(Math.floor(diffMs / (1000 * 60 * 60 * 24)));
-    const diffHours = Math.abs(Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
-    const diffMinutes = Math.abs(Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60)));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    // Calculate months and years more accurately
+    let diffMonths = (currentDate.getFullYear() - pastDate.getFullYear()) * 12;
+    diffMonths -= pastDate.getMonth();
+    diffMonths += currentDate.getMonth();
+    const diffYears = Math.floor(diffMonths / 12);
+    diffMonths = Math.abs(diffMonths % 12);
 
     let output = "";
     if (diffYears > 0) {

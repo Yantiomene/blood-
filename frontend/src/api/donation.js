@@ -37,10 +37,10 @@ export async function getDonationRequestByUserId(userId) {
     }
 }
 
-export async function updateDonationRequest(requestData) {
+export async function updateDonationRequest(requestId, requestData) {
     try {
-        console.log(">> update donation request: ", requestData);
-        const response = await axios.put(`${apiUrl}/donationRequest/${requestData}`);
+        console.log(">> update donation request: ", requestId, requestData);
+        const response = await axios.put(`${apiUrl}/donationRequest/${requestId}`, requestData);
         return response.data;
     } catch (error) {
         throw error;
@@ -60,7 +60,7 @@ export async function deleteDonationRequest(requestId) {
 // FIND REQUESTS: SEARCH
 export async function findRequestByBloodType() {
     try {
-        const response = await axios.get(`${apiUrl}/donationReq`);
+        const response = await axios.get(`${apiUrl}/donationReqByBloodType`);
         return response.data;
     } catch (error) {
         throw error;
@@ -99,10 +99,10 @@ export async function findDonationRequestByLocation(location) {
 }
 
 // REQUEST INTERACTIONS
-export async function denyDonationRequest(requestId) {
+export async function denyDonationRequest(requestId, reason) {
     try {
-        console.log(">> deny donation request: ", requestId);
-        const response = await axios.post(`${apiUrl}/denyRequest`, requestId);
+        console.log(">> deny donation request: ", requestId, reason);
+        const response = await axios.post(`${apiUrl}/denyRequest`, { requestId, reason });
         return response.data;
     } catch (error) {
         throw error;

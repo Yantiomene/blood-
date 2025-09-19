@@ -7,7 +7,7 @@ exports.seed = function (knex) {
           {
             id: 1,
             name: 'City Hospital',
-            location: knex.raw('POINT(0,0)'),
+            location: knex.raw("ST_SetSRID(ST_MakePoint(0,0), 4326)"),
             contactNumber: '987654321',
           },
           // Add more hospital entries as needed
