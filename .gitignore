@@ -39,7 +39,7 @@ next-env.d.ts
 *.pptx
 
 #testing
-/backend/coverage
+#/backend/coverage
 
 #test artifact
 /backend/test-results-messages.json
