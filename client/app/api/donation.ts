@@ -43,10 +43,12 @@ export async function makeDonationRequest(requestData: DonationRequest): Promise
     }
 }
 
-export async function updateDonationRequest(requestData: DonationRequest): Promise<any> {
+export async function updateDonationRequest(requestId: string, requestData: DonationRequest): Promise<any> {
     try {
         console.log(">> donation request: ", requestData);
-        const response = await axios.put(`${apiUrl}/donationRequest`, requestData)
+        const response = await axios.put(`${apiUrl}/donationRequest/${requestId}`, requestData, {
+            withCredentials: true,
+        });
         return response.data;
     } catch (error) {
         throw error;

@@ -357,7 +357,7 @@ G1. Login flow
 - Expected: Redirect to dashboard; auth state stored; cookie/token behavior correct
 - Test Type: Frontend Integration/E2E
 - Status: ⛔
-- Notes/Issue: Forms render, but flow blocked pending backend API server envs; cannot verify redirect/cookies.
+- Notes/Issue: Forms render; backend API reachable at http://localhost:5001 (smoke); client .env.local verified (NEXT_PUBLIC_API_URL=http://localhost:5001/api); axios uses withCredentials; backend sets HttpOnly token on POST /api/login; login route at /login ([auth] page). Client auth state wiring/redirect verification pending.
 
 G2. Protected route guard
 - Steps: Navigate to dashboard when unauthenticated
@@ -371,14 +371,14 @@ G3. Donation: create/list/update/delete via UI
 - Expected: Reflects API results; validation errors surfaced clearly
 - Test Type: Frontend Integration/E2E
 - Status: ⛔
-- Notes/Issue: UI renders and overlay opens; API calls blocked until backend is running.
+- Notes/Issue: UI (Dashboard + DonationRequestForm) present; API base must be NEXT_PUBLIC_API_URL="http://localhost:5001/api" and requires auth cookie. List/create appear reachable; update currently calls PUT /donationRequest without :requestId — needs path param to match backend PUT /api/donationRequest/:requestId; DonorCard.js call is missing :requestId; delete wiring pending.
 
 G4. Blogs: list/create/update/delete (if permitted)
 - Steps: Perform respective actions in UI
 - Expected: Displays updates; handles errors gracefully
 - Test Type: Frontend Integration/E2E
 - Status: ⛔
-- Notes/Issue: Blocked pending backend.
+- Notes/Issue: List endpoint wired and working against backend (GET /blogs/getBlogs); create/update/delete UI and permissions pending.
 
 G5. Messaging UI
 - Steps: Send message; view conversation
@@ -399,8 +399,8 @@ H1. CORS policy
 - Steps: Cross-origin requests from Next dev server to backend
 - Expected: Allowed origins only; credentials policy correct
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: Backend CORS configured with origin CLIENT_URL=http://localhost:3001 (smoke), credentials=true; verified with blogs list from http://localhost:3001 to http://localhost:5001.
 
 H2. Rate limiting for auth endpoints
 - Steps: Repeated invalid login attempts
