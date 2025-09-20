@@ -635,3 +635,31 @@ Coverage Snapshot (Backend) with latest coverage numbers from backend/coverage/l
 - Generated at: 2025-09-19T14:13:29.425Z
 - Status: ✅ Baseline coverage recorded
 - Notes/Issue: Improve statement/line coverage in next phases; high branch coverage due to limited conditional paths in exercised routes.
+
+## Blood+ (Blood Donation and Access Platform)
+
+## Progress Log (Latest Changes)
+
+- frontend/auth: De-duplicated auth pages UI by moving shared header/tabs into a single AuthPage wrapper. The route `app/[auth]/page.tsx` now renders only the relevant form (login/register/profile) within `pages/authPage.tsx` wrapper. This improves maintainability and avoids double headers.
+- frontend/banner: Improved the WHO banner presentation with a two-column layout and a lightweight animated SVG blood drop for visual engagement, plus clear CTAs.
+- frontend/dashboard: Replaced the local dashboard header with the shared `Header` component and moved the "request donation" action into the content toolbar area for consistency.
+- frontend/blog: Implemented admin-only CRUD controls (New Post / Delete) on the blog page. Admin determination is based on `NEXT_PUBLIC_ADMIN_EMAILS` env variable with a hard-coded fallback list for development parity.
+- env: Added `ADMIN_EMAILS` in backend `.env.example` and `NEXT_PUBLIC_ADMIN_EMAILS` in client `.env.example` to follow best practices for configuration.
+
+### How to configure admin users
+
+- Backend: Add a comma-separated list in `ADMIN_EMAILS` to `backend/.env` (and `.env.example` already includes a sample) to allow the server to validate/admin-route protection.
+- Frontend: Add comma-separated emails in `client/.env.local` under `NEXT_PUBLIC_ADMIN_EMAILS` so the client can hide/show admin UI. Example:
+```
+NEXT_PUBLIC_ADMIN_EMAILS=alice@example.com,bob@example.com
+```
+If not provided, the client falls back to the in-code default list used during development.
+
+### Preview
+
+- Run the frontend:
+```
+cd client
+npm run dev
+```
+Then open http://localhost:3000 to see changes. Navigate to /login, /register, /pages/blog and /pages/dashboard to review the updated UI.

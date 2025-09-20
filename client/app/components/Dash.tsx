@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCurrentUser } from '../redux/userSlice';
 import { selectAuthStatus } from '../redux/authSlice';
-// import Header from './Header';
+import Header from './Header';
 import withAuth from './authHOC';
 import Overlay from './overlayContainer';
 import { getDonationRequest } from '../api/donation';
@@ -54,35 +54,26 @@ const Dashboard: React.FC = () => {
     const handleDisplayOverlay = () => {
         setShowOverlay(!showOverlay);
         const bodyElem = document.querySelector('body');
-        console.log("body element", bodyElem);
         if (showOverlay) {
-            console.log("body element is showing", showOverlay);
             bodyElem?.classList.add('overflow-hidden');
         } else {
-            console.log("body element is closed", showOverlay);
             bodyElem?.classList.remove('overflow-hidden');
         }
     }
 
     return (
         <>
-            {/* <Header isLoggedin={auth} /> */}
-            <header className="bg-white sticky top-0 z-40 shadow">
-                <nav className="container mx-auto px-4 py-2 flex items-center justify-between">
-                    <h1 className="text-xl font-bold">Welcome, {userData?.username}!</h1>
-                    {
-                        user?.isDonor &&
-                        <button
-                            onClick={handleDisplayOverlay}
-                            className="bg-red-500 hover:bg-red-800 text-white px-4 py-2 rounded">
-                            + request donation
-                        </button>
-                    }
-                </nav>
-            </header>
+            <Header isLoggedin={auth} />
             {showOverlay && <Overlay closeOverlay={setShowOverlay} />}
             <div className="container mx-auto px-4 py-8">
-                <h2 className="text-2xl font-bold mb-4">Blood Donation Requests</h2>
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-2xl font-bold">Blood Donation Requests</h2>
+                    {user?.isDonor && (
+                        <button onClick={handleDisplayOverlay} className="bg-red-500 hover:bg-red-800 text-white px-4 py-2 rounded">
+                            + request donation
+                        </button>
+                    )}
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {
@@ -99,23 +90,6 @@ const Dashboard: React.FC = () => {
                             />
                         )
                     }
-                    {/* <div className="bg-white p-4 shadow rounded">
-                        <h3 className="text-lg font-bold mb-2">Profile</h3>
-                        <p>Email: {userData?.email}</p>
-                        <p>Username: {userData?.username}</p>
-                    </div>
-
-                    <div className="bg-white p-4 shadow rounded">
-                        <h3 className="text-lg font-bold mb-2">Blood Requests</h3>
-                        <p>Total Orders: 10</p>
-                        <p>Pending Orders: 2</p>
-                    </div>
-
-                    <div className="bg-white p-4 shadow rounded">
-                        <h3 className="text-lg font-bold mb-2">Settings</h3>
-                        <p>Notifications: On</p>
-                        <p>Language: English</p>
-                    </div> */}
                 </div>
 
                 <div className="bg-gray-200 h-[600px] my-10 p-4 rounded">
