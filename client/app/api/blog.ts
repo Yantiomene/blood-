@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const apiUrl = 'http://localhost:8000/blogs';
+const apiBase = (process.env.NEXT_PUBLIC_API_URL
+  ? process.env.NEXT_PUBLIC_API_URL.replace(/\/api\/?$/, '')
+  : 'http://localhost:5001');
+const apiUrl = `${apiBase}/blogs`;
 
 export async function getBlogs() {
     try {
