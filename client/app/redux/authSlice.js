@@ -13,6 +13,7 @@ export const initializeAuthStatus = createAsyncThunk(
       const response = await checkProtected();
       console.log(">> response", response);
       if (response) return true
+      return false;
     } catch (error) {
       console.log(error.message);
       return false;
@@ -40,12 +41,13 @@ export const authSlice = createSlice({
       })
       .addCase(initializeAuthStatus.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.isAuth = action.payload;
-        localStorage.setItem('isAuth', 'true');
+        state.isAuth = Boolean(action.payload);
+        localStorage.setItem('isAuth', action.payload ? 'true' : 'false');
       })
       .addCase(initializeAuthStatus.rejected, (state) => {
         state.isLoading = false;
-        // Handle error if necessary
+        state.isAuth = false;
+        localStorage.setItem('isAuth', 'false');
       });
   },
 });
