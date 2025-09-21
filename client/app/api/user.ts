@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
 
 axios.defaults.withCredentials = true;
 
