@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../api/user';
@@ -13,6 +13,7 @@ const UserProfileIcon: React.FC = () => {
     const dispatch = useDispatch();
     const user = useSelector((state: any) => state.user.data);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         if (!user?.email) {
@@ -39,6 +40,18 @@ const UserProfileIcon: React.FC = () => {
 
     const handleDropdownToggle = () => setIsDropdownOpen((v) => !v);
 
+    const cancelClose = () => {
+        if (closeTimerRef.current) {
+            clearTimeout(closeTimerRef.current);
+            closeTimerRef.current = null;
+        }
+    };
+
+    const scheduleClose = () => {
+        cancelClose();
+        closeTimerRef.current = setTimeout(() => setIsDropdownOpen(false), 200);
+    };
+
     const handleLogout = async () => {
         try {
             const status = await logout();
@@ -53,8 +66,8 @@ const UserProfileIcon: React.FC = () => {
 
     return (
         <div className="relative select-none"
-            onMouseEnter={() => setIsDropdownOpen(true)}
-            onMouseLeave={() => setIsDropdownOpen(false)}
+            onMouseEnter={() => { cancelClose(); setIsDropdownOpen(true); }}
+            onMouseLeave={scheduleClose}
         >
             <button
                 aria-label="User menu"
@@ -65,10 +78,14 @@ const UserProfileIcon: React.FC = () => {
                 {initials}
             </button>
             {isDropdownOpen && (
-                <div className="absolute top-12 right-0 z-50 bg-white rounded shadow min-w-[180px]">
+                <div
+                    className="absolute top-full mt-2 right-0 z-50 bg-white rounded shadow min-w-[180px]"
+                    onMouseEnter={cancelClose}
+                    onMouseLeave={scheduleClose}
+                >
                     <ul className="p-2">
                         <li className={dropdownItemStyles + ' text-nowrap'}>
-                            <Link href="/profile">
+                            <Link href="/profile" onClick={() => setIsDropdownOpen(false)}>
                                 <span className="font-medium">{user?.username || user?.email || 'Profile'}</span>
                                 {user?.bloodType && (
                                     <span className='ml-2 px-1 rounded-full text-white bg-red-500 text-center text-xs'>
@@ -78,11 +95,11 @@ const UserProfileIcon: React.FC = () => {
                             </Link>
                         </li>
                         <li className={dropdownItemStyles + ' text-nowrap'}>
-                            <Link href="/preferences">Preferences</Link>
+                            <Link href="/preferences" onClick={() => setIsDropdownOpen(false)}>Preferences</Link>
                         </li>
                         {isAdmin && (
                             <li className={dropdownItemStyles + ' text-nowrap'}>
-                                <Link href="/admin/blog">Blog Admin</Link>
+                                <Link href="/admin/blog" onClick={() => setIsDropdownOpen(false)}>Blog Admin</Link>
                             </li>
                         )}
                         <li className={dropdownItemStyles + ' hover:bg-red-100 text-red-600'} onClick={handleLogout}>

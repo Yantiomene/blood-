@@ -71,35 +71,65 @@ const BloodTransfer3D: React.FC = () => {
         dir2.position.set(-2, 2, 1);
         scene.add(ambient, dir1, dir2);
 
-        // Ground subtle
-        const planeGeo = new THREE.PlaneGeometry(20, 6);
-        const planeMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 1, metalness: 0 });
+        // Subtle ground with gradient effect
+        const planeGeo = new THREE.PlaneGeometry(20, 8);
+        const planeMat = new THREE.MeshStandardMaterial({ 
+          color: 0xf1f5f9, 
+          roughness: 0.9, 
+          metalness: 0.05 
+        });
         const ground = new THREE.Mesh(planeGeo, planeMat);
         ground.rotation.x = -Math.PI / 2;
-        ground.position.y = -1.4;
+        ground.position.y = -1.6;
         scene.add(ground);
 
-        // Helpers to build a simple human silhouette (stick-figure style)
-        const makeHuman = (x: number) => {
+        // Enhanced human builder with better proportions and materials
+        const makeHuman = (x: number, isDonor: boolean = false) => {
           const group = new THREE.Group();
-          const mat = new THREE.MeshStandardMaterial({ color: 0x9ca3af, roughness: 0.9, metalness: 0.05 });
-          const head = new THREE.Mesh(new THREE.SphereGeometry(0.35, 24, 24), mat);
-          head.position.set(0, 1.2, 0);
-          const body = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.25, 1.2, 20), mat);
-          body.position.set(0, 0.4, 0);
-          const legL = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.9, 16), mat);
-          legL.position.set(-0.18, -0.8, 0);
+          
+          // Different materials for donor vs recipient
+          const skinColor = isDonor ? 0xfdbcb4 : 0xe2e8f0; // Healthy vs pale
+          const clothingColor = isDonor ? 0x3b82f6 : 0x64748b; // Vibrant vs muted
+          
+          const skinMat = new THREE.MeshStandardMaterial({ 
+            color: skinColor, 
+            roughness: 0.8, 
+            metalness: 0.1 
+          });
+          const clothingMat = new THREE.MeshStandardMaterial({ 
+            color: clothingColor, 
+            roughness: 0.7, 
+            metalness: 0.05 
+          });
+
+          // Head with better proportions
+          const head = new THREE.Mesh(new THREE.SphereGeometry(0.4, 32, 32), skinMat);
+          head.position.set(0, 1.4, 0);
+          
+          // Body with slight taper
+          const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.3, 1.4, 24), clothingMat);
+          torso.position.set(0, 0.5, 0);
+          
+          // Arms with better positioning
+          const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 1.0, 16), skinMat);
+          armL.position.set(-0.5, 0.8, 0);
+          armL.rotation.z = Math.PI / 5;
+          
+          const armR = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 1.0, 16), skinMat);
+          armR.position.set(0.5, 0.8, 0);
+          armR.rotation.z = -Math.PI / 5;
+          
+          // Legs with better proportions
+          const legL = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.16, 1.1, 20), clothingMat);
+          legL.position.set(-0.2, -0.8, 0);
+          
           const legR = legL.clone();
-          legR.position.x = 0.18;
-          const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.8, 16), mat);
-          armL.position.set(-0.45, 0.7, 0);
-          armL.rotation.z = Math.PI / 6;
-          const armR = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.8, 16), mat);
-          armR.position.set(0.45, 0.7, 0);
-          armR.rotation.z = -Math.PI / 6;
-          group.add(head, body, legL, legR, armL, armR);
+          legR.position.x = 0.2;
+          
+          group.add(head, torso, legL, legR, armL, armR);
           group.position.x = x;
-          return { group, armR, armL };
+          
+          return { group, armR, armL, head, torso };
         };
 
         const donor = makeHuman(-3);

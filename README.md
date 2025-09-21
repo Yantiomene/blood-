@@ -1,5 +1,16 @@
 # Blood+ 🩸
 
+> Important Update (2025-09-21)
+>
+> - Redis has been started and integrated for ephemeral tokens.
+> - Email verification is now fully working for newly registered users and for previously registered users who verify later.
+> - Client uses cookie-based auth with axios.withCredentials; backend CORS is configured to allow credentials from the Next.js dev URL.
+> - To test locally:
+>   1) Ensure Redis is running (default localhost:6379) and backend env includes REDIS_URL if applicable.
+>   2) Start backend and client; register a new account via the client; retrieve the verification code from email (or logs in dev) and submit on /auth/verifyEmail.
+>   3) Existing users can also trigger a verification email and complete verification successfully.
+> - Note: Ensure NEXT_PUBLIC_API_URL (client) and CLIENT_URL/SERVER_URL (backend) are set consistently.
+>
 ## Problem Statement: 🆘
 
 In many African hospitals, the availability of blood for patients in need is a critical challenge. Hospitals often lack sufficient blood stocks, leading to delays in emergency situations or the burden of purchasing replacement blood falling on the patient's family. There is a need for a reliable and efficient system to connect blood donors with those in need and ensure a timely and accessible supply of blood in local communities.
