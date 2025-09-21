@@ -14,8 +14,10 @@ export default function AuthPage({ children }: { children: React.ReactNode }) {
     console.log(">> params from auth: ", params);
     return (
         <>
-            <Header isLoggedin={isAuth} />
-            <div className="pt-8 flex flex-col items-center min-h-screen bg-gray-100">
+            <div className="fixed top-0 left-0 right-0 z-50">
+                <Header isLoggedin={isAuth} />
+            </div>
+            <div className="pt-20 flex flex-col items-center min-h-screen bg-gray-100">
                 <div>
                     {
                         (params === '/login' || params === '/register') && 
