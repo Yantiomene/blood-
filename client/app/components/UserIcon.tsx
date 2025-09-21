@@ -28,6 +28,15 @@ const UserProfileIcon: React.FC = () => {
         return 'U';
     }, [user?.username, user?.email]);
 
+    // Determine admin from env + current user email
+    const adminEmails = useMemo(() => (
+        (process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
+            .split(',')
+            .map(s => s.trim().toLowerCase())
+            .filter(Boolean)
+    ), []);
+    const isAdmin = useMemo(() => adminEmails.includes((user?.email || '').toLowerCase()), [adminEmails, user?.email]);
+
     const handleDropdownToggle = () => setIsDropdownOpen((v) => !v);
 
     const handleLogout = async () => {
@@ -71,6 +80,11 @@ const UserProfileIcon: React.FC = () => {
                         <li className={dropdownItemStyles + ' text-nowrap'}>
                             <Link href="/preferences">Preferences</Link>
                         </li>
+                        {isAdmin && (
+                            <li className={dropdownItemStyles + ' text-nowrap'}>
+                                <Link href="/admin/blog">Blog Admin</Link>
+                            </li>
+                        )}
                         <li className={dropdownItemStyles + ' hover:bg-red-100 text-red-600'} onClick={handleLogout}>
                             Logout
                         </li>

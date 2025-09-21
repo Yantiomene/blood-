@@ -53,7 +53,7 @@ const Banner: React.FC = () => {
                             Safe blood saves lives. Many countries still face seasonal shortages, and regular voluntary donations are vital to ensure timely access for patients in need.
                         </p>
                         <div className="mt-6 flex gap-3">
-                            <Link href="/pages/blog" className="inline-block bg-red-700 hover:bg-red-800 text-white px-5 py-2 rounded-md transition-colors">Read stories on our Blog</Link>
+                            <Link href="/site/blog" className="inline-block bg-red-700 hover:bg-red-800 text-white px-5 py-2 rounded-md transition-colors">Read stories on our Blog</Link>
                             <Link href="/register" className="inline-block bg-white text-red-700 border border-red-300 hover:bg-red-50 px-5 py-2 rounded-md">Become a donor</Link>
                         </div>
                     </div>

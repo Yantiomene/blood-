@@ -23,7 +23,7 @@ export default function BlogLandingPage() {
         .split(',')
         .map((s) => s.trim().toLowerCase())
         .filter(Boolean);
-    const isAdmin = adminEmails.includes(userEmail);
+    const isAdmin = false && adminEmails.includes(userEmail);
 
     const [blogs, setBlogs] = useState<BlogItem[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -196,11 +196,6 @@ export default function BlogLandingPage() {
               </div>
             )}
         </main>
-        <footer className="bg-red-800 py-4">
-            <div className="container mx-auto text-center text-white">
-                &copy; 2024 My Blog. All rights reserved.
-            </div>
-        </footer>
         </>
     );
 };
