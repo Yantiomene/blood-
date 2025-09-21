@@ -14,7 +14,7 @@ export const updateUserProfile = createAsyncThunk(
   'user/updateUserProfile',
   async (userData) => {
     const response = await updateProfile(userData);
-    return response.user;
+    return response; // backend returns { success, message }
   }
 );
 
@@ -53,7 +53,10 @@ const userSlice = createSlice({
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.loading = false;
-        state.data = action.payload;
+        // backend update endpoint does not return user, so only update if provided
+        if (action.payload && action.payload.user) {
+          state.data = action.payload.user;
+        }
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;

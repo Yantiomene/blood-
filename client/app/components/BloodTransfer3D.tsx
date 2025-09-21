@@ -132,40 +132,104 @@ const BloodTransfer3D: React.FC = () => {
           return { group, armR, armL, head, torso };
         };
 
-        const donor = makeHuman(-3);
-        const recipient = makeHuman(3);
+        const donor = makeHuman(-3.5, true);
+        const recipient = makeHuman(3.5, false);
         scene.add(donor.group, recipient.group);
 
-        // Curve from donor right hand to recipient left hand
-        const start = donor.armR.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0.4, -0.2, 0));
-        const end = recipient.armL.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(-0.4, -0.2, 0));
-        const mid1 = start.clone().add(new THREE.Vector3(1.8, 0.8, 0.4));
-        const mid2 = end.clone().add(new THREE.Vector3(-1.8, 0.6, -0.4));
-        const curve = new THREE.CatmullRomCurve3([start, mid1, mid2, end]);
+        // Enhanced tube connection
+        const donorHandPos = new THREE.Vector3(-2.8, 0.4, 0);
+        const recipientHandPos = new THREE.Vector3(2.8, 0.4, 0);
+        const mid1 = new THREE.Vector3(-1, 1.2, 0.5);
+        const mid2 = new THREE.Vector3(1, 1.2, -0.5);
 
-        // Tube geometry
-        const tubeGeo = new THREE.TubeGeometry(curve, 100, 0.06, 16, false);
-        const tubeMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, emissive: 0x7f1d1d, emissiveIntensity: 0.3, roughness: 0.5 });
+        const curve = new THREE.CatmullRomCurve3([donorHandPos, mid1, mid2, recipientHandPos]);
+
+        // Enhanced tube with transparency
+        const tubeGeo = new THREE.TubeGeometry(curve, 120, 0.08, 20, false);
+        const tubeMat = new THREE.MeshStandardMaterial({ 
+          color: 0xb91c1c, 
+          emissive: 0x7f1d1d, 
+          emissiveIntensity: 0.2,
+          roughness: 0.3,
+          metalness: 0.1,
+          transparent: true,
+          opacity: 0.9
+        });
         const tube = new THREE.Mesh(tubeGeo, tubeMat);
         scene.add(tube);
 
-        // Droplet
-        const dropMat = new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0x991b1b, emissiveIntensity: 0.5, roughness: 0.4 });
-        const drop = new THREE.Mesh(new THREE.SphereGeometry(0.12, 24, 24), dropMat);
+        // Particle system for blood flow
+        const particleCount = 50;
+        const particles = new THREE.BufferGeometry();
+        const particlePositions = new Float32Array(particleCount * 3);
+        const particleColors = new Float32Array(particleCount * 3);
+        const particleSizes = new Float32Array(particleCount);
+
+        // Initialize particles along the curve
+        for (let i = 0; i < particleCount; i++) {
+          const t = i / particleCount;
+          const pos = curve.getPointAt(t);
+          
+          particlePositions[i * 3] = pos.x;
+          particlePositions[i * 3 + 1] = pos.y;
+          particlePositions[i * 3 + 2] = pos.z;
+          
+          // Red color with slight variation
+          particleColors[i * 3] = 0.9 + Math.random() * 0.1;     // R
+          particleColors[i * 3 + 1] = 0.1 + Math.random() * 0.2; // G  
+          particleColors[i * 3 + 2] = 0.1 + Math.random() * 0.2; // B
+          
+          particleSizes[i] = 0.5 + Math.random() * 1.0;
+        }
+
+        particles.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+        particles.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+        particles.setAttribute('size', new THREE.BufferAttribute(particleSizes, 1));
+
+        const particleMaterial = new THREE.PointsMaterial({
+          size: 0.05,
+          vertexColors: true,
+          transparent: true,
+          opacity: 0.8,
+          blending: THREE.AdditiveBlending
+        });
+
+        const particleSystem = new THREE.Points(particles, particleMaterial);
+        scene.add(particleSystem);
+
+        
+        // Enhanced droplet
+        const dropMat = new THREE.MeshStandardMaterial({ 
+          color: 0xef4444, 
+          emissive: 0x991b1b, 
+          emissiveIntensity: 0.4,
+          roughness: 0.3,
+          metalness: 0.2
+        });
+        const drop = new THREE.Mesh(new THREE.SphereGeometry(0.15, 32, 32), dropMat);
         scene.add(drop);
 
-        // Animate
+        // Animation loop
         let t = 0;
         let raf = 0 as any;
         const tick = () => {
-          t += 0.0045;
+          t += 0.005;
           if (t > 1) t = 0;
+          
           const p = curve.getPointAt(t);
           const tAhead = curve.getPointAt(Math.min(1, t + 0.01));
           drop.position.copy(p);
           drop.lookAt(tAhead);
-          donor.group.rotation.y = Math.sin(performance.now() * 0.001) * 0.1;
-          recipient.group.rotation.y = -Math.sin(performance.now() * 0.001) * 0.1;
+          
+          // Subtle breathing animation
+          const breathe = Math.sin(performance.now() * 0.002) * 0.03 + 1;
+          donor.torso.scale.y = breathe;
+          recipient.torso.scale.y = breathe * 0.95; // Weaker breathing for recipient
+          
+          // Gentle head movement
+          donor.head.rotation.y = Math.sin(performance.now() * 0.001) * 0.1;
+          recipient.head.rotation.y = -Math.sin(performance.now() * 0.001) * 0.08;
+          
           renderer.render(scene, camera);
           raf = requestAnimationFrame(tick);
         };

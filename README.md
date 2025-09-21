@@ -5,10 +5,15 @@
 > - Redis has been started and integrated for ephemeral tokens.
 > - Email verification is now fully working for newly registered users and for previously registered users who verify later.
 > - Client uses cookie-based auth with axios.withCredentials; backend CORS is configured to allow credentials from the Next.js dev URL.
+> - Client .env: Create client/.env and set NEXT_PUBLIC_API_URL to your backend API base (e.g., http://localhost:5000/api). After changing it, restart the Next.js dev server.
+> - Profile page fixes: The profile update form has been stabilized. Submission now properly validates and sends location as [longitude, latitude], awaits server response, shows clear success/error messages, and refreshes the profile state.
+> - Geolocation: Users can now click “Use my location” to auto-fill their coordinates from the browser with permission.
+> - ESLint: Cleaned up no-unescaped-entities issues (e.g., apostrophes in text) and addressed react-hooks/exhaustive-deps where applicable.
 > - To test locally:
 >   1) Ensure Redis is running (default localhost:6379) and backend env includes REDIS_URL if applicable.
 >   2) Start backend and client; register a new account via the client; retrieve the verification code from email (or logs in dev) and submit on /auth/verifyEmail.
->   3) Existing users can also trigger a verification email and complete verification successfully.
+>   3) Visit /auth/profile, edit a few fields, optionally click “Use my location”, then submit. You should see a success message and, on refresh/navigation, your updated data should persist.
+>   4) Existing users can also trigger a verification email and complete verification successfully.
 > - Note: Ensure NEXT_PUBLIC_API_URL (client) and CLIENT_URL/SERVER_URL (backend) are set consistently.
 >
 ## Problem Statement: 🆘

@@ -81,7 +81,7 @@ const VerifyEmailPage: React.FC = () => {
       {status && <p className="mt-3 text-sm text-gray-700">{status}</p>}
 
       <hr className="my-6" />
-      <h2 className="text-xl font-semibold mb-2">Didn't get a code?</h2>
+      <h2 className="text-xl font-semibold mb-2">Didn&apos;t get a code?</h2>
       <p className="text-gray-600 mb-3">Resend a new verification code to your email.</p>
       <div className="flex gap-2 mb-3">
         <input

@@ -72,7 +72,7 @@ const RegisterForm: React.FC = () => {
                         className={inputStyles}
                         aria-describedby="emailHelpText"
                     />
-                    <small id="emailHelpText" className="text-gray-500">We'll never share your email with anyone else.</small>
+                    <small id="emailHelpText" className="text-gray-500">We&apos;ll never share your email with anyone else.</small>
                 </div>
 
                 <div className="mb-4">

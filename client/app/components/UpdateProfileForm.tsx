@@ -3,17 +3,16 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import withAuth from '../components/authHOC';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchCurrentUser, updateUserProfile as updateProfile } from '../redux/userSlice';
+import { fetchCurrentUser, updateUserProfile } from '../redux/userSlice';
 import { useRouter } from 'next/navigation';
-var wkx = require('wkx');
-
 
 interface UserData {
     username: string;
     email: string;
     bloodType: string;
     isDonor: boolean;
-    location: string | [number, number];
+    // Keep location as a string in the form for easier editing; submit as [lon, lat]
+    location: string;
     contactNumber: string;
 }
 
@@ -23,10 +22,41 @@ const fieldStyles = "mb-4 flex items-center gap-4"
 const labelStyles = "block mb-1"
 const messageStyles = "text-center mt-4 text-gray-600 italic"
 
+// Helper to format user state from store into editable form data
+function normalizeUserToForm(user: any): UserData {
+    let locStr = '';
+    // If backend provides location as [lon, lat]
+    if (Array.isArray(user?.location) && user.location.length === 2) {
+        const [lon, lat] = user.location;
+        locStr = `${lon}, ${lat}`;
+    } else if (typeof user?.location === 'string') {
+        // If already a comma string, keep as-is; otherwise leave empty
+        locStr = user.location.includes(',') ? user.location : '';
+    }
+    return {
+        username: user?.username || '',
+        email: user?.email || '',
+        bloodType: user?.bloodType || '',
+        isDonor: !!user?.isDonor,
+        location: locStr,
+        contactNumber: user?.contactNumber || '',
+    };
+}
+
+function parseLocation(input: string): [number, number] | null {
+    if (!input) return null;
+    const parts = input.split(',').map(s => parseFloat(s.trim()));
+    if (parts.length !== 2 || parts.some(n => Number.isNaN(n))) return null;
+    // Expect input as "lon, lat"
+    const [lon, lat] = parts;
+    if (lon < -180 || lon > 180 || lat < -90 || lat > 90) return null;
+    return [lon, lat];
+}
+
 const UpdateUserProfile: React.FC = () => {
     const [Message, setMessage] = useState<string>('');
     const user = useSelector((state: any) => state.user.data);
-    const [formData, setFormData] = useState<UserData>(user);
+    const [formData, setFormData] = useState<UserData>(normalizeUserToForm(user));
     const [editableFields, setEditableFields] = useState<Record<string, boolean>>({
         username: false,
         email: false,
@@ -35,60 +65,87 @@ const UpdateUserProfile: React.FC = () => {
         location: false,
         contactNumber: false
     });
+    const [isLocating, setIsLocating] = useState(false);
 
     const router = useRouter();
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<any>();
+
+    // Fetch current user on mount
     useEffect(() => {
-        dispatch(fetchCurrentUser() as any);
-        setFormData(user);
+        dispatch(fetchCurrentUser());
     }, [dispatch]);
 
+    // When user in store changes, sync into form
     useEffect(() => {
-        if (user && user.location) {
-            try {
-                const locationBuffer = Buffer.from(user.location, 'hex');
-                const point = wkx.Geometry.parse(locationBuffer);
-                const latitude = point.y;
-                const longitude = point.x;
-                console.log('Latitude:', latitude);
-                console.log('Longitude:', longitude);
-                setFormData({ ...formData, location: `${longitude}, ${latitude}` })
-            } catch (error) {
-                console.error('Error parsing location data:', error);
-            }
-        }
+        setFormData(normalizeUserToForm(user));
     }, [user]);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, checked } = e.target;
-        setFormData({ ...formData, [name]: checked });
-    };
-
-    const handleLocationChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const { value } = e.target;
-        const [longitude, latitude] = value.split(',').map(parseFloat);
-        setFormData({ ...formData, location: [longitude, latitude] });
+        setFormData(prev => ({ ...prev, [name]: checked }));
     };
 
     const handleEditField = (fieldName: keyof UserData) => {
-        setEditableFields({ ...editableFields, [fieldName]: true });
+        setEditableFields(prev => ({ ...prev, [fieldName]: true }));
+    };
+
+    const useMyLocation = () => {
+        if (!navigator.geolocation) {
+            setMessage('Geolocation is not supported by your browser.');
+            return;
+        }
+        setIsLocating(true);
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const { latitude, longitude } = pos.coords;
+                setFormData(prev => ({ ...prev, location: `${longitude}, ${latitude}` }));
+                setEditableFields(prev => ({ ...prev, location: true }));
+                setIsLocating(false);
+            },
+            (err) => {
+                console.error('Geolocation error:', err);
+                setMessage('Unable to fetch your location. Please allow location access or enter it manually.');
+                setIsLocating(false);
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
     };
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        setMessage('');
         try {
-            const [longitude, latitude] = formData.location.split(',').map(parseFloat);
-            setFormData({ ...formData, location: [longitude, latitude] });
-            dispatch(updateProfile(formData) as any);
-            router.push('/dashboard');
-            setMessage('successfully updated info');
+            const parsed = parseLocation(formData.location);
+            if (!parsed) {
+                setMessage('Please enter a valid location as "longitude, latitude" or click "Use my location".');
+                return;
+            }
+            const payload = {
+                username: formData.username,
+                email: formData.email,
+                bloodType: formData.bloodType,
+                isDonor: formData.isDonor,
+                location: parsed, // [lon, lat]
+                contactNumber: formData.contactNumber,
+            } as any;
+
+            // Dispatch thunk and check for rejection manually to avoid TS unwrap issues
+            const resultAction = await (dispatch((updateUserProfile as any)(payload)) as any);
+            if ((resultAction as any)?.error) {
+                throw (resultAction as any).error;
+            }
+            // Refresh user profile
+            await (dispatch(fetchCurrentUser()) as any);
+            setMessage('Profile updated successfully.');
+            // Stay on page; do not auto-redirect so user can see success
         } catch (error: any) {
-            setMessage('an error occurred');
+            const serverMsg = error?.response?.data?.error || error?.message;
+            setMessage(serverMsg || 'An error occurred while updating your profile.');
         }
     };
 
@@ -184,9 +241,9 @@ const UpdateUserProfile: React.FC = () => {
                             type="text"
                             name="location"
                             onChange={handleChange}
-                            placeholder='latitude, longitude'
+                            placeholder='longitude, latitude'
                             className={inputStyles}
-                            value={`${formData.location}`}
+                            value={formData.location}
                             disabled={!editableFields.location}
                         />
                         {!editableFields.location && (
@@ -199,7 +256,17 @@ const UpdateUserProfile: React.FC = () => {
                             </button>
                         )}
                     </div>
+                </div>
 
+                <div className="mb-4 flex items-center gap-4">
+                    <button
+                        type="button"
+                        onClick={useMyLocation}
+                        className="bg-gray-700 text-white rounded-md px-3 py-2 disabled:opacity-60"
+                        disabled={isLocating}
+                    >
+                        {isLocating ? 'Fetching location…' : 'Use my location'}
+                    </button>
                 </div>
 
                 <div className={fieldStyles}>

@@ -2,10 +2,15 @@ const passport = require('passport');
 
 const userAuth = passport.authenticate('jwt', { session: false });
 // Allow configuring admin emails via env, with sensible defaults
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'yan2016tiomene@gmail.com,yaninthe.douanla@keecash.fr')
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
   .split(',')
   .map(e => e.trim().toLowerCase())
   .filter(Boolean);
+
+// Warn if no admin emails configured
+if (ADMIN_EMAILS.length === 0) {
+  console.warn('Warning: No ADMIN_EMAILS configured. Admin functionality will be disabled.');
+}
 
 const adminOnly = (req, res, next) => {
   const user = req.user;

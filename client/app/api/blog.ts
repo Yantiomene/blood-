@@ -1,8 +1,10 @@
 import axios from 'axios';
 
-const apiBase = (process.env.NEXT_PUBLIC_API_URL
-  ? process.env.NEXT_PUBLIC_API_URL.replace(/\/api\/?$/, '')
-  : 'http://localhost:5001');
+const apiBase = (() => {
+  const url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+  // Remove trailing /api or /api/ more reliably
+  return url.replace(/\/api\/?$/, '').replace(/\/$/, '');
+})();
 const apiUrl = `${apiBase}/blogs`;
 
 // Ensure cookies (if any permissions are enforced later) are included
