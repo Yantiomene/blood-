@@ -5,14 +5,13 @@ import Link from "next/link";
 import { usePathname } from 'next/navigation';
 import NavItem from './NavItem';
 import UserProfileIcon from "./UserIcon";
-import Image from "next/image";
 
 const Header: React.FC<{ isLoggedin: boolean }> = ({ isLoggedin }) => {
     const pathname = usePathname();
 
     useEffect(() => {
         localStorage.setItem('isAuth', `${isLoggedin}`);
-    }, []);
+    }, [isLoggedin]);
 
     return (
         <header className="bg-red-500 p-4">
@@ -26,10 +25,11 @@ const Header: React.FC<{ isLoggedin: boolean }> = ({ isLoggedin }) => {
 
                 <nav className="flex items-center gap-6">
                     <ul className="md:flex space-x-4 hidden mr-10">
+                        <NavItem href="/" isActive={pathname === '/'}>Home</NavItem>
                         <NavItem href="/site/blog" isActive={pathname === '/site/blog'}>Blog</NavItem>
                         <NavItem href="/site/about" isActive={pathname === '/site/about'}>About</NavItem>
                     </ul>
-                    <ul className="flex space-x-4">
+                    <ul className="flex space-x-4 items-center">
                         {isLoggedin && <NavItem href="/dashboard" isActive={pathname === '/dashboard'}>Dashboard</NavItem>}
                         {!isLoggedin && <NavItem href="/login" isActive={pathname === '/login'}>Login</NavItem>}
                         {!isLoggedin && <NavItem href="/register" isActive={pathname === '/register'}>Register</NavItem>}

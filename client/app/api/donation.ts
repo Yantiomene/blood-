@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
 
 axios.defaults.withCredentials = true;
 
@@ -43,10 +43,12 @@ export async function makeDonationRequest(requestData: DonationRequest): Promise
     }
 }
 
-export async function updateDonationRequest(requestData: DonationRequest): Promise<any> {
+export async function updateDonationRequest(requestId: string, requestData: DonationRequest): Promise<any> {
     try {
         console.log(">> donation request: ", requestData);
-        const response = await axios.put(`${apiUrl}/donationRequest`, requestData)
+        const response = await axios.put(`${apiUrl}/donationRequest/${requestId}`, requestData, {
+            withCredentials: true,
+        });
         return response.data;
     } catch (error) {
         throw error;

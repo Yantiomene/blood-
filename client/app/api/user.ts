@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
 
 axios.defaults.withCredentials = true;
 
@@ -93,4 +93,13 @@ export async function verifyEmail(token: string): Promise<any> {
       throw error;
     }
   }
+  
+export async function checkProtected(): Promise<boolean> {
+  try {
+    await getCurrentUser();
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
   

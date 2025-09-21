@@ -2,7 +2,7 @@
 
 import Header from "../components/Header";
 import { useSelector } from 'react-redux';
-import { selectAuthStatus } from "../../../frontend/src/redux/authSlice";
+import { selectAuthStatus } from "../redux/authSlice";
 
 export default function DashboardPage({ children }: { children: React.ReactNode }) {
     const auth = useSelector(selectAuthStatus);

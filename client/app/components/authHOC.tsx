@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
-import { initializeAuthStatus, selectAuthStatus } from '../../../frontend/src/redux/authSlice';
+import { initializeAuthStatus, selectAuthStatus } from '../redux/authSlice';
 
 const withAuth = (WrappedComponent: React.FC) => {
   const WrapperComponent: React.FC = (props) => {
@@ -9,24 +9,31 @@ const withAuth = (WrappedComponent: React.FC) => {
 
     const dispatch = useDispatch();
     const isAuth = useSelector(selectAuthStatus);
+    const isLoading = useSelector((state: any) => state.auth.isLoading);
 
     useEffect(() => {
       dispatch(initializeAuthStatus() as any);
     }, [dispatch]);
 
     useEffect(() => {
-      if (!isAuth) {
+      if (!isLoading && !isAuth) {
         router.push('/login');
       }
-    }, [isAuth, router]);
+    }, [isAuth, isLoading, router]);
 
-    // Render the wrapped component if the user is authenticated
+    if (isLoading) {
+      return (
+        <div className="min-h-[40vh] flex items-center justify-center text-gray-600">
+          Checking session...
+        </div>
+      );
+    }
+
     if (isAuth) {
       return <WrappedComponent {...props} />;
-    } else {
-      // Return null if the user is not authenticated (the navigation will handle redirection)
-      return null;
     }
+
+    return null;
   };
 
   return WrapperComponent;

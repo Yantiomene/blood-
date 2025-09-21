@@ -11,11 +11,10 @@ export const metadata: Metadata = {
     description: "Login to your account",
 };
 
-
 const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
     return (
-        <div className="pt-[5%] flex flex-col items-center min-h-screen bg-gray-100">
-            <div>{children}</div>
+        <div className="min-h-screen bg-gray-100">
+            {children}
         </div>
     );
 };

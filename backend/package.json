@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
-    "test": "jest"
+    "test": "jest",
+    "dev:smoke": "cross-env DOTENV_CONFIG_PATH=.env.smoke NODE_ENV=production nodemon --exec \"node -r dotenv/config\" server.js",
+    "start:smoke": "cross-env DOTENV_CONFIG_PATH=.env.smoke NODE_ENV=production node -r dotenv/config server.js"
   },
   "keywords": [],
   "author": "",
@@ -36,6 +38,7 @@
     "supertest": "^6.3.4",
     "winston": "^3.11.0",
     "wkx": "^0.5.0",
-    "ws": "^8.16.0"
+    "ws": "^8.16.0",
+    "cross-env": "^7.0.3"
   }
 }

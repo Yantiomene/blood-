@@ -234,63 +234,77 @@ B5. Validation errors
 
 Section C — Backend: Blogs
 C1. List blogs
-- Endpoint(s): GET /api/blogs
+- Endpoint(s): GET /blogs/getBlogs
 - Expected: 200 + array; sort/pagination if applicable
 - Test Type: Integration
-- Status: —
-- Notes/Issue: Not covered yet in baseline tests.
+- Status: ✅
+- Notes/Issue: Implemented and tested via GET /blogs/getBlogs (public). Route path differs from planned "/api/blogs"; to unify later.
 
 C2. Create blog (authorized role)
-- Endpoint(s): POST /api/blogs
+- Endpoint(s): POST /blogs/create
 - Pre-conditions: Auth with author/admin privileges
 - Expected: 201 + blog created; image handling if present
 - Test Type: Integration
-- Status: —
-- Notes/Issue: Not covered yet in baseline tests.
+- Status: ✅
+- Notes/Issue: Implemented and tested via POST /blogs/create; auth cookie required. Role enforcement TBD.
 
 C3. Update blog (authorized)
-- Endpoint(s): PUT /api/blogs/:id
+- Endpoint(s): PUT /blogs/updateBlog/:id
 - Expected: 200 + updated blog
 - Test Type: Integration
-- Status: —
-- Notes/Issue: Not covered yet in baseline tests.
+- Status: ✅
+- Notes/Issue: Implemented and tested via PUT /blogs/updateBlog/:id.
 
 C4. Delete blog (authorized)
-- Endpoint(s): DELETE /api/blogs/:id
+- Endpoint(s): DELETE /blogs/deleteBlog/:id
 - Expected: 200/204 + removed
 - Test Type: Integration
-- Status: —
-- Notes/Issue: Not covered yet in baseline tests.
+- Status: ✅
+- Notes/Issue: Implemented and tested via DELETE /blogs/deleteBlog/:id.
 
 Section D — Backend: Messaging & Conversations
-D1. Create message (new conversation auto-create)
-- Endpoint(s): POST /api/messages
-- Pre-conditions: Valid senderId/receiverId; auth
-- Expected: 201 + message created; conversationId created/linked correctly
+D1. Create message (auto-create conversation if needed)
+- Endpoint(s): POST /api/createMessage
+- Pre-conditions: Authenticated users; valid payload (senderId, receiverId, content, messageType)
+- Expected: 201 + message created; conversation auto-created when not provided
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: Implemented and tested; cookie auth used for protected routes.
 
-D2. Fetch conversation by participants
-- Endpoint(s): GET /api/messages/conversation?senderId=&receiverId=
-- Expected: 200 + conversation found/created as per logic
+D2. Get messages by conversation
+- Endpoint(s): GET /api/messages/:conversationId
+- Expected: 200 + array of messages
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: Implemented and tested.
 
-D3. Get messages by conversationId
-- Endpoint(s): GET /api/messages?conversationId=
-- Expected: 200 + ordered messages
+D3. List conversations by user
+- Endpoint(s): GET /api/conversations/:userId
+- Expected: 200 + array of conversations
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: Implemented and tested.
 
-D4. Update/Delete message (ownership/permissions)
-- Endpoint(s): PUT/DELETE /api/messages/:id
-- Expected: 200 + updated or 204 delete; permission checks enforced
+D4. List messages by user
+- Endpoint(s): GET /api/messages/user/:userId
+- Expected: 200 + array of messages
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: Implemented and tested.
+
+D5. Update message
+- Endpoint(s): PUT /api/updateMessage/:messageId
+- Expected: 200 + updated message
+- Test Type: Integration
+- Status: ⛔
+- Notes/Issue: Known update query bug; test skipped pending fix.
+
+D6. Delete message
+- Endpoint(s): DELETE /api/deleteMessage/:messageId
+- Expected: 200/204 + removed
+- Test Type: Integration
+- Status: ✅
+- Notes/Issue: Implemented and tested.
 
 Section E — Backend: WebSocket (if currently active)
 E1. Connect with auth
@@ -342,51 +356,51 @@ G1. Login flow
 - Steps: Submit valid credentials in client/app/components/LoginForm
 - Expected: Redirect to dashboard; auth state stored; cookie/token behavior correct
 - Test Type: Frontend Integration/E2E
-- Status:
-- Notes/Issue:
+- Status: ⛔
+- Notes/Issue: Forms render; backend API reachable at http://localhost:5001 (smoke); client .env.local verified (NEXT_PUBLIC_API_URL=http://localhost:5001/api); axios uses withCredentials; backend sets HttpOnly token on POST /api/login; login route at /login ([auth] page). Client auth state wiring/redirect verification pending.
 
 G2. Protected route guard
 - Steps: Navigate to dashboard when unauthenticated
 - Expected: Redirect to login or show restricted access
 - Test Type: Frontend Integration/E2E
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: Visiting /dashboard triggers withAuth guard and navigates to /login when isAuth=false.
 
 G3. Donation: create/list/update/delete via UI
 - Steps: Perform CRUD via UI
 - Expected: Reflects API results; validation errors surfaced clearly
 - Test Type: Frontend Integration/E2E
-- Status:
-- Notes/Issue:
+- Status: ⛔
+- Notes/Issue: UI (Dashboard + DonationRequestForm) present; API base must be NEXT_PUBLIC_API_URL="http://localhost:5001/api" and requires auth cookie. List/create appear reachable; update currently calls PUT /donationRequest without :requestId — needs path param to match backend PUT /api/donationRequest/:requestId; DonorCard.js call is missing :requestId; delete wiring pending.
 
 G4. Blogs: list/create/update/delete (if permitted)
 - Steps: Perform respective actions in UI
 - Expected: Displays updates; handles errors gracefully
 - Test Type: Frontend Integration/E2E
-- Status:
-- Notes/Issue:
+- Status: ⛔
+- Notes/Issue: List endpoint wired and working against backend (GET /blogs/getBlogs); create/update/delete UI and permissions pending.
 
 G5. Messaging UI
 - Steps: Send message; view conversation
 - Expected: Real-time updates or polling; correct rendering
 - Test Type: Frontend Integration/E2E
-- Status:
-- Notes/Issue:
+- Status: ⛔
+- Notes/Issue: Blocked pending backend and WebSocket server.
 
 G6. SSR/CSR/hydration sanity
 - Steps: Load pages with/without auth
 - Expected: No hydration warnings; correct SSR/CSR behavior
 - Test Type: Frontend Integration
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: Home, login, and dashboard (guarded) render without hydration warnings; hot reload works.
 
 Section H — Cross-Cutting & Security
 H1. CORS policy
 - Steps: Cross-origin requests from Next dev server to backend
 - Expected: Allowed origins only; credentials policy correct
 - Test Type: Integration
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: Backend CORS configured with origin CLIENT_URL=http://localhost:3001 (smoke), credentials=true; verified with blogs list from http://localhost:3001 to http://localhost:5001.
 
 H2. Rate limiting for auth endpoints
 - Steps: Repeated invalid login attempts
@@ -406,20 +420,32 @@ Section I — CI & Tooling
 I1. CI pipeline runs tests on PR
 - Expected: Lint/tests/coverage jobs run; status reported
 - Test Type: CI
-- Status:
-- Notes/Issue:
+- Status: ✅
+- Notes/Issue: CI run is green on PR; npm install (no lockfile) succeeded, DB migrations/seeds/tests passed, and coverage artifact uploaded.
 
 I2. Coverage thresholds enforced (initial baseline)
 - Expected: Coverage reported; baseline thresholds recorded (even if low)
 - Test Type: CI
-- Status:
-- Notes/Issue:
+- Status: Baseline coverage recorded; thresholds not yet enforced
+- Notes/Issue: Enable thresholds in later phases after stabilizing baseline.
 
 Known Blockers (to be captured during Phase 0)
-- Blocker:
-- Impact:
-- Owner:
-- Issue Link:
+- Blocker: Messages update endpoint (PUT /api/updateMessage/:messageId) has a known update query bug causing test to be skipped
+  - Impact: Users cannot edit messages; partial messaging feature
+  - Owner: Backend
+  - Issue Link: TODO (create ticket)
+- Blocker: Invalid login returns 400 instead of expected 401
+  - Impact: Spec mismatch; clients may rely on 401 for auth flows
+  - Owner: Backend
+  - Issue Link: TODO (create ticket)
+- Blocker: CSRF/CORS behavior not validated yet
+  - Impact: Potential security gaps; to be validated in Phase 2
+  - Owner: Backend/Frontend
+  - Issue Link: TODO (create ticket)
+- Blocker: Backend dev server requires several envs to boot (SERVER_URL, CLIENT_URL, SECRET, EMAIL, PASSWORD, GOOGLE_MAPS_API_KEY, DB_*)
+  - Impact: Frontend smoke tests for authenticated flows blocked until backend is up; unauth flows render
+  - Owner: DevOps/Backend
+  - Issue Link: TODO (create ticket)
 
 ---
 
@@ -607,5 +633,33 @@ Coverage Snapshot (Backend) with latest coverage numbers from backend/coverage/l
 - Functions: 27.77% (25/90)
 - Lines: 20.51% (575/2803)
 - Generated at: 2025-09-19T14:13:29.425Z
-- Status:
-- Notes/Issue:
+- Status: ✅ Baseline coverage recorded
+- Notes/Issue: Improve statement/line coverage in next phases; high branch coverage due to limited conditional paths in exercised routes.
+
+## Blood+ (Blood Donation and Access Platform)
+
+## Progress Log (Latest Changes)
+
+- frontend/auth: De-duplicated auth pages UI by moving shared header/tabs into a single AuthPage wrapper. The route `app/[auth]/page.tsx` now renders only the relevant form (login/register/profile) within `pages/authPage.tsx` wrapper. This improves maintainability and avoids double headers.
+- frontend/banner: Improved the WHO banner presentation with a two-column layout and a lightweight animated SVG blood drop for visual engagement, plus clear CTAs.
+- frontend/dashboard: Replaced the local dashboard header with the shared `Header` component and moved the "request donation" action into the content toolbar area for consistency.
+- frontend/blog: Implemented admin-only CRUD controls (New Post / Delete) on the blog page. Admin determination is based on `NEXT_PUBLIC_ADMIN_EMAILS` env variable with a hard-coded fallback list for development parity.
+- env: Added `ADMIN_EMAILS` in backend `.env.example` and `NEXT_PUBLIC_ADMIN_EMAILS` in client `.env.example` to follow best practices for configuration.
+
+### How to configure admin users
+
+- Backend: Add a comma-separated list in `ADMIN_EMAILS` to `backend/.env` (and `.env.example` already includes a sample) to allow the server to validate/admin-route protection.
+- Frontend: Add comma-separated emails in `client/.env.local` under `NEXT_PUBLIC_ADMIN_EMAILS` so the client can hide/show admin UI. Example:
+```
+NEXT_PUBLIC_ADMIN_EMAILS=alice@example.com,bob@example.com
+```
+If not provided, the client falls back to the in-code default list used during development.
+
+### Preview
+
+- Run the frontend:
+```
+cd client
+npm run dev
+```
+Then open http://localhost:3000 to see changes. Navigate to /login, /register, /pages/blog and /pages/dashboard to review the updated UI.

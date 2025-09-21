@@ -123,6 +123,7 @@ Status: Default standards to be used moving forward (subject to future ADRs if c
 
 ## 9) Documentation & ADRs
 - Keep README(s) updated with setup, scripts, and endpoints.
+- The root README.md MUST be updated immediately whenever significant or breaking changes are made (e.g., features, architecture, environment variables, scripts, or API endpoints). Treat the README as a living document and include README updates in the same PR as the change. (Repo root: /Users/macbookpro/Documents/ALX_SE/blood-/README.md)
 - Record key architectural decisions via short ADRs in docs/adrs/ (numbered, dated).
 
 ## 10) Decommissioning Legacy
