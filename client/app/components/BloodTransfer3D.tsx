@@ -96,6 +96,11 @@ const BloodTransfer3D: React.FC = () => {
             roughness: 0.8, 
             metalness: 0.1 
           });
+          // Store original colors for transformation
+          skinMat.userData = { 
+            originalColor: new THREE.Color(skinColor),
+            targetColor: isDonor ? new THREE.Color(skinColor) : new THREE.Color(0xfdbcb4) // Recipients target healthy color
+          };
           const clothingMat = new THREE.MeshStandardMaterial({ 
             color: clothingColor, 
             roughness: 0.7, 
@@ -187,11 +192,12 @@ const BloodTransfer3D: React.FC = () => {
         particles.setAttribute('size', new THREE.BufferAttribute(particleSizes, 1));
 
         const particleMaterial = new THREE.PointsMaterial({
-          size: 0.05,
+          size: 0.7,  // Much larger so particles are visible
           vertexColors: true,
           transparent: true,
-          opacity: 0.8,
-          blending: THREE.AdditiveBlending
+          opacity: 0.7,
+          blending: THREE.AdditiveBlending,
+          sizeAttenuation: true  // Makes particles smaller when far away
         });
 
         const particleSystem = new THREE.Points(particles, particleMaterial);
@@ -220,6 +226,44 @@ const BloodTransfer3D: React.FC = () => {
           const tAhead = curve.getPointAt(Math.min(1, t + 0.01));
           drop.position.copy(p);
           drop.lookAt(tAhead);
+
+          // Animate particles
+          const time = performance.now() * 0.001;
+          const positions = particleSystem.geometry.attributes.position.array;
+
+          for (let i = 0; i < particleCount; i++) {
+            // Each particle moves along the curve with staggered timing
+            let particleT = ((time * 0.2) + (i * 0.04)) % 1;  // Slower, more spread out
+            const pos = curve.getPointAt(particleT);
+            
+            positions[i * 3] = pos.x + (Math.sin(time * 3 + i * 0.5) * 0.015);     
+            positions[i * 3 + 1] = pos.y + (Math.cos(time * 2 + i * 0.3) * 0.015); 
+            positions[i * 3 + 2] = pos.z;                                      
+          }
+
+          particleSystem.geometry.attributes.position.needsUpdate = true;
+
+          // Pulse the particle opacity
+          particleMaterial.opacity = 0.6 + Math.sin(time * 3) * 0.2;
+
+          // Recipient transformation based on blood flow progress
+          const transformProgress = Math.min(t * 2, 1); // Transform faster than droplet movement
+          const recipientSkinMat = recipient.head.material;
+
+          if (transformProgress > 0.3) { // Start transformation when droplet is 30% through
+            const healthProgress = Math.min((transformProgress - 0.3) / 0.7, 1); // Scale from 30% to 100%
+            
+            // Gradually warm the recipient's skin color
+            recipientSkinMat.color.lerpColors(
+              recipientSkinMat.userData.originalColor,
+              recipientSkinMat.userData.targetColor,
+              healthProgress * 0.6 // Only 60% transformation for subtle effect
+            );
+            
+            // Add subtle glow effect
+            recipientSkinMat.emissive.setHex(0x332211);
+            recipientSkinMat.emissiveIntensity = healthProgress * 0.15;
+          }
           
           // Subtle breathing animation
           const breathe = Math.sin(performance.now() * 0.002) * 0.03 + 1;

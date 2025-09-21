@@ -1,6 +1,8 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { acceptRequest } from '../api/donation';
 
 interface DonationRequestData {
     id: number;
@@ -10,6 +12,7 @@ interface DonationRequestData {
     created_at: Date;
     updated_at: Date;
     location: string;
+    userId?: number;
 }
 
 const convertDateTime = (dateStr: Date) => {
@@ -27,8 +30,34 @@ const DonationCard = (props: DonationRequestData) => {
         isFulfilled,
         created_at,
         updated_at,
-        location
+        location,
+        userId,
     }: DonationRequestData = props
+
+    const currentUser = useSelector((state: any) => state.user?.data || {});
+    const isDonor = !!currentUser?.isDonor;
+    const isOwn = typeof userId === 'number' && currentUser?.id === userId;
+
+    const [accepting, setAccepting] = useState(false);
+    const [accepted, setAccepted] = useState(false);
+    const [acceptMsg, setAcceptMsg] = useState<string>("");
+
+    const canAccept = isDonor && !isFulfilled && !isOwn;
+
+    const onAccept = async () => {
+        try {
+            setAccepting(true);
+            setAcceptMsg("");
+            await acceptRequest(id);
+            setAccepted(true);
+            setAcceptMsg('You accepted this request. The requester has been notified via email.');
+        } catch (e: any) {
+            const msg = e?.response?.data?.message || e?.message || 'Failed to accept request.';
+            setAcceptMsg(msg);
+        } finally {
+            setAccepting(false);
+        }
+    };
 
     return (
         <div
@@ -41,6 +70,21 @@ const DonationCard = (props: DonationRequestData) => {
             <p>Updated on <span>{convertDateTime(updated_at)}</span></p>
             {/* <p>Zone: {location}</p> */}
             <p><span className='px-2 py-1 text-xs rounded-lg bg-yellow-200'>{isFulfilled ? 'donation received' : 'awaiting donors'}</span></p>
+
+            {canAccept && (
+                <div className="mt-3">
+                    <button
+                        onClick={onAccept}
+                        disabled={accepting || accepted}
+                        className={`px-3 py-2 rounded text-white ${accepted ? 'bg-green-600' : 'bg-blue-600 hover:bg-blue-700'} disabled:opacity-60`}
+                    >
+                        {accepted ? 'Accepted' : (accepting ? 'Accepting…' : 'Accept request')}
+                    </button>
+                    {acceptMsg && (
+                        <p className="text-sm mt-2 text-gray-700">{acceptMsg}</p>
+                    )}
+                </div>
+            )}
         </div>
     )
 }

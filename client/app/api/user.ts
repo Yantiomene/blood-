@@ -79,7 +79,6 @@ export async function logout(): Promise<any> {
 
 export async function updateProfile(user: UserProfile): Promise<any> {
     try {
-        console.log(">> profile: ", user);
         const response = await axios.put(`${apiUrl}/profile`, user)
         return response.data;
     } catch (error) {
