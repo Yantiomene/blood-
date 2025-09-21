@@ -250,7 +250,7 @@ const BloodTransfer3D: React.FC = () => {
           const transformProgress = Math.min(t * 2, 1); // Transform faster than droplet movement
           const recipientSkinMat = recipient.head.material;
 
-          if (transformProgress > 0.3) { // Start transformation when droplet is 30% through
+          if (transformProgress > 0.5) { // Start transformation when droplet is 30% through
             const healthProgress = Math.min((transformProgress - 0.3) / 0.7, 1); // Scale from 30% to 100%
             
             // Gradually warm the recipient's skin color
@@ -263,6 +263,73 @@ const BloodTransfer3D: React.FC = () => {
             // Add subtle glow effect
             recipientSkinMat.emissive.setHex(0x332211);
             recipientSkinMat.emissiveIntensity = healthProgress * 0.15;
+          }
+
+          // Create glowing aura around recipient
+          const auraGeometry = new THREE.RingGeometry(1.1, 1.2, 10);
+          const auraMaterial = new THREE.MeshBasicMaterial({
+            color: 0x44ff88,
+            transparent: true,
+            opacity: 0,
+            side: THREE.DoubleSide
+          });
+          const aura = new THREE.Mesh(auraGeometry, auraMaterial);
+          aura.rotation.x = -Math.PI / 2;
+          aura.position.set(2.1, -1.2, 0); // Position under recipient
+          scene.add(aura);
+
+          // Create energy particles around recipient
+          const energyCount = 10;
+          const energyGeometry = new THREE.BufferGeometry();
+          const energyPositions = new Float32Array(energyCount * 3);
+          const energyColors = new Float32Array(energyCount * 3);
+
+          for (let i = 0; i < energyCount; i++) {
+            const angle = (i / energyCount) * Math.PI * 2;
+            const radius = 1.5 + Math.random() * 0.5;
+            
+            energyPositions[i * 3] = 3.5 + Math.cos(angle) * radius;     // X around recipient
+            energyPositions[i * 3 + 1] = 0.5 + Math.random() * 1.5;     // Y at body level
+            energyPositions[i * 3 + 2] = Math.sin(angle) * radius;      // Z for 3D circle
+            
+            // Green/golden energy colors
+            energyColors[i * 3] = 0.3 + Math.random() * 0.4;     // R
+            energyColors[i * 3 + 1] = 0.8 + Math.random() * 0.2; // G
+            energyColors[i * 3 + 2] = 0.2 + Math.random() * 0.3; // B
+          }
+
+          energyGeometry.setAttribute('position', new THREE.BufferAttribute(energyPositions, 3));
+          energyGeometry.setAttribute('color', new THREE.BufferAttribute(energyColors, 3));
+
+          const energyMaterial = new THREE.PointsMaterial({
+            size: 3.0,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0,
+            blending: THREE.AdditiveBlending,
+            sizeAttenuation: true
+          });
+
+          const energyParticles = new THREE.Points(energyGeometry, energyMaterial);
+          scene.add(energyParticles);
+
+          // Animate healing aura and energy particles
+          if (transformProgress > 0.4) { // Show effects after 40% progress
+            const auraIntensity = Math.min((transformProgress - 0.4) / 0.6, 1);
+            
+            // Pulsing aura
+            aura.material.opacity = auraIntensity * 0.3 * (0.7 + Math.sin(time * 4) * 0.3);
+            aura.rotation.z += 0.01; // Slow rotation
+            
+            // Floating energy particles
+            energyMaterial.opacity = auraIntensity * 0.6;
+            const energyPos = energyParticles.geometry.attributes.position.array;
+            
+            for (let i = 0; i < energyCount; i++) {
+              const baseY = 0.5 + (i / energyCount) * 1.5;
+              energyPos[i * 3 + 1] = baseY + Math.sin(time * 2 + i) * 0.2; // Floating up and down
+            }
+            energyParticles.geometry.attributes.position.needsUpdate = true;
           }
           
           // Subtle breathing animation

@@ -38,7 +38,28 @@ async function getNearbyHospitals(latitude, longitude) {
   }
 }
 
+// Forward geocoding: address/place -> [lon, lat]
+async function geocodeAddress(address) {
+  if (!address || typeof address !== 'string' || !address.trim()) {
+    throw new Error('Address is required');
+  }
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${GOOGLE_MAPS_API_KEY}`;
+  try {
+    const resp = await axios.get(url);
+    if (!resp.data.results || resp.data.results.length === 0) {
+      throw new Error('No results found for the provided address');
+    }
+    const { lat, lng } = resp.data.results[0].geometry.location;
+    // Return [lon, lat]
+    return [lng, lat];
+  } catch (error) {
+    console.error('Error geocoding address:', error.message);
+    throw new Error('Error geocoding the provided address');
+  }
+}
+
 module.exports = {
     validateLocationFormat,
     getNearbyHospitals,
+    geocodeAddress,
 };

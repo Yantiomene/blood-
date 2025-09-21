@@ -114,4 +114,16 @@ export async function resendVerification(email: string): Promise<any> {
     throw error;
   }
 }
+
+// Geocode address -> [lon, lat]
+export async function geocode(address: string): Promise<{ success: boolean; location?: [number, number]; error?: string; }> {
+  try {
+    const response = await axios.post(`${apiUrl}/geocode`, { address });
+    return response.data;
+  } catch (error: any) {
+    // Pass through backend error shape when available
+    const msg = error?.response?.data || { success: false, error: 'Network or server error' };
+    return msg;
+  }
+}
   

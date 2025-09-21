@@ -7,7 +7,7 @@ const {
   sendVerificationEmail,
   sendPasswordResetEmail,
 } = require("../utils/email");
-const { validateLocationFormat } = require("../utils/geoUtils");
+const { validateLocationFormat, geocodeAddress } = require("../utils/geoUtils");
 
 exports.getUsers = async (req, res) => {
   try {
@@ -360,6 +360,22 @@ exports.updateUserLocation = async (req, res) => {
       success: false,
       error: "Internal server error",
     });
+  }
+};
+
+// New: Forward geocode an address/place to [longitude, latitude]
+exports.geocodeAddress = async (req, res) => {
+  try {
+    const { address } = req.body || {};
+    if (!address || typeof address !== 'string' || !address.trim()) {
+      return res.status(400).json({ success: false, error: 'Address is required' });
+    }
+    const coords = await geocodeAddress(address.trim()); // returns [lng, lat]
+    req.logger.info(`Geocoded address successfully: ${address}`);
+    return res.status(200).json({ success: true, location: coords });
+  } catch (error) {
+    req.logger.error('Error geocoding address:', error.message);
+    return res.status(500).json({ success: false, error: 'Error geocoding address' });
   }
 };
 

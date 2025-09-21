@@ -12,6 +12,7 @@ const {
   passwordResetRequest,
   resetPassword,
   requestNewToken,
+  geocodeAddress,
 } = require("../controllers/auth");
 const {
   createDonationRequest,
@@ -58,6 +59,8 @@ router.post(
   resetPassword
 );
 router.put("/user/location", userAuth, updateUserLocation);
+// utility
+router.post("/geocode", userAuth, geocodeAddress);
 
 // requests
 router.post("/donationRequest", userAuth, verifiedOnly, createDonationRequest);
