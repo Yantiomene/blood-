@@ -21,4 +21,16 @@ const adminOnly = (req, res, next) => {
   next();
 };
 
-module.exports = { userAuth, adminOnly };
+// Require verified email to proceed
+const verifiedOnly = (req, res, next) => {
+  const user = req.user;
+  if (!user) {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
+  }
+  if (!user.isVerified) {
+    return res.status(403).json({ success: false, error: 'Email not verified. Please verify your email address to continue.' });
+  }
+  next();
+};
+
+module.exports = { userAuth, adminOnly, verifiedOnly };

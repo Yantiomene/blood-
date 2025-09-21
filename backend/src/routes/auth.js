@@ -37,7 +37,7 @@ const {
 const {
   validationMiddleware,
 } = require("../middlewares/validations-middleware");
-const { userAuth } = require("../middlewares/auth-middleware");
+const { userAuth, verifiedOnly } = require("../middlewares/auth-middleware");
 const router = Router();
 
 // user
@@ -60,23 +60,23 @@ router.post(
 router.put("/user/location", userAuth, updateUserLocation);
 
 // requests
-router.post("/donationRequest", userAuth, createDonationRequest);
-router.get("/donationRequest", userAuth, getDonationRequests);
-router.get("/donationRequest/:userId", userAuth, getDonationRequestByUserId);
-router.put("/donationRequest/:requestId", userAuth, updateDonationRequest);
-router.delete("/donationRequest/:requestId", userAuth, deleteRequest);
+router.post("/donationRequest", userAuth, verifiedOnly, createDonationRequest);
+router.get("/donationRequest", userAuth, verifiedOnly, getDonationRequests);
+router.get("/donationRequest/:userId", userAuth, verifiedOnly, getDonationRequestByUserId);
+router.put("/donationRequest/:requestId", userAuth, verifiedOnly, updateDonationRequest);
+router.delete("/donationRequest/:requestId", userAuth, verifiedOnly, deleteRequest);
 // find requests
-router.get("/donationReq", userAuth, findRequestByBloodType);
-router.post("/donationReqByDate", userAuth, findRequestByDate);
-router.get("/donationReqByPriority/:urgent", userAuth, findRequestByPriority);
-router.post("/donationReqByLocation", userAuth, findRequestByLocation);
+router.get("/donationReq", userAuth, verifiedOnly, findRequestByBloodType);
+router.post("/donationReqByDate", userAuth, verifiedOnly, findRequestByDate);
+router.get("/donationReqByPriority/:urgent", userAuth, verifiedOnly, findRequestByPriority);
+router.post("/donationReqByLocation", userAuth, verifiedOnly, findRequestByLocation);
 // request interactions
-router.post("/denyRequest", userAuth, denyRequest);
-router.post("/acceptRequest/:requestId", userAuth, acceptRequest);
-router.get("/incrementView/:requestId", userAuth, incrementViewCount);
+router.post("/denyRequest", userAuth, verifiedOnly, denyRequest);
+router.post("/acceptRequest/:requestId", userAuth, verifiedOnly, acceptRequest);
+router.get("/incrementView/:requestId", userAuth, verifiedOnly, incrementViewCount);
 
 // donors
-router.post("/donors/find", userAuth, findNearbyDonors);
-router.get("/donors", userAuth, getDonors);
+router.post("/donors/find", userAuth, verifiedOnly, findNearbyDonors);
+router.get("/donors", userAuth, verifiedOnly, getDonors);
 
 module.exports = router;

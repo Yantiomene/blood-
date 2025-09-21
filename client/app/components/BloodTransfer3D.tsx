@@ -50,10 +50,11 @@ const BloodTransfer3D: React.FC = () => {
         // Init renderer
         const container = containerRef.current!;
         const width = container.clientWidth || 600;
-        const height = Math.min(260, Math.max(180, Math.round(width * 0.35)));
+        const height = Math.min(300, Math.max(200, Math.round(width * 0.4)));
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(width, height);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.setClearColor(0xf8fafc, 1);
         container.innerHTML = "";
         container.appendChild(renderer.domElement);
 
@@ -63,10 +64,12 @@ const BloodTransfer3D: React.FC = () => {
         camera.position.set(0, 1.2, 6);
 
         // Lights
-        const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-        const dir = new THREE.DirectionalLight(0xffffff, 0.8);
-        dir.position.set(2, 3, 2);
-        scene.add(ambient, dir);
+        const ambient = new THREE.AmbientLight(0xffffff, 0.7);
+        const dir1 = new THREE.DirectionalLight(0xffffff, 0.8);
+        dir1.position.set(3, 4, 3);
+        const dir2 = new THREE.DirectionalLight(0xffffff, 0.4);
+        dir2.position.set(-2, 2, 1);
+        scene.add(ambient, dir1, dir2);
 
         // Ground subtle
         const planeGeo = new THREE.PlaneGeometry(20, 6);

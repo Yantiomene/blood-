@@ -32,14 +32,22 @@ const RegisterForm: React.FC = () => {
             const response = await register(user);
             if (response.success){
                 setRegisterError('');
-                setRegisterSuccess('Registration successful! Redirecting to login...');
-                setTimeout(() => router.push('/login?registered=1'), 1000);
+                setRegisterSuccess('Registration successful! We sent you a 5-digit code. Please verify your email to continue...');
+                setTimeout(() => router.push(`/auth/verifyEmail`), 1000);
                 return;
             }
             setRegisterError('');
         }
-        catch (error) {
-            setRegisterError('Registration failed');
+        catch (error: any) {
+            // Surface server-side validation errors if available
+            const validationErrors = error?.response?.data?.errors;
+            if (Array.isArray(validationErrors) && validationErrors.length) {
+                const msgs = validationErrors.map((e: any) => e.msg).filter(Boolean);
+                setRegisterError(msgs.join(' '));
+            } else {
+                const serverMsg = error?.response?.data?.error || error?.message;
+                setRegisterError(serverMsg || 'Registration failed');
+            }
             console.error('Register error:', error);
         }
 

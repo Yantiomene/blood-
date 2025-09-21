@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+const apiUrl = process.env.NEXT_PUBLIC_API_URL as string;
 
 axios.defaults.withCredentials = true;
 
@@ -100,6 +100,16 @@ export async function checkProtected(): Promise<boolean> {
     return true;
   } catch (e) {
     return false;
+  }
+}
+
+export async function resendVerification(email: string): Promise<any> {
+  try {
+    const response = await axios.post(`${apiUrl}/requestNewToken`, { email });
+    return response.data;
+  } catch (error) {
+    console.error('Resend verification error:', error);
+    throw error;
   }
 }
   

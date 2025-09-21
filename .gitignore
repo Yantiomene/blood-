@@ -36,8 +36,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# presentation
-*.pptx
+# presentations
+presentation.pptx
+presentation_final.pptx
 
 #testing
 #/backend/coverage
