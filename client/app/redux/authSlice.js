@@ -3,7 +3,7 @@ import { checkProtected } from '../api/user';
 
 const initialState = {
   isAuth: false,
-  isLoading: false,
+  isLoading: true,
 };
 
 export const initializeAuthStatus = createAsyncThunk(

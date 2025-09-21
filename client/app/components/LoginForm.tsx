@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { login } from '../api/user';
 import { useDispatch } from 'react-redux';
 import { authenticateUser } from "../redux/authSlice";
@@ -12,6 +12,8 @@ const LoginForm: React.FC = () => {
     const [loginError, setLoginError] = useState('');
 
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const registered = searchParams.get('registered');
     const dispatch = useDispatch();
 
     const handleemailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,6 +43,7 @@ const LoginForm: React.FC = () => {
     return (
         <>
             <form onSubmit={handleSubmit} className="w-[90vw] md:w-[40vw] bg-white shadow-md rounded px-8 py-8 mb-4">
+                {registered && <p className="text-green-600 mb-4">Registration successful. Please log in.</p>}
                 {loginError && <p className="text-red-500 mb-4">{loginError}</p>}
                 <div className="mb-4">
                     <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">

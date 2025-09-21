@@ -11,6 +11,7 @@ const RegisterForm: React.FC = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [bloodType, setBloodType] = useState('');
     const [registerError, setRegisterError] = useState('');
+    const [registerSuccess, setRegisterSuccess] = useState('');
     const router = useRouter()
 
     const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -30,7 +31,9 @@ const RegisterForm: React.FC = () => {
             };
             const response = await register(user);
             if (response.success){
-                router.push('/login');
+                setRegisterError('');
+                setRegisterSuccess('Registration successful! Redirecting to login...');
+                setTimeout(() => router.push('/login?registered=1'), 1000);
                 return;
             }
             setRegisterError('');
@@ -46,6 +49,7 @@ const RegisterForm: React.FC = () => {
 
     return (
         <>
+            {registerSuccess && <p className="text-green-600 mb-4">{registerSuccess}</p>}
             <form onSubmit={handleRegister} className="w-[90vw] md:w-[40vw] bg-white shadow-md rounded px-8 py-8 mb-4">
                 {registerError && <p className="text-red-500 mb-4">{registerError}</p>}
 
