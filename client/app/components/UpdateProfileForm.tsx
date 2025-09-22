@@ -16,6 +16,8 @@ interface UserData {
     address: string;
     // Keep computed location in memory for submit
     location: string; // "lon, lat"
+    // Display-only: formatted address for current coordinates
+    currentAddress?: string;
     contactNumber: string;
 }
 
@@ -43,6 +45,7 @@ interface UserData {
          isDonor: !!user?.isDonor,
         address: '',
         location: locStr,
+        currentAddress: user?.address || '',
          contactNumber: user?.contactNumber || '',
      };
  }
@@ -136,9 +139,9 @@ interface UserData {
                 return;
             }
             const [lon, lat] = resp.location;
-            setFormData(prev => ({ ...prev, location: `${lon}, ${lat}` }));
+            setFormData(prev => ({ ...prev, location: `${lon}, ${lat}`, currentAddress: resp.address || prev.currentAddress }));
             setEditableFields(prev => ({ ...prev, location: true }));
-            setMessage('Address geocoded successfully. Coordinates filled.');
+            setMessage('Address geocoded successfully. Coordinates filled and formatted address set.');
         } catch (e: any) {
             setMessage(e?.message || 'Error while geocoding address.');
         } finally {
@@ -253,6 +256,26 @@ interface UserData {
                          </button>
                      )}
                  </div>
+                 <div className={fieldStyles}>
+                     <label className={labelStyles}>Donor status</label>
+                     <input
+                        type="checkbox"
+                        name="isDonor"
+                        checked={formData.isDonor}
+                        onChange={handleCheckboxChange}
+                        className="h-5 w-5"
+                        disabled={!editableFields.isDonor}
+                     />
+                     {!editableFields.isDonor && (
+                         <button
+                             type="button"
+                             onClick={() => handleEditField('isDonor')}
+                             className={editStyles}
+                         >
+                             Edit
+                         </button>
+                     )}
+                 </div>
                  <div className="mb-4 flex flex-col gap-4">
                     <div className={fieldStyles}>
                         <label className={labelStyles}>Address</label>
@@ -284,27 +307,20 @@ interface UserData {
                         </button>
                     </div>
 
+                     {/* Removed manual lat/lon editing UI; show display-only current address and coordinates */}
                      <div className={fieldStyles}>
-                         <label className={labelStyles}>Coordinates</label>
+                         <label className={labelStyles}>Current Address</label>
                          <input
                              type="text"
-                             name="location"
-                             onChange={handleChange}
-                            placeholder='auto-filled as "longitude, latitude" after geocoding or using your location'
+                             name="currentAddress"
                              className={inputStyles}
-                             value={formData.location}
-                             disabled={!editableFields.location}
+                             value={formData.currentAddress || ''}
+                             disabled
                          />
-                         {!editableFields.location && (
-                             <button
-                                 type="button"
-                                 onClick={() => handleEditField('location')}
-                                 className={editStyles}
-                             >
-                                 Edit
-                             </button>
-                         )}
                      </div>
+                     <p className="text-sm text-gray-500 px-1">
+                         {formData.location ? `Coordinates: ${formData.location}` : 'Coordinates will be filled after geocoding or using your location.'}
+                     </p>
                  </div>
 
                  <div className="mb-4 flex items-center gap-4">

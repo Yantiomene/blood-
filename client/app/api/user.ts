@@ -115,8 +115,8 @@ export async function resendVerification(email: string): Promise<any> {
   }
 }
 
-// Geocode address -> [lon, lat]
-export async function geocode(address: string): Promise<{ success: boolean; location?: [number, number]; error?: string; }> {
+// Geocode address -> { location: [lon, lat], address }
+export async function geocode(address: string): Promise<{ success: boolean; location?: [number, number]; address?: string; error?: string; }> {
   try {
     const response = await axios.post(`${apiUrl}/geocode`, { address });
     return response.data;

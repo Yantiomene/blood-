@@ -38,7 +38,23 @@ async function getNearbyHospitals(latitude, longitude) {
   }
 }
 
-// Forward geocoding: address/place -> [lon, lat]
+// Reverse geocoding: [lat, lon] -> address
+async function reverseGeocode(latitude, longitude) {
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`;
+  try {
+    const resp = await axios.get(url);
+    if (!resp.data.results || resp.data.results.length === 0) {
+      throw new Error('No reverse geocoding results found');
+    }
+    const formattedAddress = resp.data.results[0].formatted_address;
+    return formattedAddress;
+  } catch (error) {
+    console.error('Error reverse geocoding:', error.message);
+    throw new Error('Error reverse geocoding the provided coordinates');
+  }
+}
+
+// Forward geocoding: address/place -> { coords: [lon, lat], address }
 async function geocodeAddress(address) {
   if (!address || typeof address !== 'string' || !address.trim()) {
     throw new Error('Address is required');
@@ -49,9 +65,11 @@ async function geocodeAddress(address) {
     if (!resp.data.results || resp.data.results.length === 0) {
       throw new Error('No results found for the provided address');
     }
-    const { lat, lng } = resp.data.results[0].geometry.location;
-    // Return [lon, lat]
-    return [lng, lat];
+    const top = resp.data.results[0];
+    const { lat, lng } = top.geometry.location;
+    const formattedAddress = top.formatted_address;
+    // Return [lon, lat] and formatted address
+    return { coords: [lng, lat], address: formattedAddress };
   } catch (error) {
     console.error('Error geocoding address:', error.message);
     throw new Error('Error geocoding the provided address');
@@ -61,5 +79,6 @@ async function geocodeAddress(address) {
 module.exports = {
     validateLocationFormat,
     getNearbyHospitals,
+    reverseGeocode,
     geocodeAddress,
 };

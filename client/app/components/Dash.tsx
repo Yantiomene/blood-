@@ -162,7 +162,8 @@ const Dashboard: React.FC = () => {
                         <div className="mb-8">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="text-xl font-semibold">Your Requests</h3>
-                                <Link className="text-sm text-blue-600 hover:underline" href="/profile">Update profile</Link>
+                                {/* Remove Update profile button for non-donor users; Become a donor link exists below */}
+                                {/* <Link className="text-sm text-blue-600 hover:underline" href="/profile">Update profile</Link> */}
                             </div>
                             {myRequests.length === 0 ? (
                                 <p className="text-gray-500">You haven’t made any requests yet.</p>

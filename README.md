@@ -7,7 +7,7 @@
 > - Client uses cookie-based auth with axios.withCredentials; backend CORS is configured to allow credentials from the Next.js dev URL.
 > - Client .env: Create client/.env and set NEXT_PUBLIC_API_URL to your backend API base (e.g., http://localhost:5000/api). After changing it, restart the Next.js dev server.
 > - Profile page fixes: The profile update form has been stabilized. Submission now properly validates and sends location as [longitude, latitude], awaits server response, shows clear success/error messages, and refreshes the profile state.
-> - Geolocation: Users can now click “Use my location” to auto-fill their coordinates from the browser with permission.
+> - Geolocation: Users can click “Use my location” to auto-fill coordinates (longitude, latitude). After submitting your profile, the server attaches a formatted address based on those coordinates.
 > - Address-based geocoding: Type an address or place name and click “Geocode” to fill coordinates; backend calls Google Geocoding API and stores location as [longitude, latitude]. Requires GOOGLE_MAPS_API_KEY in backend env; client must set NEXT_PUBLIC_API_URL to your backend /api base (e.g., http://localhost:2000/api).
 > - ESLint: Cleaned up no-unescaped-entities issues (e.g., apostrophes in text) and addressed react-hooks/exhaustive-deps where applicable.
 > - To test locally:
@@ -81,7 +81,7 @@ In many African hospitals, the availability of blood for patients in need is a c
 4. Create a `.env.local` with NEXT_PUBLIC_API_URL pointing to your backend API base, e.g. `NEXT_PUBLIC_API_URL=http://localhost:2000/api`.
 5. Start the development server: `npm run dev`.
 
-Tip: On the profile page (/auth/profile), you can either click “Use my location” to auto-fill coordinates or type an address and click “Geocode” to resolve coordinates via the backend. Ensure the backend has GOOGLE_MAPS_API_KEY configured.
+Tip: On the profile page (/auth/profile), click “Use my location” to fill coordinates automatically or type an address and click “Geocode”. The form shows a read-only “Current Address” derived from geocode or your coordinates; manual lat/lon inputs have been removed. Ensure the backend has GOOGLE_MAPS_API_KEY configured.
 
 ## Contributors:
 

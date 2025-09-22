@@ -7,7 +7,7 @@ const {
   sendVerificationEmail,
   sendPasswordResetEmail,
 } = require("../utils/email");
-const { validateLocationFormat, geocodeAddress } = require("../utils/geoUtils");
+const { validateLocationFormat, geocodeAddress, reverseGeocode } = require("../utils/geoUtils");
 
 exports.getUsers = async (req, res) => {
   try {
@@ -127,9 +127,21 @@ exports.getUserProfile = async (req, res) => {
       });
     }
     req.logger.info("Fetched user profile successfully");
+    const user = userProfile.rows[0];
+    let formattedAddress = null;
+    try {
+      if (user.location && typeof user.location === 'string' && user.location.includes(',')) {
+        const parts = user.location.split(',').map(s => parseFloat(s.trim()));
+        if (parts.length === 2 && parts.every(n => !Number.isNaN(n))) {
+          formattedAddress = await reverseGeocode(parts[1], parts[0]); // lat, lon
+        }
+      }
+    } catch (e) {
+      req.logger.warn('Reverse geocoding failed:', e.message);
+    }
     return res.status(200).json({
       success: true,
-      user: userProfile.rows[0],
+      user: { ...user, address: formattedAddress || null },
     });
   } catch (error) {
     req.logger.error("Error fetching user profile:", error.message);
@@ -363,16 +375,15 @@ exports.updateUserLocation = async (req, res) => {
   }
 };
 
-// New: Forward geocode an address/place to [longitude, latitude]
 exports.geocodeAddress = async (req, res) => {
   try {
     const { address } = req.body || {};
     if (!address || typeof address !== 'string' || !address.trim()) {
       return res.status(400).json({ success: false, error: 'Address is required' });
     }
-    const coords = await geocodeAddress(address.trim()); // returns [lng, lat]
+    const result = await geocodeAddress(address.trim()); // returns { coords: [lng, lat], address }
     req.logger.info(`Geocoded address successfully: ${address}`);
-    return res.status(200).json({ success: true, location: coords });
+    return res.status(200).json({ success: true, location: result.coords, address: result.address });
   } catch (error) {
     req.logger.error('Error geocoding address:', error.message);
     return res.status(500).json({ success: false, error: 'Error geocoding address' });
