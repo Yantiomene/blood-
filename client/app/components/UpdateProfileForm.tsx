@@ -97,32 +97,59 @@ interface UserData {
      const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
          const { name, checked } = e.target;
          setFormData(prev => ({ ...prev, [name]: checked }));
+         if (name === 'isDonor') {
+             setMessage(
+                 checked
+                     ? 'Donor status enabled. You may be discoverable to recipients based on your blood type and location.'
+                     : 'Donor status disabled. You will not be shown in donor searches.'
+             );
+         }
      };
 
      const handleEditField = (fieldName: keyof UserData) => {
          setEditableFields(prev => ({ ...prev, [fieldName]: true }));
      };
 
-     const useMyLocation = () => {
+     const useMyLocation = async () => {
          if (!navigator.geolocation) {
              setMessage('Geolocation is not supported by your browser.');
              return;
          }
-         setIsLocating(true);
-         navigator.geolocation.getCurrentPosition(
-             (pos) => {
-                 const { latitude, longitude } = pos.coords;
-                setFormData(prev => ({ ...prev, location: `${longitude}, ${latitude}` }));
-                setEditableFields(prev => ({ ...prev, location: true }));
-                 setIsLocating(false);
-             },
-             (err) => {
-                 console.error('Geolocation error:', err);
-                setMessage('Unable to fetch your location. Please allow location access or type an address instead.');
-                 setIsLocating(false);
-             },
-             { enableHighAccuracy: true, timeout: 10000 }
-         );
+         setMessage('Requesting location permission...');
+         try {
+             // Pre-check permission where supported to provide clearer guidance
+             // eslint-disable-next-line @typescript-eslint/no-explicit-any
+             const navAny: any = navigator as any;
+             if (navAny.permissions && typeof navAny.permissions.query === 'function') {
+                 try {
+                     const status = await navAny.permissions.query({ name: 'geolocation' as PermissionName });
+                     if (status.state === 'denied') {
+                         setMessage('Location access is denied. Please enable location permissions in your browser settings and try again.');
+                         return;
+                     }
+                 } catch {
+                     // Ignore permission API errors and proceed with geolocation request
+                 }
+             }
+             setIsLocating(true);
+             navigator.geolocation.getCurrentPosition(
+                 (pos) => {
+                     const { latitude, longitude } = pos.coords;
+                    setFormData(prev => ({ ...prev, location: `${longitude}, ${latitude}` }));
+                    setEditableFields(prev => ({ ...prev, location: true }));
+                    setMessage('Location captured. Coordinates filled. The formatted address will be added after you submit.');
+                    setIsLocating(false);
+                 },
+                 (err) => {
+                     console.error('Geolocation error:', err);
+                    setMessage('Unable to fetch your location. Please allow location access and try again, or enter an address.');
+                    setIsLocating(false);
+                 },
+                 { enableHighAccuracy: true, timeout: 10000 }
+             );
+         } catch (e) {
+             setMessage('Unable to start location request.');
+         }
      };
 
     const geocodeAddress = async () => {
@@ -153,9 +180,27 @@ interface UserData {
          event.preventDefault();
          setMessage('');
          try {
-             const parsed = parseLocation(formData.location);
+             let parsed = parseLocation(formData.location);
+             // If coordinates are not set, try geocoding the provided address on submit
+             if (!parsed && formData.address && formData.address.trim()) {
+                 try {
+                     setIsGeocoding(true);
+                     const resp = await geocodeAPI(formData.address.trim());
+                     if (resp?.success && resp?.location) {
+                         const [lon, lat] = resp.location;
+                         parsed = [lon, lat];
+                         setFormData(prev => ({ ...prev, location: `${lon}, ${lat}`, currentAddress: resp.address || prev.currentAddress }));
+                         setEditableFields(prev => ({ ...prev, location: true }));
+                     } else {
+                         setMessage(resp?.error || 'Could not geocode that address. Please check and try again.');
+                         return;
+                     }
+                 } finally {
+                     setIsGeocoding(false);
+                 }
+             }
              if (!parsed) {
-                setMessage('Please geocode an address or click "Use my location" to fill valid coordinates.');
+                 setMessage('Please click "Use my location" or provide an address. Location will be fetched when you click Update.');
                  return;
              }
              const payload = {
@@ -174,7 +219,7 @@ interface UserData {
              }
              // Refresh user profile
              await (dispatch(fetchCurrentUser()) as any);
-             setMessage('Profile updated successfully.');
+             setMessage(`Profile updated successfully. Donor status: ${formData.isDonor ? 'Enabled' : 'Disabled'}. ${formData.isDonor ? 'Recipients may contact you based on your blood type and location.' : 'You will not be shown to recipients.'} ${formData.currentAddress ? `Address: ${formData.currentAddress}` : ''}`.trim());
              // Stay on page; do not auto-redirect so user can see success
          } catch (error: any) {
              const serverMsg = error?.response?.data?.error || error?.message;
@@ -283,7 +328,7 @@ interface UserData {
                             type="text"
                             name="address"
                             onChange={handleChange}
-                            placeholder='Enter an address or place (e.g., "KICC Nairobi" or "221B Baker Street")'
+                            placeholder={formData.currentAddress ? `Current: ${formData.currentAddress}` : 'Enter an address or place (e.g., "KICC Nairobi" or "221B Baker Street")'}
                             className={inputStyles}
                             value={formData.address}
                             disabled={!editableFields.address}
@@ -297,14 +342,6 @@ interface UserData {
                                 Edit
                             </button>
                         )}
-                        <button
-                            type="button"
-                            onClick={geocodeAddress}
-                            className="ml-2 bg-green-600 text-white rounded-md px-3 py-2 disabled:opacity-60"
-                            disabled={isGeocoding}
-                        >
-                            {isGeocoding ? 'Geocoding…' : 'Geocode'}
-                        </button>
                     </div>
 
                      {/* Removed manual lat/lon editing UI; show display-only current address and coordinates */}
