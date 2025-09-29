@@ -215,6 +215,38 @@ const BloodTransfer3D: React.FC = () => {
         const drop = new THREE.Mesh(new THREE.SphereGeometry(0.15, 32, 32), dropMat);
         scene.add(drop);
 
+        // Point light attached to droplet for glow effect
+        const dropLight = new THREE.PointLight(0xff3333, 0.8, 2);
+        drop.add(dropLight); // Attach light to droplet so it moves together
+
+        // Create droplet trail effect
+        const trailCount = 10;
+        const trailGeometry = new THREE.BufferGeometry();
+        const trailPositions = new Float32Array(trailCount * 3);
+        const trailOpacities = new Float32Array(trailCount);
+
+        for (let i = 0; i < trailCount; i++) {
+          trailPositions[i * 3] = 0;
+          trailPositions[i * 3 + 1] = 0;
+          trailPositions[i * 3 + 2] = 0;
+          trailOpacities[i] = 1.0 - (i / trailCount); // Fade out along trail
+        }
+
+        trailGeometry.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
+        trailGeometry.setAttribute('alpha', new THREE.BufferAttribute(trailOpacities, 1));
+
+        const trailMaterial = new THREE.PointsMaterial({
+          size: 2.5,
+          color: 0xff6666,
+          transparent: true,
+          opacity: 0.6,
+          blending: THREE.AdditiveBlending,
+          sizeAttenuation: true
+        });
+
+        const trail = new THREE.Points(trailGeometry, trailMaterial);
+        scene.add(trail);
+
         // Animation loop
         let t = 0;
         let raf = 0 as any;
@@ -288,7 +320,7 @@ const BloodTransfer3D: React.FC = () => {
             const angle = (i / energyCount) * Math.PI * 2;
             const radius = 1.5 + Math.random() * 0.5;
             
-            energyPositions[i * 3] = 3.5 + Math.cos(angle) * radius;     // X around recipient
+            energyPositions[i * 3] = 4.5 + Math.cos(angle) * radius;     // X around recipient
             energyPositions[i * 3 + 1] = 0.5 + Math.random() * 1.5;     // Y at body level
             energyPositions[i * 3 + 2] = Math.sin(angle) * radius;      // Z for 3D circle
             

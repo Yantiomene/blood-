@@ -5,7 +5,8 @@ import withAuth from '../components/authHOC';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCurrentUser, updateUserProfile } from '../redux/userSlice';
 import { useRouter } from 'next/navigation';
-import { geocode as geocodeAPI } from '../api/user';
+import { geocode as geocodeAPI, getCurrentUser as getCurrentUserAPI } from '../api/user';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 interface UserData {
     username: string;
@@ -75,6 +76,8 @@ interface UserData {
      });
      const [isLocating, setIsLocating] = useState(false);
     const [isGeocoding, setIsGeocoding] = useState(false);
+    const [phoneCountry, setPhoneCountry] = useState<string>('');
+    const [phoneError, setPhoneError] = useState<string>('');
 
      const router = useRouter();
      const dispatch = useDispatch<any>();
@@ -87,11 +90,17 @@ interface UserData {
      // When user in store changes, sync into form
      useEffect(() => {
          setFormData(normalizeUserToForm(user));
+         // Try to infer phone country from existing E.164 number
+         try {
+           const pn = parsePhoneNumberFromString(user?.contactNumber || '');
+           if (pn?.country) setPhoneCountry(prev => prev || pn.country);
+         } catch {}
      }, [user]);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
          const { name, value } = e.target;
          setFormData(prev => ({ ...prev, [name]: value }));
+         if (name === 'contactNumber') setPhoneError('');
      };
 
      const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -152,33 +161,12 @@ interface UserData {
          }
      };
 
-    const geocodeAddress = async () => {
-        setMessage('');
-        if (!formData.address || !formData.address.trim()) {
-            setMessage('Please enter an address or place name to geocode.');
-            return;
-        }
-        try {
-            setIsGeocoding(true);
-            const resp = await geocodeAPI(formData.address.trim());
-            if (!resp?.success || !resp?.location) {
-                setMessage(resp?.error || 'Could not geocode that address.');
-                return;
-            }
-            const [lon, lat] = resp.location;
-            setFormData(prev => ({ ...prev, location: `${lon}, ${lat}`, currentAddress: resp.address || prev.currentAddress }));
-            setEditableFields(prev => ({ ...prev, location: true }));
-            setMessage('Address geocoded successfully. Coordinates filled and formatted address set.');
-        } catch (e: any) {
-            setMessage(e?.message || 'Error while geocoding address.');
-        } finally {
-            setIsGeocoding(false);
-        }
-    };
+    // Geocoding is now performed during submit inside handleSubmit; geocodeAddress helper removed.
 
      const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
          event.preventDefault();
          setMessage('');
+         setPhoneError('');
          try {
              let parsed = parseLocation(formData.location);
              // If coordinates are not set, try geocoding the provided address on submit
@@ -199,18 +187,38 @@ interface UserData {
                      setIsGeocoding(false);
                  }
              }
-             if (!parsed) {
-                 setMessage('Please click "Use my location" or provide an address. Location will be fetched when you click Update.');
+             // Allow updates without address if the user already has one stored
+             const hasExistingAddressOrCoords = !!(user?.address || formData.currentAddress || parseLocation(formData.location) || (Array.isArray(user?.location) && user.location.length === 2));
+             if (!parsed && !hasExistingAddressOrCoords) {
+                 setMessage('Please click "Use my location" or provide an address. Location is required only if you have not set any address yet.');
                  return;
              }
-             const payload = {
+
+             // Validate and format contact number per selected country
+             let formattedContact = (formData.contactNumber || '').trim();
+             if (formattedContact) {
+               let pn;
+               try {
+                 pn = phoneCountry ? parsePhoneNumberFromString(formattedContact, phoneCountry) : parsePhoneNumberFromString(formattedContact);
+               } catch {}
+               if (!pn || !pn.isValid()) {
+                 setPhoneError('Invalid phone number for the selected country. Please check and try again.');
+                 setMessage('Please enter a valid phone number for the selected country.');
+                 return;
+               }
+               formattedContact = pn.format('E.164');
+             }
+
+             const payload: any = {
                  username: formData.username,
                  email: formData.email,
                  bloodType: formData.bloodType,
                  isDonor: formData.isDonor,
-                 location: parsed, // [lon, lat]
-                 contactNumber: formData.contactNumber,
-             } as any;
+                 contactNumber: formattedContact,
+             };
+             if (parsed) {
+                 payload.location = parsed; // [lon, lat]
+             }
 
              // Dispatch thunk and check for rejection manually to avoid TS unwrap issues
              const resultAction = await (dispatch((updateUserProfile as any)(payload)) as any);
@@ -219,6 +227,12 @@ interface UserData {
              }
              // Refresh user profile
              await (dispatch(fetchCurrentUser()) as any);
+             // Rehydrate full form state from the latest API response to ensure consistency across all fields
+             try {
+               const refreshed = await getCurrentUserAPI();
+               const latest = refreshed?.user || refreshed;
+               setFormData(normalizeUserToForm(latest));
+             } catch {}
              setMessage(`Profile updated successfully. Donor status: ${formData.isDonor ? 'Enabled' : 'Disabled'}. ${formData.isDonor ? 'Recipients may contact you based on your blood type and location.' : 'You will not be shown to recipients.'} ${formData.currentAddress ? `Address: ${formData.currentAddress}` : ''}`.trim());
              // Stay on page; do not auto-redirect so user can see success
          } catch (error: any) {
@@ -231,6 +245,10 @@ interface UserData {
          <>
              <form onSubmit={handleSubmit} className="w-[90vw] md:w-[40vw] bg-white rounded px-8 py-8 mb-4">
                  {Message && <p className={messageStyles}>{Message}</p>}
+                 <div className="mb-4 p-4 bg-gray-50 rounded border">
+                   <p className="text-sm text-gray-700"><span className="font-medium">Current Address:</span> {user?.address || formData.currentAddress || 'Not available yet'}</p>
+                   <p className="text-sm text-gray-700"><span className="font-medium">Contact Number:</span> {user?.contactNumber || formData.contactNumber || 'Not set'}</p>
+                 </div>
                  <div className={fieldStyles}>
                      <label className={labelStyles}>Username</label>
                      <input
@@ -345,16 +363,7 @@ interface UserData {
                     </div>
 
                      {/* Removed manual lat/lon editing UI; show display-only current address and coordinates */}
-                     <div className={fieldStyles}>
-                         <label className={labelStyles}>Current Address</label>
-                         <input
-                             type="text"
-                             name="currentAddress"
-                             className={inputStyles}
-                             value={formData.currentAddress || ''}
-                             disabled
-                         />
-                     </div>
+                     {/* Display-only coordinates; address is shown in the summary above to avoid duplication */}
                      <p className="text-sm text-gray-500 px-1">
                          {formData.location ? `Coordinates: ${formData.location}` : 'Coordinates will be filled after geocoding or using your location.'}
                      </p>
@@ -365,7 +374,7 @@ interface UserData {
                          type="button"
                          onClick={useMyLocation}
                          className="bg-gray-700 text-white rounded-md px-3 py-2 disabled:opacity-60"
-                         disabled={isLocating}
+                         disabled={isLocating || isGeocoding}
                      >
                          {isLocating ? 'Fetching location…' : 'Use my location'}
                      </button>
@@ -373,6 +382,28 @@ interface UserData {
 
                  <div className={fieldStyles}>
                      <label className={labelStyles}>Contact Number</label>
+                     <select
+                       name="phoneCountry"
+                       value={phoneCountry}
+                       onChange={(e) => setPhoneCountry(e.target.value)}
+                       className={inputStyles}
+                       disabled={!editableFields.contactNumber}
+                     >
+                       <option value="">Select country</option>
+                       <option value="KE">Kenya (+254)</option>
+                       <option value="NG">Nigeria (+234)</option>
+                       <option value="UG">Uganda (+256)</option>
+                       <option value="TZ">Tanzania (+255)</option>
+                       <option value="RW">Rwanda (+250)</option>
+                       <option value="ET">Ethiopia (+251)</option>
+                       <option value="GH">Ghana (+233)</option>
+                       <option value="ZA">South Africa (+27)</option>
+                       <option value="CM">Cameroon (+237)</option>
+                       <option value="SN">Senegal (+221)</option>
+                       <option value="DZ">Algeria (+213)</option>
+                       <option value="MA">Morocco (+212)</option>
+                       <option value="EG">Egypt (+20)</option>
+                     </select>
                      <input
                          type="text"
                          name="contactNumber"
@@ -380,6 +411,7 @@ interface UserData {
                          onChange={handleChange}
                          className={inputStyles}
                          disabled={!editableFields.contactNumber}
+                         placeholder={phoneCountry ? `Enter number for ${phoneCountry}` : 'Enter phone number'}
                      />
                      {!editableFields.contactNumber && (
                          <button
@@ -391,6 +423,7 @@ interface UserData {
                          </button>
                      )}
                  </div>
+                 {phoneError && <p className="text-sm text-red-600 px-1">{phoneError}</p>}
 
                  <button
                      className="bg-red-500 inline-block w-full hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"

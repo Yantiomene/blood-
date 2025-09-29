@@ -8,6 +8,7 @@ const {
   sendPasswordResetEmail,
 } = require("../utils/email");
 const { validateLocationFormat, geocodeAddress, reverseGeocode } = require("../utils/geoUtils");
+const wkx = require('wkx');
 
 exports.getUsers = async (req, res) => {
   try {
@@ -116,7 +117,7 @@ exports.getUserProfile = async (req, res) => {
 
   try {
     const userProfile = await db.query(
-      'SELECT id, username, email, "bloodType", "isDonor", location, "isVerified" FROM users WHERE id = $1',
+      'SELECT id, username, email, "bloodType", "isDonor", location, "isVerified", "contactNumber" FROM users WHERE id = $1',
       [userId]
     );
 
@@ -130,10 +131,43 @@ exports.getUserProfile = async (req, res) => {
     const user = userProfile.rows[0];
     let formattedAddress = null;
     try {
-      if (user.location && typeof user.location === 'string' && user.location.includes(',')) {
-        const parts = user.location.split(',').map(s => parseFloat(s.trim()));
-        if (parts.length === 2 && parts.every(n => !Number.isNaN(n))) {
-          formattedAddress = await reverseGeocode(parts[1], parts[0]); // lat, lon
+      if (user.location) {
+        let lon, lat;
+        if (typeof user.location === 'string') {
+          if (user.location.includes(',')) {
+            const parts = user.location.split(',').map(s => parseFloat(s.trim()));
+            if (parts.length === 2 && parts.every(n => !Number.isNaN(n))) {
+              [lon, lat] = [parts[0], parts[1]];
+            }
+          } else if (user.location.startsWith('POINT')) {
+            const match = user.location.match(/POINT\(([-\d\.]+) ([-\d\.]+)\)/);
+            if (match) {
+              lon = parseFloat(match[1]);
+              lat = parseFloat(match[2]);
+            }
+          } else {
+            // Try parse as hex WKB geometry string
+            try {
+              const geom = wkx.Geometry.parse(Buffer.from(user.location, 'hex'));
+              if (geom && typeof geom.x === 'number' && typeof geom.y === 'number') {
+                lon = geom.x;
+                lat = geom.y;
+              }
+            } catch {}
+          }
+        } else {
+          // Buffer or other type from db -> attempt WKB parse
+          try {
+            const buf = Buffer.isBuffer(user.location) ? user.location : Buffer.from(String(user.location), 'hex');
+            const geom = wkx.Geometry.parse(buf);
+            if (geom && typeof geom.x === 'number' && typeof geom.y === 'number') {
+              lon = geom.x;
+              lat = geom.y;
+            }
+          } catch {}
+        }
+        if (typeof lon === 'number' && typeof lat === 'number' && !Number.isNaN(lon) && !Number.isNaN(lat)) {
+          formattedAddress = await reverseGeocode(lat, lon); // lat, lon
         }
       }
     } catch (e) {
@@ -159,7 +193,7 @@ exports.getUserById = async (req, res) => {
 
   try {
     const user = await db.query(
-      'SELECT id, username, email, "bloodType", "isDonor", location, "isVerified" FROM users WHERE id = $1',
+      'SELECT id, username, email, "bloodType", "isDonor", location, "isVerified", "contactNumber" FROM users WHERE id = $1',
       [userId]
     );
 
