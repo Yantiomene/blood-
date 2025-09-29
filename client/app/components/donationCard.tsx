@@ -13,6 +13,7 @@ interface DonationRequestData {
     updated_at: Date;
     location: string;
     userId?: number;
+    message?: string;
 }
 
 const convertDateTime = (dateStr: Date) => {
@@ -32,6 +33,7 @@ const DonationCard = (props: DonationRequestData) => {
         updated_at,
         location,
         userId,
+        message,
     }: DonationRequestData = props
 
     const currentUser = useSelector((state: any) => state.user?.data || {});
@@ -68,8 +70,14 @@ const DonationCard = (props: DonationRequestData) => {
             </h3>
             <p>Requested on <span>{convertDateTime(created_at)}</span></p>
             <p>Updated on <span>{convertDateTime(updated_at)}</span></p>
-            {/* <p>Zone: {location}</p> */}
+            <p>Location: <span className='text-gray-700'>{location}</span></p>
             <p><span className='px-2 py-1 text-xs rounded-lg bg-yellow-200'>{isFulfilled ? 'donation received' : 'awaiting donors'}</span></p>
+
+            {message && (
+                <div className="mt-3 p-3 bg-gray-50 rounded">
+                    <p className="text-sm text-gray-800"><span className="font-semibold">Note from requester:</span> {message}</p>
+                </div>
+            )}
 
             {canAccept && (
                 <div className="mt-3">

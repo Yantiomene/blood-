@@ -4,15 +4,18 @@ import DonationRequestForm from "./donationRequestForm";
 const Overlay: React.FC<{ closeOverlay: Function }> = ({ closeOverlay }) => {
     return (
         <div
-            style={{ backgroundColor: "rgb(0 0 0 / 68%)" }}
-            className="absolute z-50 w-full h-full top-0 flex flex-col pt-[8%] items-center"
+            className="fixed inset-0 z-50 bg-black/70 overflow-y-auto"
         >
             <button
                 onClick={() => closeOverlay(false)}
-                className="p-2 my-4 bg-white flex items-center justify-center w-10 h-10 rounded-full"
-            >X
+                className="absolute top-4 right-4 bg-white flex items-center justify-center w-10 h-10 rounded-full shadow"
+                aria-label="Close overlay"
+            >
+                X
             </button>
-            <DonationRequestForm />
+            <div className="min-h-screen flex items-start sm:items-center justify-center p-4 sm:p-6">
+                <DonationRequestForm />
+            </div>
         </div>
     )
 }

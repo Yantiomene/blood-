@@ -8,6 +8,8 @@ interface DonationRequest {
     bloodType: string;
     quantity: number;
     location: [number, number];
+    message?: string;
+    contactNumber?: string; // optional, may be embedded into message until backend supports field
 }
 
 

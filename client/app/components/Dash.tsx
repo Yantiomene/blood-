@@ -21,6 +21,7 @@ interface DonationRequestData {
     updated_at: Date;
     location: string;
     userId?: number;
+    message?: string;
 }
 
 const Dashboard: React.FC = () => {
@@ -79,9 +80,10 @@ const Dashboard: React.FC = () => {
     }, [requestList, user?.id]);
 
     const handleDisplayOverlay = () => {
-        setShowOverlay(!showOverlay);
+        const nextShow = !showOverlay;
+        setShowOverlay(nextShow);
         const bodyElem = document.querySelector('body');
-        if (showOverlay) {
+        if (nextShow) {
             bodyElem?.classList.add('overflow-hidden');
         } else {
             bodyElem?.classList.remove('overflow-hidden');
@@ -91,15 +93,21 @@ const Dashboard: React.FC = () => {
     return (
         <>
             <Header isLoggedin={auth} />
-            {showOverlay && <Overlay closeOverlay={setShowOverlay} />}
+            {showOverlay && (
+                <Overlay closeOverlay={(val: boolean) => {
+                    setShowOverlay(val);
+                    if (!val) {
+                        const bodyElem = document.querySelector('body');
+                        bodyElem?.classList.remove('overflow-hidden');
+                    }
+                }} />
+            )}
             <div className="container mx-auto px-4 py-8">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold">Dashboard</h2>
-                    {user?.isDonor && (
-                        <button onClick={handleDisplayOverlay} className="bg-red-500 hover:bg-red-800 text-white px-4 py-2 rounded">
-                            + request donation
-                        </button>
-                    )}
+                    <button onClick={handleDisplayOverlay} className="bg-red-500 hover:bg-red-800 text-white px-4 py-2 rounded">
+                        + request donation
+                    </button>
                 </div>
 
                 {user?.isDonor ? (
@@ -146,6 +154,7 @@ const Dashboard: React.FC = () => {
                                     updated_at={data.updated_at}
                                     location={data.location}
                                     userId={data.userId}
+                                    message={data.message}
                                 />
                             ))}
                             {loadingRequest === 'loading' && (
@@ -180,6 +189,7 @@ const Dashboard: React.FC = () => {
                                             updated_at={data.updated_at}
                                             location={data.location}
                                             userId={data.userId}
+                                            message={data.message}
                                         />
                                     ))}
                                 </div>
@@ -203,6 +213,7 @@ const Dashboard: React.FC = () => {
                                     updated_at={data.updated_at}
                                     location={data.location}
                                     userId={data.userId}
+                                    message={data.message}
                                 />
                             ))}
                             {loadingRequest === 'loading' && (
