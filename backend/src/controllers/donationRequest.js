@@ -53,26 +53,64 @@ const createDonationRequest = async (req, res) => {
 
 
 const getDonationRequests = async (req, res) => {
-    const { isFulfilled } = req.query;
+    const { isFulfilled, page = '1', limit = '5' } = req.query;
 
     try {
+        const pageNum = Math.max(parseInt(page, 10) || 1, 1);
+        const limitNum = Math.max(parseInt(limit, 10) || 5, 1);
+        const offsetNum = (pageNum - 1) * limitNum;
 
-        let query = 'SELECT * FROM donation_requests';
+        const whereClauses = [];
         const params = [];
 
-        if (isFulfilled) {
-            query += ' WHERE "isFulfilled" = $1';
+        if (isFulfilled !== undefined) {
+            whereClauses.push('"isFulfilled" = $' + (params.length + 1));
             params.push(isFulfilled);
         }
 
-        // Retrieve all donation requests from the database
-        const result = await db.query(query, params);
-        const donationRequests = result.rows;
+        const whereSql = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+        const dataQuery = `
+            SELECT 
+                id,
+                "userId",
+                "bloodType",
+                quantity,
+                "isFulfilled",
+                message,
+                "requestingEntity",
+                "requestingEntityId",
+                created_at,
+                updated_at,
+                ST_Y(location::geometry) AS latitude,
+                ST_X(location::geometry) AS longitude
+            FROM donation_requests
+            ${whereSql}
+            ORDER BY created_at DESC
+            LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+        `;
+
+        const countQuery = `SELECT COUNT(*) AS total FROM donation_requests ${whereSql}`;
+
+        const [dataResult, countResult] = await Promise.all([
+            db.query(dataQuery, [...params, limitNum, offsetNum]),
+            db.query(countQuery, params),
+        ]);
+
+        const donationRequests = dataResult.rows;
+        const total = parseInt(countResult.rows[0].total, 10);
+        const totalPages = Math.max(Math.ceil(total / limitNum), 1);
 
         req.logger.info('Fetched donation requests successfully');
         res.status(200).json({
             success: true,
             donationRequests,
+            pagination: {
+                page: pageNum,
+                limit: limitNum,
+                total,
+                totalPages,
+            },
         });
     } catch (error) {
         req.logger.error('Error retrieving donation requests:', error.message);
@@ -1002,6 +1040,7 @@ module.exports = {
     updateDonationRequest,
     findNearbyDonors,
     getDonationRequestByUserId,
+    getDonationRequestById,
     getDonors,
     deleteRequest,
     findRequestByBloodType,
@@ -1011,4 +1050,25 @@ module.exports = {
     findRequestByPriority,
     findRequestByLocation,
     incrementViewCount,
+};
+
+// get donation request by id
+async function getDonationRequestById(req, res) {
+    const { requestId } = req.params;
+    try {
+        const result = await db.query(
+            'SELECT id, "userId", "bloodType", quantity, "isFulfilled", message, "requestingEntity", "requestingEntityId", created_at, updated_at, ST_Y(location::geometry) AS latitude, ST_X(location::geometry) AS longitude FROM donation_requests WHERE id = $1',
+            [requestId]
+        );
+        const donationRequest = result.rows[0];
+        if (!donationRequest) {
+            return res.status(404).json({ success: false, error: 'Donation request not found' });
+        }
+        req.logger && req.logger.info && req.logger.info('Fetched donation request by id successfully');
+        return res.status(200).json({ success: true, donationRequest });
+    } catch (error) {
+        req.logger && req.logger.error && req.logger.error('Error getting donation request by id:', error.message);
+        console.error('Error getting donation request by id:', error.message);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
 };

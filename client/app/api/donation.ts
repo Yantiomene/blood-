@@ -79,3 +79,41 @@ export async function acceptRequest(requestId: string | number): Promise<any> {
         throw error;
     }
 }
+
+export async function denyRequest(requestId: string | number, reason: string): Promise<any> {
+    try {
+        const response = await axios.post(`${apiUrl}/denyRequest`, { requestId, reason }, { withCredentials: true });
+        return response.data;
+    } catch (error) {
+        console.error('Error denying request:', error);
+        throw error;
+    }
+}
+
+export async function getDonationRequestById(requestId: string | number): Promise<any> {
+    try {
+        const response = await axios.get(`${apiUrl}/donationRequest/${requestId}`, { withCredentials: true });
+        return response.data;
+    } catch (error) {
+        console.error('Error getting donation request by id:', error);
+        throw error;
+    }
+}
+
+export async function getDonationRequestsPaginated(params: { page?: number; limit?: number; isFulfilled?: boolean }): Promise<any> {
+    const { page = 1, limit = 5, isFulfilled } = params || {};
+    const query = new URLSearchParams();
+    query.set('page', String(page));
+    query.set('limit', String(limit));
+    if (typeof isFulfilled !== 'undefined') query.set('isFulfilled', String(isFulfilled));
+
+    try {
+        const response = await axios.get(`${apiUrl}/donationRequest?${query.toString()}`, {
+            withCredentials: true,
+        });
+        return response.data;
+    } catch (error: any) {
+        console.error('Error getting paginated donation requests:', error.message);
+        throw error;
+    }
+}

@@ -128,7 +128,9 @@ const Dashboard: React.FC = () => {
                             </div>
                             <div className="bg-white rounded shadow p-4">
                                 <p className="text-sm text-gray-500">Requests awaiting donors</p>
-                                <p className="text-3xl font-bold">{awaitingDonorsCount}</p>
+                                <Link href={{ pathname: '/dashboard/donor-requests', query: { page: '1' } }} className="text-3xl font-bold text-blue-600 hover:underline">
+                                    {awaitingDonorsCount}
+                                </Link>
                             </div>
                         </div>
 
