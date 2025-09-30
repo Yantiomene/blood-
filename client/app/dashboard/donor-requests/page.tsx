@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Header from '../../components/Header';
 import withAuth from '../../components/authHOC';
 import { getDonationRequestsPaginated } from '../../api/donation';
+import { useSelector } from 'react-redux';
 
 interface DonorRequestItem {
   id: number;
@@ -49,6 +50,9 @@ const DonorRequestsPage: React.FC = () => {
     const next = Math.max(1, Math.min(p, pagination?.totalPages || 1));
     router.push(`/dashboard/donor-requests?page=${next}`);
   };
+
+  const currentUser = useSelector((state: any) => state.user?.data || {});
+  const isDonor = !!currentUser?.isDonor;
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -98,11 +102,20 @@ const DonorRequestsPage: React.FC = () => {
             {/* Minimal, static map preview: center on first item if coords exist */}
             {/* We avoid heavy map libraries; for richer maps we can add Leaflet later */}
             {items.some(i => typeof i.latitude === 'number' && typeof i.longitude === 'number') ? (
-              <iframe
-                title="Requests Map"
-                className="w-full h-full"
-                src={`https://www.openstreetmap.org/export/embed.html?bbox=${(items[0]?.longitude as number ?? 0)-0.1},${(items[0]?.latitude as number ?? 0)-0.1},${(items[0]?.longitude as number ?? 0)+0.1},${(items[0]?.latitude as number ?? 0)+0.1}&layer=mapnik${items.filter(i=>typeof i.latitude==='number'&&typeof i.longitude==='number').map(i=>`&marker=${i.latitude},${i.longitude}`).join('')}`}
-              />
+              (() => {
+                const coords = items.filter(i => typeof i.latitude === 'number' && typeof i.longitude === 'number');
+                const centerLon = Number(coords[0]?.longitude ?? 0);
+                const centerLat = Number(coords[0]?.latitude ?? 0);
+                const markers = coords.map(i => `&marker=${Number(i.latitude)},${Number(i.longitude)}`).join('');
+                const bbox = `${centerLon - 0.1},${centerLat - 0.1},${centerLon + 0.1},${centerLat + 0.1}`;
+                return (
+                  <iframe
+                    title="Requests Map"
+                    className="w-full h-full"
+                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik${markers}`}
+                  />
+                );
+              })()
             ) : (
               <div className="flex items-center justify-center h-full text-gray-500">No coordinates available</div>
             )}

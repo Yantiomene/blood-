@@ -59,7 +59,7 @@ export async function makeDonationRequest(requestData: DonationRequest): Promise
 
 export async function updateDonationRequest(requestId: string, requestData: DonationRequest): Promise<any> {
     try {
-        console.log(">> donation request: ", requestData);
+        console.log('>> donation request: ', requestData);
         const response = await axios.put(`${apiUrl}/donationRequest/${requestId}`, requestData, {
             withCredentials: true,
         });
@@ -92,7 +92,7 @@ export async function denyRequest(requestId: string | number, reason: string): P
 
 export async function getDonationRequestById(requestId: string | number): Promise<any> {
     try {
-        const response = await axios.get(`${apiUrl}/donationRequest/${requestId}`, { withCredentials: true });
+        const response = await axios.get(`${apiUrl}/donationRequest/id/${requestId}`, { withCredentials: true });
         return response.data;
     } catch (error) {
         console.error('Error getting donation request by id:', error);
@@ -114,6 +114,16 @@ export async function getDonationRequestsPaginated(params: { page?: number; limi
         return response.data;
     } catch (error: any) {
         console.error('Error getting paginated donation requests:', error.message);
+        throw error;
+    }
+}
+
+export async function deleteDonationRequest(requestId: string | number): Promise<any> {
+    try {
+        const response = await axios.delete(`${apiUrl}/donationRequest/${requestId}`, { withCredentials: true });
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting donation request:', error);
         throw error;
     }
 }

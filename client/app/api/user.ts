@@ -126,4 +126,15 @@ export async function geocode(address: string): Promise<{ success: boolean; loca
     return msg;
   }
 }
+
+// Get user by id -> used for requestor contact info
+export async function getUserById(userId: string | number): Promise<any> {
+  try {
+    const response = await axios.get(`${apiUrl}/user/${userId}`, { withCredentials: true });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error getting user by id:', error.message);
+    throw error;
+  }
+}
   
