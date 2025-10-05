@@ -32,22 +32,13 @@ export default function BlogAdminPage() {
 
   const isAdmin = useMemo(() => adminEmails.includes(userEmail), [adminEmails, userEmail]);
 
-  // Add server-side admin check
-  const [isServerAdmin, setIsServerAdmin] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (userEmail) {
-      // Verify admin status with backend
-      fetch('/api/user/admin-status')
-        .then(res => res.json())
-        .then(data => setIsServerAdmin(data.isAdmin))
-        .catch(() => setIsServerAdmin(false));
-    }
-  }, [userEmail]);
+  // Removed server-side admin check that pointed to Next.js /api.
+  // Admin gating relies on Redux user data and NEXT_PUBLIC_ADMIN_EMAILS.
 
   const [blogs, setBlogs] = useState<BlogItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [autoWritingId, setAutoWritingId] = useState<number | null>(null);
 
   const [showCreate, setShowCreate] = useState<boolean>(false);
   const [creating, setCreating] = useState<boolean>(false);
@@ -141,6 +132,38 @@ export default function BlogAdminPage() {
     }
   };
 
+  const generateContentFromTitle = (title: string): string => {
+    const t = title.trim();
+    const intro = `In this post, we explore "${t}" — a topic that touches lives across our communities.`;
+    const why = `Why it matters: blood and its components save lives every day. Understanding ${t.toLowerCase()} helps donors, hospitals, and families make informed decisions when time is critical.`;
+    const learn = `What you'll learn: practical guidance, common misconceptions, and the real-world impact behind ${t.toLowerCase()}. We pull together stories, data, and field experience to make complex ideas simple and actionable.`;
+    const action = `How you can help: share this post, start a conversation, or take the next step as a donor or advocate. Small actions around ${t.toLowerCase()} can ripple into big outcomes for patients in need.`;
+    const sections = [
+      `Introduction\n\n${intro}`,
+      `The Need\n\n${why}`,
+      `What You'll Learn\n\n${learn}`,
+      `Guidance & Tips\n\n• Know your blood type and eligibility\n• Stay hydrated and eat well before donating\n• Bring valid ID and arrive on time\n• Follow post-donation care to recover quickly\n\nThese simple steps ensure safer, smoother donations and better outcomes.`,
+      `Real Impact\n\nBehind every unit collected is a patient, a family, and a care team. ${t} is more than a headline — it's a lifesaving chain that depends on all of us.`,
+      `Call to Action\n\n${action}`
+    ];
+    return sections.join('\n\n');
+  };
+
+  const handleAutoWrite = async (b: BlogItem) => {
+    try {
+      setError(null);
+      setAutoWritingId(b.id);
+      const generated = generateContentFromTitle(b.title);
+      const res = await updateBlog(b.id, { content: generated });
+      setBlogs((prev) => prev.map((x) => x.id === b.id ? { ...x, content: res.blog?.content || generated } : x));
+    } catch (err) {
+      console.error('Auto-write failed', err);
+      setError('Failed to auto-write content. Ensure you are logged in as admin.');
+    } finally {
+      setAutoWritingId(null);
+    }
+  };
+
   return (
     <Provider store={store}>
       <>
@@ -194,6 +217,13 @@ export default function BlogAdminPage() {
                     <div className="mt-3 flex gap-2">
                       <button onClick={() => handleEdit(b)} className="px-3 py-1 rounded border border-amber-300 text-amber-700 hover:bg-amber-50">Edit</button>
                       <button onClick={() => handleDelete(b.id)} className="px-3 py-1 rounded border border-red-300 text-red-700 hover:bg-red-50">Delete</button>
+                      <button
+                        onClick={() => handleAutoWrite(b)}
+                        disabled={autoWritingId === b.id}
+                        className="px-3 py-1 rounded border border-blue-300 text-blue-700 hover:bg-blue-50 disabled:opacity-60"
+                      >
+                        {autoWritingId === b.id ? 'Writing…' : 'Auto-write content'}
+                      </button>
                     </div>
                   )}
                 </article>

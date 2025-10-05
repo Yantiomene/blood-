@@ -35,8 +35,18 @@ const messageRoutes = require('./routes/messagesRoute');
 //initialize middlewares
 app.use(express.json());
 app.use(cookieParser());
+// Robust CORS: allow configured CLIENT_URL, common localhost dev ports, and no-origin requests
+const allowOrigins = [CLIENT_URL, 'http://localhost:3000', 'http://localhost:5173'].filter(Boolean);
 app.use(cors({
-    origin: CLIENT_URL,
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like curl, mobile apps)
+        if (!origin) return callback(null, true);
+        const isLocalhost = /^https?:\/\/localhost:\d+$/.test(origin);
+        if (allowOrigins.includes(origin) || isLocalhost) {
+            return callback(null, true);
+        }
+        callback(new Error('Not allowed by CORS'));
+    },
     credentials: true
 }))
 app.use(helmet());

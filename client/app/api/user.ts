@@ -1,9 +1,10 @@
 import axios from 'axios';
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-if (!apiUrl) {
-  throw new Error('NEXT_PUBLIC_API_URL environment variable is required');
-}
+// Prefer NEXT_PUBLIC_API_URL, fallback to NEXT_PUBLIC_API_BASE_URL, then localhost:8000/api
+const rawApi = process.env.NEXT_PUBLIC_API_URL
+  || process.env.NEXT_PUBLIC_API_BASE_URL
+  || 'http://localhost:8000/api';
+const apiUrl = rawApi.replace(/\/$/, '');
 
 axios.defaults.withCredentials = true;
 

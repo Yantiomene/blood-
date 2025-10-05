@@ -28,7 +28,9 @@ const loadScript = (src: string) => {
 };
 
 declare global {
-  interface Window { [key: string]: any }
+  interface Window {
+    THREE?: any;
+  }
 }
 
 const BloodTransfer3D: React.FC = () => {

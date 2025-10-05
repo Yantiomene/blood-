@@ -1,13 +1,15 @@
 import axios from 'axios';
 
-const apiBase = (() => {
-  const url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
-  // Remove trailing /api or /api/ more reliably
-  return url.replace(/\/api\/?$/, '').replace(/\/$/, '');
-})();
+// Prefer NEXT_PUBLIC_API_URL, fallback to NEXT_PUBLIC_API_BASE_URL, then localhost:8000
+const rawBase = process.env.NEXT_PUBLIC_API_URL
+  || process.env.NEXT_PUBLIC_API_BASE_URL
+  || 'http://localhost:2000/api';
+
+// Normalize: strip trailing /api and trailing slash, then append /blogs
+const apiBase = rawBase.replace(/\/api\/?$/, '').replace(/\/$/, '');
 const apiUrl = `${apiBase}/blogs`;
 
-// Ensure cookies (if any permissions are enforced later) are included
+// Ensure cookies (JWT in cookie) are included for admin-only routes
 axios.defaults.withCredentials = true;
 
 export async function getBlogs() {
@@ -18,6 +20,16 @@ export async function getBlogs() {
         return response.data;
     } catch (error) {
         console.error('Failed to get blogs:', error);
+        throw error;
+    }
+}
+
+export async function getBlogById(id: number) {
+    try {
+        const response = await axios.get(`${apiUrl}/getBlog/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Failed to get blog ${id}:`, error);
         throw error;
     }
 }
