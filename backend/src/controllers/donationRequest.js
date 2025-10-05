@@ -5,6 +5,15 @@ const wkx = require('wkx');
 const fs = require('fs');
 const { NODE_ENV } = require('../constants');
 
+// helper: extract contact number from the donation request message (prefers E.164 provided by client)
+function extractContactNumberFromMessage(msg) {
+  if (!msg || typeof msg !== 'string') return null;
+  // Look for a line starting with "Contact:" or "Phone:" and capture everything until line break
+  const match = msg.match(/(?:^|\n)\s*(?:Contact|Phone)\s*:\s*([^\n\r]+)/i);
+  return match && match[1] ? match[1].trim() : null;
+}
+
+
 const createDonationRequest = async (req, res) => {
     const { bloodType, quantity, location, message } = req.body;
     const userId = req.user.id;
@@ -963,18 +972,29 @@ const acceptRequest = async (req, res) => {
             }
         }
 
-        const enrichedRequest = { ...reqRow, address };
-
+        // Fetch requestor details to include contact info for donor
         const requestor = await db.query('SELECT * FROM users WHERE id = $1', [reqRow.userId]);
+        const requestorInfo = requestor.rows[0] || {};
+
+        // Prefer contact number embedded in the donation request message; fall back to user profile
+        const contactFromMessage = extractContactNumberFromMessage(reqRow.message);
+
+        const enrichedRequest = {
+            ...reqRow,
+            address,
+            requestorName: requestorInfo.username,
+            requestorEmail: requestorInfo.email,
+            requestorContactNumber: contactFromMessage || requestorInfo.contactNumber,
+        };
 
         // Send email to requestor with donor details
         try {
-            await sendAcceptEmail(requestor.rows[0].email, reqRow.bloodType, req.user);
+            await sendAcceptEmail(requestorInfo.email, reqRow.bloodType, req.user);
         } catch (e) {
             req.logger.error('Failed to send accept email to requestor:', e.message);
         }
 
-        // Send instructions to donor (with formatted address if available)
+        // Send instructions to donor (with formatted address if available and requestor contact)
         try {
             await sendDonorInstructionEmail(req.user.email, enrichedRequest);
         } catch (e) {

@@ -367,7 +367,10 @@ if (process.env.NODE_ENV === 'test') {
       location,
       address,
       requestingEntity,
-      requestingEntityId
+      requestingEntityId,
+      requestorName,
+      requestorEmail,
+      requestorContactNumber,
     } = request;
 
     const emailContent = `<!DOCTYPE html>
@@ -401,6 +404,7 @@ if (process.env.NODE_ENV === 'test') {
         .section ul { padding-left: 18px; margin: 8px 0; }
         .icon { font-size: 18px; }
         .thank-you { margin-top: 24px; text-align: center; color: var(--success); font-weight: 700; }
+        .contact a { color: var(--secondary); text-decoration: none; }
       </style>
     </head>
     <body>
@@ -413,6 +417,16 @@ if (process.env.NODE_ENV === 'test') {
           <div class="detail-item"><div class="label">Quantity Needed</div><div class="value">${quantity || 'N/A'}</div></div>
           <div class="detail-item"><div class="label">Location</div><div class="value">${address || 'N/A'}</div></div>
           <div class="detail-item"><div class="label">Requesting Entity</div><div class="value">${requestingEntity || 'N/A'}${requestingEntityId ? ` (ID: ${requestingEntityId})` : ''}</div></div>
+        </div>
+
+        <h2><span class="icon">📞</span> Contact the Requestor</h2>
+        <div class="section contact">
+          <ul>
+            <li><strong>Name:</strong> ${requestorName || 'N/A'}</li>
+            <li><strong>Phone:</strong> ${requestorContactNumber ? `<a href="tel:${requestorContactNumber}">${requestorContactNumber}</a>` : 'N/A'}</li>
+            <li><strong>Email:</strong> ${requestorEmail ? `<a href="mailto:${requestorEmail}">${requestorEmail}</a>` : 'N/A'}</li>
+          </ul>
+          <p style="color: var(--muted); font-size: 13px;">Please reach out to coordinate the donation time and any specific requirements.</p>
         </div>
 
         <h2><span class="icon">⏰</span> Before Your Donation</h2>
