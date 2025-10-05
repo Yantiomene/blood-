@@ -19,6 +19,7 @@ interface DonorRequestItem {
   updated_at: string;
   latitude?: number;
   longitude?: number;
+  address?: string;
 }
 
 const DonorRequestsPage: React.FC = () => {
@@ -80,6 +81,7 @@ const DonorRequestsPage: React.FC = () => {
                 </div>
               </div>
               {req.message && <p className="mt-2 text-sm text-gray-700">{req.message}</p>}
+              <p className="mt-2 text-xs text-gray-500">{req.address ? `Location: ${req.address}` : 'Location: unknown'}</p>
             </Link>
           ))}
         </div>

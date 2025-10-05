@@ -20,6 +20,7 @@ interface RequestDetail {
   created_at: string;
   latitude?: number;
   longitude?: number;
+  address?: string;
 }
 
 const RequestDetailPage: React.FC = () => {
@@ -111,8 +112,21 @@ const RequestDetailPage: React.FC = () => {
     if (!detail) return;
     setActionLoading(true);
     try {
+      if (!message.trim()) {
+        alert('Please write a message for the donor before marking as fulfilled.');
+        setActionLoading(false);
+        return;
+      }
       await updateDonationRequest(String(detail.id), { isFulfilled: true } as any);
-      alert('Marked as fulfilled.');
+      // Send a thank-you message to the donor via messages API (if donor info is available)
+      try {
+        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/createMessage`, {
+          recipientId: detail.userId, // requestor id; if we tracked donor acceptance we could send to donor
+          content: message,
+          messageType: 'text',
+        }, { withCredentials: true });
+      } catch {}
+      alert('Marked as fulfilled. Your message has been sent.');
     } catch (e: any) {
       alert(`Failed to mark fulfilled: ${e?.message || 'Unknown error'}`);
     } finally {
@@ -167,6 +181,7 @@ const RequestDetailPage: React.FC = () => {
           <h1 className="text-xl font-bold mb-2">Request #{detail.id}</h1>
           <p className="text-sm text-gray-600">Blood Type: <span className="font-semibold">{detail.bloodType}</span></p>
           <p className="text-sm text-gray-600">Quantity: <span className="font-semibold">{detail.quantity} ml</span></p>
+          <p className="text-sm text-gray-600">Address: <span className="font-semibold">{detail.address || 'Unknown'}</span></p>
           {typeof detail.latitude === 'number' && typeof detail.longitude === 'number' && (
             <div className="mt-4 w-full h-48">
               <iframe
@@ -211,6 +226,11 @@ const RequestDetailPage: React.FC = () => {
             <div className="mt-8 border-t pt-4">
               <h2 className="text-lg font-semibold mb-2">Requestor actions</h2>
               <p className="text-sm text-gray-600">Only you (the requestor) can mark this as fulfilled, edit or delete the request.</p>
+              <div className="mt-4">
+                <label className="block text-sm text-gray-700 mb-1">Message for the donor</label>
+                <textarea value={message} onChange={(e)=>setMessage(e.target.value)} className="w-full border rounded p-2 min-h-[96px]" placeholder="Share appreciation or coordination details..." />
+                <p className="text-xs text-gray-500 mt-1">This message is required to mark the request as fulfilled.</p>
+              </div>
               <div className="flex gap-2 mt-2">
                 <button disabled={actionLoading} onClick={markFulfilledByRequestor} className="px-4 py-2 rounded bg-purple-600 text-white disabled:opacity-50">Mark as Fulfilled</button>
                 <button disabled={actionLoading} onClick={startEditing} className="px-4 py-2 rounded bg-yellow-500 text-white disabled:opacity-50">Edit</button>

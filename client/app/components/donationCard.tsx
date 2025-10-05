@@ -14,6 +14,7 @@ interface DonationRequestData {
     location: string;
     userId?: number;
     message?: string;
+    address?: string;
 }
 
 const convertDateTime = (dateStr: Date) => {
@@ -34,6 +35,7 @@ const DonationCard = (props: DonationRequestData) => {
         location,
         userId,
         message,
+        address,
     }: DonationRequestData = props
 
     const currentUser = useSelector((state: any) => state.user?.data || {});
@@ -70,7 +72,7 @@ const DonationCard = (props: DonationRequestData) => {
             </h3>
             <p>Requested on <span>{convertDateTime(created_at)}</span></p>
             <p>Updated on <span>{convertDateTime(updated_at)}</span></p>
-            <p>Location: <span className='text-gray-700'>{location}</span></p>
+            <p>Location: <span className='text-gray-700'>{address || location || 'Unknown'}</span></p>
             <p><span className='px-2 py-1 text-xs rounded-lg bg-yellow-200'>{isFulfilled ? 'donation received' : 'awaiting donors'}</span></p>
 
             {message && (

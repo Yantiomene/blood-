@@ -22,6 +22,7 @@ interface DonationRequestData {
     location: string;
     userId?: number;
     message?: string;
+    address?: string;
 }
 
 const Dashboard: React.FC = () => {
@@ -157,6 +158,7 @@ const Dashboard: React.FC = () => {
                                     location={data.location}
                                     userId={data.userId}
                                     message={data.message}
+                                    address={data.address}
                                 />
                             ))}
                             {loadingRequest === 'loading' && (
@@ -192,6 +194,7 @@ const Dashboard: React.FC = () => {
                                             location={data.location}
                                             userId={data.userId}
                                             message={data.message}
+                                            address={data.address}
                                         />
                                     ))}
                                 </div>
@@ -216,6 +219,7 @@ const Dashboard: React.FC = () => {
                                     location={data.location}
                                     userId={data.userId}
                                     message={data.message}
+                                    address={data.address}
                                 />
                             ))}
                             {loadingRequest === 'loading' && (

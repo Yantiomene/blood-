@@ -1,4 +1,4 @@
-const { validateLocationFormat, getNearbyHospitals } = require('../utils/geoUtils');
+const { validateLocationFormat, getNearbyHospitals, reverseGeocode } = require('../utils/geoUtils');
 const { sendNotificationEmail, sendDenyEmail, sendAcceptEmail } = require('../utils/email');
 const db = require('../db');
 const wkx = require('wkx');
@@ -98,13 +98,28 @@ const getDonationRequests = async (req, res) => {
         ]);
 
         const donationRequests = dataResult.rows;
+        // Enrich with human-readable address using reverse geocoding (best-effort)
+        const donationRequestsEnriched = await Promise.all(donationRequests.map(async (r) => {
+            const lat = Number(r.latitude);
+            const lon = Number(r.longitude);
+            let address = null;
+            if (Number.isFinite(lat) && Number.isFinite(lon)) {
+                try {
+                    address = await reverseGeocode(lat, lon);
+                } catch (e) {
+                    // ignore geocoding errors
+                }
+            }
+            return { ...r, address };
+        }));
+
         const total = parseInt(countResult.rows[0].total, 10);
         const totalPages = Math.max(Math.ceil(total / limitNum), 1);
 
         req.logger.info('Fetched donation requests successfully');
         res.status(200).json({
             success: true,
-            donationRequests,
+            donationRequests: donationRequestsEnriched,
             pagination: {
                 page: pageNum,
                 limit: limitNum,
@@ -1064,8 +1079,19 @@ async function getDonationRequestById(req, res) {
         if (!donationRequest) {
             return res.status(404).json({ success: false, error: 'Donation request not found' });
         }
+        // Best-effort: add human-readable address from coordinates
+        let address = null;
+        const lat = Number(donationRequest.latitude);
+        const lon = Number(donationRequest.longitude);
+        if (Number.isFinite(lat) && Number.isFinite(lon)) {
+            try {
+                address = await reverseGeocode(lat, lon);
+            } catch (e) {
+                // ignore geocoding errors
+            }
+        }
         req.logger && req.logger.info && req.logger.info('Fetched donation request by id successfully');
-        return res.status(200).json({ success: true, donationRequest });
+        return res.status(200).json({ success: true, donationRequest: { ...donationRequest, address } });
     } catch (error) {
         req.logger && req.logger.error && req.logger.error('Error getting donation request by id:', error.message);
         console.error('Error getting donation request by id:', error.message);
