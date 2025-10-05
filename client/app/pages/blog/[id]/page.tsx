@@ -103,7 +103,7 @@ export default function BlogDetail({ params }: { params: { id: string } }) {
         {blog.updated_at && (
           <p className="text-xs text-gray-400 mb-4">Updated: {new Date(blog.updated_at).toLocaleString()}</p>
         )}
-        <div className="prose max-w-none whitespace-pre-line">{blog.content}</div>
+        <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: blog.content || '' }}></div>
 
         <div className="mt-6 flex items-center gap-3">
           <button onClick={handleShare} className="px-3 py-2 rounded border border-gray-300 hover:bg-gray-50">Share</button>

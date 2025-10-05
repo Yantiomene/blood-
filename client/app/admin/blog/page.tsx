@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getBlogs, createBlog, updateBlog, deleteBlog } from '@/app/api/blog';
+import { generateContentFromTitle, stripHtml } from '@/app/utils/generateBlogContent';
 import { fetchCurrentUser } from '@/app/redux/userSlice';
 import { Provider } from 'react-redux';
 import store from '@/app/redux/store';
@@ -132,22 +133,6 @@ export default function BlogAdminPage() {
     }
   };
 
-  const generateContentFromTitle = (title: string): string => {
-    const t = title.trim();
-    const intro = `In this post, we explore "${t}" — a topic that touches lives across our communities.`;
-    const why = `Why it matters: blood and its components save lives every day. Understanding ${t.toLowerCase()} helps donors, hospitals, and families make informed decisions when time is critical.`;
-    const learn = `What you'll learn: practical guidance, common misconceptions, and the real-world impact behind ${t.toLowerCase()}. We pull together stories, data, and field experience to make complex ideas simple and actionable.`;
-    const action = `How you can help: share this post, start a conversation, or take the next step as a donor or advocate. Small actions around ${t.toLowerCase()} can ripple into big outcomes for patients in need.`;
-    const sections = [
-      `Introduction\n\n${intro}`,
-      `The Need\n\n${why}`,
-      `What You'll Learn\n\n${learn}`,
-      `Guidance & Tips\n\n• Know your blood type and eligibility\n• Stay hydrated and eat well before donating\n• Bring valid ID and arrive on time\n• Follow post-donation care to recover quickly\n\nThese simple steps ensure safer, smoother donations and better outcomes.`,
-      `Real Impact\n\nBehind every unit collected is a patient, a family, and a care team. ${t} is more than a headline — it's a lifesaving chain that depends on all of us.`,
-      `Call to Action\n\n${action}`
-    ];
-    return sections.join('\n\n');
-  };
 
   const handleAutoWrite = async (b: BlogItem) => {
     try {
@@ -209,7 +194,7 @@ export default function BlogAdminPage() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={b.image} alt={b.title} className="w-full h-40 object-cover rounded mb-3" />
                   )}
-                  <p className="text-gray-700 line-clamp-4">{b.content}</p>
+                  <p className="text-gray-700 line-clamp-4">{stripHtml(b.content || '')}</p>
                   {b.updated_at && (
                     <p className="text-xs text-gray-400 mt-3">Updated: {new Date(b.updated_at).toLocaleString()}</p>
                   )}
