@@ -1,22 +1,5 @@
 # Blood+ 🩸
 
-> Important Update (2025-09-21)
->
-> - Redis has been started and integrated for ephemeral tokens.
-> - Email verification is now fully working for newly registered users and for previously registered users who verify later.
-> - Client uses cookie-based auth with axios.withCredentials; backend CORS is configured to allow credentials from the Next.js dev URL.
-> - Client .env: Create client/.env and set NEXT_PUBLIC_API_URL to your backend API base (e.g., http://localhost:5000/api). After changing it, restart the Next.js dev server.
-> - Profile page fixes: The profile update form has been stabilized. Submission now properly validates and sends location as [longitude, latitude], awaits server response, shows clear success/error messages, and refreshes the profile state.
-> - Geolocation: Users can click “Use my location” to auto-fill coordinates (longitude, latitude). After submitting your profile, the server attaches a formatted address based on those coordinates.
-> - Address-based geocoding: Type an address or place name and click “Geocode” to fill coordinates; backend calls Google Geocoding API and stores location as [longitude, latitude]. Requires GOOGLE_MAPS_API_KEY in backend env; client must set NEXT_PUBLIC_API_URL to your backend /api base (e.g., http://localhost:2000/api).
-> - ESLint: Cleaned up no-unescaped-entities issues (e.g., apostrophes in text) and addressed react-hooks/exhaustive-deps where applicable.
-> - To test locally:
->   1) Ensure Redis is running (default localhost:6379) and backend env includes REDIS_URL if applicable.
->   2) Start backend and client; register a new account via the client; retrieve the verification code from email (or logs in dev) and submit on /auth/verifyEmail.
->   3) Visit /auth/profile, edit a few fields, optionally click “Use my location”, then submit. You should see a success message and, on refresh/navigation, your updated data should persist.
->   4) Existing users can also trigger a verification email and complete verification successfully.
-> - Note: Ensure NEXT_PUBLIC_API_URL (client) and CLIENT_URL/SERVER_URL (backend) are set consistently.
->
 ## Problem Statement: 🆘
 
 In many African hospitals, the availability of blood for patients in need is a critical challenge. Hospitals often lack sufficient blood stocks, leading to delays in emergency situations or the burden of purchasing replacement blood falling on the patient's family. There is a need for a reliable and efficient system to connect blood donors with those in need and ensure a timely and accessible supply of blood in local communities.
@@ -683,3 +666,50 @@ cd client
 npm run dev
 ```
 Then open http://localhost:3000 to see changes. Navigate to /login, /register, /pages/blog and /pages/dashboard to review the updated UI.
+
+## Advancements (2025-10-05)
+
+Backend
+- Reverse geocoding is integrated for donation requests. List endpoint now returns a human-readable address for each request, derived from stored latitude/longitude, and the single request detail endpoint also includes an address field.
+- User profiles include a formatted address when location coordinates are present. Location parsing is resilient to POINT/WKB formats and string coordinates.
+- Update flow supports marking a request as fulfilled and adding a message; route mapping confirmed and tested via PUT /api/donationRequest/:requestId.
+
+API and routes verification
+- Blogs endpoint responds successfully at /blogs/getBlogs (mounted under /blogs).
+- Auth and donation requests are mounted under /api; protected donation request endpoints require authentication.
+- Messages routes are available under /api/messages.
+
+Frontend
+- Donor requests list displays “Location: [address]” when available and “unknown” otherwise.
+- DonationCard prioritizes showing address, then falls back to raw location, then “Unknown”.
+- Request detail page displays address and requires the requester to enter a message before marking the request as fulfilled; UI includes an input and validations for this flow.
+- Dashboard passes address into DonationCard to ensure consistent display of geocoded locations.
+
+Environment and dev servers
+- Client .env verified: NEXT_PUBLIC_API_URL=http://localhost:2000/api.
+- CORS configured to allow credentials from http://localhost:3001; client uses axios.withCredentials for cookie-based auth.
+- Verified protected endpoints using seeded user (john@example.com / password). Donation requests list returns address fields; marking request fulfilled with a message returns 200 OK and updates the record.
+
+Known limitations and next steps
+- Backend currently does not persist the accepted donor identifier; as a result, automatic targeting of the donor for thank-you messaging after fulfillment is limited. Proposed follow-up:
+  - Add acceptedDonorId column to donation_requests and persist req.user.id in acceptRequest.
+  - Expose acceptedDonorId in GET endpoints and send a thank-you message to that donor on fulfillment.
+- Strengthen tests for CSRF/CORS on mutating routes when using cookies cross-origin.
+
+> Important Update (2025-09-21)
+>
+> - Redis has been started and integrated for ephemeral tokens.
+> - Email verification is now fully working for newly registered users and for previously registered users who verify later.
+> - Client uses cookie-based auth with axios.withCredentials; backend CORS is configured to allow credentials from the Next.js dev URL.
+> - Client .env: Create client/.env and set NEXT_PUBLIC_API_URL to your backend API base (e.g., http://localhost:5000/api). After changing it, restart the Next.js dev server.
+> - Profile page fixes: The profile update form has been stabilized. Submission now properly validates and sends location as [longitude, latitude], awaits server response, shows clear success/error messages, and refreshes the profile state.
+> - Geolocation: Users can click “Use my location” to auto-fill coordinates (longitude, latitude). After submitting your profile, the server attaches a formatted address based on those coordinates.
+> - Address-based geocoding: Type an address or place name and click “Geocode” to fill coordinates; backend calls Google Geocoding API and stores location as [longitude, latitude]. Requires GOOGLE_MAPS_API_KEY in backend env; client must set NEXT_PUBLIC_API_URL to your backend /api base (e.g., http://localhost:2000/api).
+> - ESLint: Cleaned up no-unescaped-entities issues (e.g., apostrophes in text) and addressed react-hooks/exhaustive-deps where applicable.
+> - To test locally:
+>   1) Ensure Redis is running (default localhost:6379) and backend env includes REDIS_URL if applicable.
+>   2) Start backend and client; register a new account via the client; retrieve the verification code from email (or logs in dev) and submit on /auth/verifyEmail.
+>   3) Visit /auth/profile, edit a few fields, optionally click “Use my location”, then submit. You should see a success message and, on refresh/navigation, your updated data should persist.
+>   4) Existing users can also trigger a verification email and complete verification successfully.
+> - Note: Ensure NEXT_PUBLIC_API_URL (client) and CLIENT_URL/SERVER_URL (backend) are set consistently.
+>
