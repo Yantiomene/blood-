@@ -15,6 +15,7 @@ interface DonationRequestData {
     userId?: number;
     message?: string;
     address?: string;
+    acceptedByCurrentUser?: boolean;
 }
 
 type Props = DonationRequestData & { onAccepted?: () => void };
@@ -46,10 +47,10 @@ const DonationCard = (props: Props) => {
     const isOwn = typeof userId === 'number' && currentUser?.id === userId;
 
     const [accepting, setAccepting] = useState(false);
-    const [accepted, setAccepted] = useState(false);
+    const [accepted, setAccepted] = useState(!!props.acceptedByCurrentUser);
     const [acceptMsg, setAcceptMsg] = useState<string>("");
 
-    const canAccept = isDonor && !isFulfilled && !isOwn;
+    const canAccept = isDonor && !isFulfilled && !isOwn && !accepted;
 
     const onAccept = async () => {
         try {

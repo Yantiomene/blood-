@@ -23,6 +23,7 @@ interface DonationRequestData {
     userId?: number;
     message?: string;
     address?: string;
+    acceptedByCurrentUser?: boolean;
 }
 
 const Dashboard: React.FC = () => {
@@ -66,17 +67,29 @@ const Dashboard: React.FC = () => {
         fetchMine();
     }, [user?.id]);
 
-    const [acceptedCount, setAcceptedCount] = useState(0);
-    const [acceptedPendingCount, setAcceptedPendingCount] = useState(0);
-    const [acceptedFulfilledCount, setAcceptedFulfilledCount] = useState(0);
+    const acceptedCount = useMemo(() => {
+        return requestList.filter(r => !!r.acceptedByCurrentUser).length;
+    }, [requestList]);
+    const acceptedPendingCount = useMemo(() => {
+        return requestList.filter(r => !!r.acceptedByCurrentUser && !r.isFulfilled).length;
+    }, [requestList]);
+    const acceptedFulfilledCount = useMemo(() => {
+        return requestList.filter(r => !!r.acceptedByCurrentUser && r.isFulfilled).length;
+    }, [requestList]);
 
     const awaitingDonorsCount = useMemo(() => {
         return requestList.filter(r => !r.isFulfilled).length;
     }, [requestList]);
 
-    const onAcceptedUpdateCounters = () => {
-        setAcceptedCount(prev => prev + 1);
-        setAcceptedPendingCount(prev => prev + 1);
+    const refreshRequests = async () => {
+        try {
+            const data = await getDonationRequest();
+            setRequestList(data.donationRequests || []);
+            setLoadingRequest('success');
+        } catch (error: any) {
+            setLoadingRequest('failed');
+            console.log("Error occurred while refreshing donation requests: ", error.message)
+        }
     };
 
     const othersRequests = useMemo(() => {
@@ -163,7 +176,8 @@ const Dashboard: React.FC = () => {
                                     userId={data.userId}
                                     message={data.message}
                                     address={data.address}
-                                    onAccepted={onAcceptedUpdateCounters}
+                                    acceptedByCurrentUser={data.acceptedByCurrentUser}
+                                    onAccepted={refreshRequests}
                                 />
                             ))}
                             {loadingRequest === 'loading' && (
@@ -200,7 +214,8 @@ const Dashboard: React.FC = () => {
                                             userId={data.userId}
                                             message={data.message}
                                             address={data.address}
-                                            onAccepted={onAcceptedUpdateCounters}
+                                            acceptedByCurrentUser={data.acceptedByCurrentUser}
+                                            onAccepted={refreshRequests}
                                         />
                                     ))}
                                 </div>
@@ -226,7 +241,8 @@ const Dashboard: React.FC = () => {
                                     userId={data.userId}
                                     message={data.message}
                                     address={data.address}
-                                    onAccepted={onAcceptedUpdateCounters}
+                                    acceptedByCurrentUser={data.acceptedByCurrentUser}
+                                    onAccepted={refreshRequests}
                                 />
                             ))}
                             {loadingRequest === 'loading' && (

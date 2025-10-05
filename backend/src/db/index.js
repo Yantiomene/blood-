@@ -81,6 +81,16 @@ if (NODE_ENV === 'test') {
         created_at TIMESTAMP DEFAULT now(),
         updated_at TIMESTAMP DEFAULT now()
       );
+
+      -- Track donor acceptances of donation requests
+      CREATE TABLE IF NOT EXISTS donation_acceptances (
+        id SERIAL PRIMARY KEY,
+        "requestId" INTEGER REFERENCES donation_requests(id) ON DELETE CASCADE,
+        "donorId" INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT now()
+      );
+      -- Ensure a donor can accept a request only once
+      CREATE UNIQUE INDEX IF NOT EXISTS donation_acceptances_unique ON donation_acceptances ("requestId", "donorId");
     `);
 
     // Seed baseline user matching seed file

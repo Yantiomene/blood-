@@ -107,7 +107,7 @@ const getDonationRequests = async (req, res) => {
         ]);
 
         const donationRequests = dataResult.rows;
-        // Enrich with human-readable address using reverse geocoding (best-effort)
+        // Enrich with human-readable address using reverse geocoding (best-effort) and acceptedByCurrentUser flag
         const donationRequestsEnriched = await Promise.all(donationRequests.map(async (r) => {
             const lat = Number(r.latitude);
             const lon = Number(r.longitude);
@@ -119,7 +119,12 @@ const getDonationRequests = async (req, res) => {
                     // ignore geocoding errors
                 }
             }
-            return { ...r, address };
+            let acceptedByCurrentUser = false;
+            try {
+                const acc = await db.query('SELECT 1 FROM donation_acceptances WHERE "requestId" = $1 AND "donorId" = $2 LIMIT 1', [r.id, req.user.id]);
+                acceptedByCurrentUser = acc.rows.length > 0;
+            } catch (e) {}
+            return { ...r, address, acceptedByCurrentUser };
         }));
 
         const total = parseInt(countResult.rows[0].total, 10);
@@ -962,6 +967,18 @@ const acceptRequest = async (req, res) => {
 
         const reqRow = requestRes.rows[0];
 
+        // Persist acceptance by this donor; prevent duplicate acceptances
+        const acceptanceRes = await db.query(
+            'INSERT INTO donation_acceptances ("requestId", "donorId") VALUES ($1, $2) ON CONFLICT ("requestId", "donorId") DO NOTHING RETURNING id',
+            [requestId, req.user.id]
+        );
+        if (!acceptanceRes.rows || acceptanceRes.rows.length === 0) {
+            return res.status(409).json({
+                success: false,
+                message: 'You have already accepted this request.'
+            });
+        }
+
         // Resolve human-readable address from coordinates (best-effort)
         let address;
         if (typeof reqRow.latitude === 'number' && typeof reqRow.longitude === 'number') {
@@ -1138,8 +1155,14 @@ async function getDonationRequestById(req, res) {
                 // ignore geocoding errors
             }
         }
+        // Include acceptance status for current user
+        let acceptedByCurrentUser = false;
+        try {
+            const acc = await db.query('SELECT 1 FROM donation_acceptances WHERE "requestId" = $1 AND "donorId" = $2 LIMIT 1', [donationRequest.id, req.user.id]);
+            acceptedByCurrentUser = acc.rows.length > 0;
+        } catch (e) {}
         req.logger && req.logger.info && req.logger.info('Fetched donation request by id successfully');
-        return res.status(200).json({ success: true, donationRequest: { ...donationRequest, address } });
+        return res.status(200).json({ success: true, donationRequest: { ...donationRequest, address, acceptedByCurrentUser } });
     } catch (error) {
         req.logger && req.logger.error && req.logger.error('Error getting donation request by id:', error.message);
         console.error('Error getting donation request by id:', error.message);
