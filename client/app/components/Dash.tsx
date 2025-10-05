@@ -134,15 +134,21 @@ const Dashboard: React.FC = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                             <div className="bg-white rounded shadow p-4">
                                 <p className="text-sm text-gray-500">Accepted donations</p>
-                                <p className="text-3xl font-bold">{acceptedCount}</p>
+                                <Link href={{ pathname: '/dashboard/donor-requests', query: { page: '1', acceptedByMe: 'true' } }} className="text-3xl font-bold text-blue-600 hover:underline">
+                                    {acceptedCount}
+                                </Link>
                             </div>
                             <div className="bg-white rounded shadow p-4">
                                 <p className="text-sm text-gray-500">Accepted & fulfilled</p>
-                                <p className="text-3xl font-bold">{acceptedFulfilledCount}</p>
+                                <Link href={{ pathname: '/dashboard/donor-requests', query: { page: '1', acceptedByMe: 'true', isFulfilled: 'true' } }} className="text-3xl font-bold text-blue-600 hover:underline">
+                                    {acceptedFulfilledCount}
+                                </Link>
                             </div>
                             <div className="bg-white rounded shadow p-4">
                                 <p className="text-sm text-gray-500">Accepted & pending</p>
-                                <p className="text-3xl font-bold">{acceptedPendingCount}</p>
+                                <Link href={{ pathname: '/dashboard/donor-requests', query: { page: '1', acceptedByMe: 'true', isFulfilled: 'false' } }} className="text-3xl font-bold text-blue-600 hover:underline">
+                                    {acceptedPendingCount}
+                                </Link>
                             </div>
                             <div className="bg-white rounded shadow p-4">
                                 <p className="text-sm text-gray-500">Requests awaiting donors</p>

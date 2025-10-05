@@ -14,6 +14,7 @@ interface DonorRequestItem {
   bloodType: string;
   quantity: number;
   isFulfilled: boolean;
+  acceptedByCurrentUser?: boolean;
   message?: string;
   created_at: string;
   updated_at: string;
@@ -31,13 +32,24 @@ const DonorRequestsPage: React.FC = () => {
 
   const page = useMemo(() => parseInt(searchParams.get('page') || '1', 10), [searchParams]);
   const limit = 5;
+  const acceptedByMe = useMemo(() => (searchParams.get('acceptedByMe') || '').toLowerCase() === 'true', [searchParams]);
+  const isFulfilledParam = useMemo(() => searchParams.get('isFulfilled'), [searchParams]);
+  const isFulfilledFilter: boolean | undefined = useMemo(() => {
+    if (isFulfilledParam === null) {
+      // Default: awaiting donors view when not acceptedByMe; otherwise show all accepted
+      return acceptedByMe ? undefined : false;
+    }
+    return isFulfilledParam.toLowerCase() === 'true';
+  }, [isFulfilledParam, acceptedByMe]);
 
   useEffect(() => {
     const fetchPage = async () => {
       setLoading('loading');
       try {
-        const data = await getDonationRequestsPaginated({ page, limit, isFulfilled: false });
-        setItems(data.donationRequests || []);
+        const data = await getDonationRequestsPaginated({ page, limit, isFulfilled: isFulfilledFilter });
+        const list: DonorRequestItem[] = data.donationRequests || [];
+        const filtered = acceptedByMe ? list.filter(i => i.acceptedByCurrentUser) : list;
+        setItems(filtered);
         setPagination(data.pagination || { page, limit, total: 0, totalPages: 1 });
         setLoading('idle');
       } catch (e) {
@@ -45,7 +57,7 @@ const DonorRequestsPage: React.FC = () => {
       }
     };
     fetchPage();
-  }, [page]);
+  }, [page, acceptedByMe, isFulfilledFilter]);
 
   const gotoPage = (p: number) => {
     const next = Math.max(1, Math.min(p, pagination?.totalPages || 1));
@@ -58,7 +70,13 @@ const DonorRequestsPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-6">
       <Header isLoggedin={true} />
-      <h1 className="text-2xl font-bold mb-4">Requests awaiting donors</h1>
+      <h1 className="text-2xl font-bold mb-4">
+        {acceptedByMe
+          ? (isFulfilledFilter === true
+              ? 'Accepted & fulfilled by you'
+              : (isFulfilledFilter === false ? 'Accepted & pending by you' : 'Requests accepted by you'))
+          : (isFulfilledFilter === true ? 'Fulfilled requests' : 'Requests awaiting donors')}
+      </h1>
 
       {loading === 'loading' && <p className="text-gray-500">Loading...</p>}
       {loading === 'error' && <p className="text-red-600">Failed to load requests.</p>}
@@ -77,7 +95,11 @@ const DonorRequestsPage: React.FC = () => {
                   <p className="font-semibold">{req.quantity} ml</p>
                 </div>
                 <div>
-                  <span className="px-2 py-1 text-xs rounded bg-yellow-200">awaiting donors</span>
+                  {acceptedByMe ? (
+                    <span className="px-2 py-1 text-xs rounded bg-blue-200">accepted by you</span>
+                  ) : (
+                    <span className="px-2 py-1 text-xs rounded bg-yellow-200">{req.isFulfilled ? 'fulfilled' : 'awaiting donors'}</span>
+                  )}
                 </div>
               </div>
               {req.message && <p className="mt-2 text-sm text-gray-700">{req.message}</p>}
