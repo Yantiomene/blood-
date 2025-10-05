@@ -82,6 +82,12 @@ const DonationCard = (props: Props) => {
             <p>Location: <span className='text-gray-700'>{address || location || 'Unknown'}</span></p>
             <p><span className='px-2 py-1 text-xs rounded-lg bg-yellow-200'>{isFulfilled ? 'donation received' : 'awaiting donors'}</span></p>
 
+            {accepted && (
+                <p className="mt-2">
+                    <span className='px-2 py-1 text-xs rounded-lg bg-green-200 text-green-800'>accepted by you</span>
+                </p>
+            )}
+
             {message && (
                 <div className="mt-3 p-3 bg-gray-50 rounded">
                     <p className="text-sm text-gray-800"><span className="font-semibold">Note from requester:</span> {message}</p>

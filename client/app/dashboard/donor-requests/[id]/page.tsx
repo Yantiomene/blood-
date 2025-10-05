@@ -21,6 +21,7 @@ interface RequestDetail {
   latitude?: number;
   longitude?: number;
   address?: string;
+  acceptedByCurrentUser?: boolean;
 }
 
 const RequestDetailPage: React.FC = () => {
@@ -58,6 +59,7 @@ const RequestDetailPage: React.FC = () => {
         const latitude = typeof (req?.latitude) !== 'undefined' ? Number(req.latitude) : undefined;
         const longitude = typeof (req?.longitude) !== 'undefined' ? Number(req.longitude) : undefined;
         setDetail({ ...req, latitude, longitude });
+        setAccepted(!!req?.acceptedByCurrentUser);
         // Fetch requestor contact info
         if (req?.userId) {
           try {
@@ -181,6 +183,9 @@ const RequestDetailPage: React.FC = () => {
       {detail && (
         <div className="bg-white rounded shadow p-4">
           <h1 className="text-xl font-bold mb-2">Request #{detail.id}</h1>
+          {accepted && (
+            <p className="mb-2"><span className="px-2 py-1 text-xs rounded bg-green-200 text-green-800">accepted by you</span></p>
+          )}
           <p className="text-sm text-gray-600">Blood Type: <span className="font-semibold">{detail.bloodType}</span></p>
           <p className="text-sm text-gray-600">Quantity: <span className="font-semibold">{detail.quantity} ml</span></p>
           <p className="text-sm text-gray-600">Address: <span className="font-semibold">{detail.address || 'Unknown'}</span></p>
