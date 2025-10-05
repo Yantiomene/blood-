@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useSelector } from 'react-redux';
+import Header from '@/app/components/Header';
 import { getBlogById } from '@/app/api/blog';
 
 interface BlogItem {
@@ -15,6 +17,7 @@ interface BlogItem {
 
 export default function BlogDetail({ params }: { params: { id: string } }) {
   const id = Number(params.id);
+  const auth = useSelector((state: any) => state.auth.isAuth);
   const [blog, setBlog] = useState<BlogItem | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +31,7 @@ export default function BlogDetail({ params }: { params: { id: string } }) {
       try {
         setLoading(true);
         const data = await getBlogById(id);
-        if (mounted) setBlog(Array.isArray(data) ? data[0] : data);
+        if (mounted) setBlog(data?.blog ?? (Array.isArray(data) ? data[0] : data));
       } catch (err) {
         console.error('Failed to load blog:', err);
         if (mounted) setError('Failed to load blog');
@@ -67,13 +70,24 @@ export default function BlogDetail({ params }: { params: { id: string } }) {
     setCommentInput('');
   };
 
-  if (loading) return <main className="container mx-auto py-8"><p>Loading…</p></main>;
-  if (error) return <main className="container mx-auto py-8"><p className="text-red-600">{error}</p></main>;
-  if (!blog) return <main className="container mx-auto py-8"><p>No blog found.</p></main>;
+  if (loading) return <>
+    <Header isLoggedin={auth} />
+    <main className="container mx-auto py-8"><p>Loading…</p></main>
+  </>;
+  if (error) return <>
+    <Header isLoggedin={auth} />
+    <main className="container mx-auto py-8"><p className="text-red-600">{error}</p></main>
+  </>;
+  if (!blog) return <>
+    <Header isLoggedin={auth} />
+    <main className="container mx-auto py-8"><p>No blog found.</p></main>
+  </>;
 
   return (
-    <main className="container mx-auto py-8">
-      <Link href="/pages/blog" className="text-sm text-gray-600 hover:text-gray-800">← Back to blogs</Link>
+    <>
+      <Header isLoggedin={auth} />
+      <main className="container mx-auto py-8">
+      <Link href="/site/blog" className="text-sm text-gray-600 hover:text-gray-800">← Back to blogs</Link>
       <article className="mt-4 border rounded-lg p-6 shadow-sm bg-white">
         <h1 className="text-3xl font-bold mb-3">{blog.title}</h1>
         {blog.image && (
@@ -120,5 +134,6 @@ export default function BlogDetail({ params }: { params: { id: string } }) {
         </section>
       </article>
     </main>
+    </>
   );
 }
