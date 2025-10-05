@@ -33,6 +33,8 @@ passport.use(
                 contactNumber: rows[0].contactNumber,
                 bloodType: rows[0].bloodType,
                 isDonor: rows[0].isDonor,
+                // include verification status so routes can enforce gating
+                isVerified: rows[0].isVerified,
             };
             return await done(null, user);
         } catch (error) {

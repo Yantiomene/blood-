@@ -13,16 +13,14 @@ import FourZeroFour from '../pages/404';
 
 const LoginPage = ({ params }: { params: { auth: string } }) => {
   return (
-    <Provider store={store}>
-      <AuthPage>
-        {
-          params.auth === 'register' ? <RegisterForm/> :
-          params.auth === 'login' ? <LoginForm/> :
-          params.auth === 'profile' ? <UpdateProfileForm/> :
-          <FourZeroFour />
-        }
-      </AuthPage>
-    </Provider>
+    <AuthPage>
+      {
+        params.auth === 'register' ? <RegisterForm/> :
+        params.auth === 'login' ? <LoginForm/> :
+        params.auth === 'profile' ? <UpdateProfileForm/> :
+        <FourZeroFour />
+      }
+    </AuthPage>
   );
 };
 

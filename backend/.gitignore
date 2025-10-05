@@ -1,6 +1,8 @@
 .env
+.env.smoke
 /node_modules
 *-lock.json
 *.lock
 *.log
 *.rdb
+cookies.txt

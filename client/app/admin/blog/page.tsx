@@ -32,6 +32,19 @@ export default function BlogAdminPage() {
 
   const isAdmin = useMemo(() => adminEmails.includes(userEmail), [adminEmails, userEmail]);
 
+  // Add server-side admin check
+  const [isServerAdmin, setIsServerAdmin] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (userEmail) {
+      // Verify admin status with backend
+      fetch('/api/user/admin-status')
+        .then(res => res.json())
+        .then(data => setIsServerAdmin(data.isAdmin))
+        .catch(() => setIsServerAdmin(false));
+    }
+  }, [userEmail]);
+
   const [blogs, setBlogs] = useState<BlogItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);

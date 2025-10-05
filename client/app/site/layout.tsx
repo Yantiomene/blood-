@@ -1,17 +1,12 @@
 import React from 'react';
 import type { Metadata } from "next";
 
-type OtherLayoutProps = {
-    title: string;
-    children: React.ReactNode;
-};
-
 export const metadata: Metadata = {
     title: "Blood+ Site",
     description: "Learn more about who we are and what we do",
 };
 
-const OtherLayout: React.FC<OtherLayoutProps> = ({ children }) => {
+export default function SiteLayout({ children }: { children: React.ReactNode }) {
     return (
         <>
             {children}
@@ -22,6 +17,4 @@ const OtherLayout: React.FC<OtherLayoutProps> = ({ children }) => {
             </footer>
         </>
     );
-};
-
-export default OtherLayout;
+}

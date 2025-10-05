@@ -1,6 +1,8 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { acceptRequest } from '../api/donation';
 
 interface DonationRequestData {
     id: number;
@@ -10,7 +12,13 @@ interface DonationRequestData {
     created_at: Date;
     updated_at: Date;
     location: string;
+    userId?: number;
+    message?: string;
+    address?: string;
+    acceptedByCurrentUser?: boolean;
 }
+
+type Props = DonationRequestData & { onAccepted?: () => void };
 
 const convertDateTime = (dateStr: Date) => {
     const date = new Date(dateStr).toDateString();
@@ -18,7 +26,7 @@ const convertDateTime = (dateStr: Date) => {
     return `${date} at ${time}`;
 }
 
-const DonationCard = (props: DonationRequestData) => {
+const DonationCard = (props: Props) => {
 
     const {
         id,
@@ -27,8 +35,40 @@ const DonationCard = (props: DonationRequestData) => {
         isFulfilled,
         created_at,
         updated_at,
-        location
-    }: DonationRequestData = props
+        location,
+        userId,
+        message,
+        address,
+        onAccepted,
+    }: Props = props
+
+    const currentUser = useSelector((state: any) => state.user?.data || {});
+    const isDonor = !!currentUser?.isDonor;
+    const isOwn = typeof userId === 'number' && currentUser?.id === userId;
+
+    const [accepting, setAccepting] = useState(false);
+    const [accepted, setAccepted] = useState(!!props.acceptedByCurrentUser);
+    const [acceptMsg, setAcceptMsg] = useState<string>("");
+
+    const canAccept = isDonor && !isFulfilled && !isOwn && !accepted;
+
+    const onAccept = async () => {
+        try {
+            setAccepting(true);
+            setAcceptMsg("");
+            await acceptRequest(id);
+            setAccepted(true);
+            setAcceptMsg('You accepted this request. The requester has been notified via email.');
+            if (typeof onAccepted === 'function') {
+                onAccepted();
+            }
+        } catch (e: any) {
+            const msg = e?.response?.data?.message || e?.message || 'Failed to accept request.';
+            setAcceptMsg(msg);
+        } finally {
+            setAccepting(false);
+        }
+    };
 
     return (
         <div
@@ -39,8 +79,35 @@ const DonationCard = (props: DonationRequestData) => {
             </h3>
             <p>Requested on <span>{convertDateTime(created_at)}</span></p>
             <p>Updated on <span>{convertDateTime(updated_at)}</span></p>
-            {/* <p>Zone: {location}</p> */}
+            <p>Location: <span className='text-gray-700'>{address || location || 'Unknown'}</span></p>
             <p><span className='px-2 py-1 text-xs rounded-lg bg-yellow-200'>{isFulfilled ? 'donation received' : 'awaiting donors'}</span></p>
+
+            {accepted && (
+                <p className="mt-2">
+                    <span className='px-2 py-1 text-xs rounded-lg bg-green-200 text-green-800'>accepted by you</span>
+                </p>
+            )}
+
+            {message && (
+                <div className="mt-3 p-3 bg-gray-50 rounded">
+                    <p className="text-sm text-gray-800"><span className="font-semibold">Note from requester:</span> {message}</p>
+                </div>
+            )}
+
+            {canAccept && (
+                <div className="mt-3">
+                    <button
+                        onClick={onAccept}
+                        disabled={accepting || accepted}
+                        className={`px-3 py-2 rounded text-white ${accepted ? 'bg-green-600' : 'bg-blue-600 hover:bg-blue-700'} disabled:opacity-60`}
+                    >
+                        {accepted ? 'Accepted' : (accepting ? 'Accepting…' : 'Accept request')}
+                    </button>
+                    {acceptMsg && (
+                        <p className="text-sm mt-2 text-gray-700">{acceptMsg}</p>
+                    )}
+                </div>
+            )}
         </div>
     )
 }

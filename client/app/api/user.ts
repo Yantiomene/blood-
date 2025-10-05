@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+if (!apiUrl) {
+  throw new Error('NEXT_PUBLIC_API_URL environment variable is required');
+}
 
 axios.defaults.withCredentials = true;
 
@@ -76,7 +79,6 @@ export async function logout(): Promise<any> {
 
 export async function updateProfile(user: UserProfile): Promise<any> {
     try {
-        console.log(">> profile: ", user);
         const response = await axios.put(`${apiUrl}/profile`, user)
         return response.data;
     } catch (error) {
@@ -100,6 +102,39 @@ export async function checkProtected(): Promise<boolean> {
     return true;
   } catch (e) {
     return false;
+  }
+}
+
+export async function resendVerification(email: string): Promise<any> {
+  try {
+    const response = await axios.post(`${apiUrl}/requestNewToken`, { email });
+    return response.data;
+  } catch (error) {
+    console.error('Resend verification error:', error);
+    throw error;
+  }
+}
+
+// Geocode address -> { location: [lon, lat], address }
+export async function geocode(address: string): Promise<{ success: boolean; location?: [number, number]; address?: string; error?: string; }> {
+  try {
+    const response = await axios.post(`${apiUrl}/geocode`, { address });
+    return response.data;
+  } catch (error: any) {
+    // Pass through backend error shape when available
+    const msg = error?.response?.data || { success: false, error: 'Network or server error' };
+    return msg;
+  }
+}
+
+// Get user by id -> used for requestor contact info
+export async function getUserById(userId: string | number): Promise<any> {
+  try {
+    const response = await axios.get(`${apiUrl}/user/${userId}`, { withCredentials: true });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error getting user by id:', error.message);
+    throw error;
   }
 }
   

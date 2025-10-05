@@ -112,7 +112,7 @@ export async function denyDonationRequest(requestId, reason) {
 export async function acceptDonationRequest(requestId) {
     try {
         console.log(">> accept donation request: ", requestId);
-        const response = await axios.get(`${apiUrl}/acceptRequest/${requestId}`);
+        const response = await axios.post(`${apiUrl}/acceptRequest/${requestId}`);
         return response.data;
     } catch (error) {
         throw error;

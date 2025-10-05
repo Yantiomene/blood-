@@ -1,9 +1,18 @@
-const { validateLocationFormat, getNearbyHospitals } = require('../utils/geoUtils');
-const { sendNotificationEmail, sendDenyEmail, sendAcceptEmail } = require('../utils/email');
+const { validateLocationFormat, getNearbyHospitals, reverseGeocode } = require('../utils/geoUtils');
+const { sendNotificationEmail, sendDenyEmail, sendAcceptEmail, sendDonorInstructionEmail } = require('../utils/email');
 const db = require('../db');
 const wkx = require('wkx');
 const fs = require('fs');
 const { NODE_ENV } = require('../constants');
+
+// helper: extract contact number from the donation request message (prefers E.164 provided by client)
+function extractContactNumberFromMessage(msg) {
+  if (!msg || typeof msg !== 'string') return null;
+  // Look for a line starting with "Contact:" or "Phone:" and capture everything until line break
+  const match = msg.match(/(?:^|\n)\s*(?:Contact|Phone)\s*:\s*([^\n\r]+)/i);
+  return match && match[1] ? match[1].trim() : null;
+}
+
 
 const createDonationRequest = async (req, res) => {
     const { bloodType, quantity, location, message } = req.body;
@@ -53,26 +62,84 @@ const createDonationRequest = async (req, res) => {
 
 
 const getDonationRequests = async (req, res) => {
-    const { isFulfilled } = req.query;
+    const { isFulfilled, page = '1', limit = '5' } = req.query;
 
     try {
+        const pageNum = Math.max(parseInt(page, 10) || 1, 1);
+        const limitNum = Math.max(parseInt(limit, 10) || 5, 1);
+        const offsetNum = (pageNum - 1) * limitNum;
 
-        let query = 'SELECT * FROM donation_requests';
+        const whereClauses = [];
         const params = [];
 
-        if (isFulfilled) {
-            query += ' WHERE "isFulfilled" = $1';
+        if (isFulfilled !== undefined) {
+            whereClauses.push('"isFulfilled" = $' + (params.length + 1));
             params.push(isFulfilled);
         }
 
-        // Retrieve all donation requests from the database
-        const result = await db.query(query, params);
-        const donationRequests = result.rows;
+        const whereSql = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+        const dataQuery = `
+            SELECT 
+                id,
+                "userId",
+                "bloodType",
+                quantity,
+                "isFulfilled",
+                message,
+                "requestingEntity",
+                "requestingEntityId",
+                created_at,
+                updated_at,
+                ST_Y(location::geometry) AS latitude,
+                ST_X(location::geometry) AS longitude
+            FROM donation_requests
+            ${whereSql}
+            ORDER BY created_at DESC
+            LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+        `;
+
+        const countQuery = `SELECT COUNT(*) AS total FROM donation_requests ${whereSql}`;
+
+        const [dataResult, countResult] = await Promise.all([
+            db.query(dataQuery, [...params, limitNum, offsetNum]),
+            db.query(countQuery, params),
+        ]);
+
+        const donationRequests = dataResult.rows;
+        // Enrich with human-readable address using reverse geocoding (best-effort) and acceptedByCurrentUser flag
+        const donationRequestsEnriched = await Promise.all(donationRequests.map(async (r) => {
+            const lat = Number(r.latitude);
+            const lon = Number(r.longitude);
+            let address = null;
+            if (Number.isFinite(lat) && Number.isFinite(lon)) {
+                try {
+                    address = await reverseGeocode(lat, lon);
+                } catch (e) {
+                    // ignore geocoding errors
+                }
+            }
+            let acceptedByCurrentUser = false;
+            try {
+                const acc = await db.query('SELECT 1 FROM donation_acceptances WHERE "requestId" = $1 AND "donorId" = $2 LIMIT 1', [r.id, req.user.id]);
+                acceptedByCurrentUser = acc.rows.length > 0;
+            } catch (e) {}
+            return { ...r, address, acceptedByCurrentUser };
+        }));
+
+        const total = parseInt(countResult.rows[0].total, 10);
+        const totalPages = Math.max(Math.ceil(total / limitNum), 1);
 
         req.logger.info('Fetched donation requests successfully');
         res.status(200).json({
             success: true,
-            donationRequests,
+            donationRequests: donationRequestsEnriched,
+            pagination: {
+                page: pageNum,
+                limit: limitNum,
+                total,
+                totalPages,
+            },
         });
     } catch (error) {
         req.logger.error('Error retrieving donation requests:', error.message);
@@ -885,25 +952,76 @@ const acceptRequest = async (req, res) => {
             });
         }
 
-        // Fetch request details
-        const request = await db.query('SELECT * FROM donation_requests WHERE id = $1', [requestId]);
+        // Fetch request details with coordinates for reverse geocoding
+        const requestRes = await db.query(
+            'SELECT id, "userId", "bloodType", quantity, "isFulfilled", message, "requestingEntity", "requestingEntityId", ST_Y(location::geometry) AS latitude, ST_X(location::geometry) AS longitude FROM donation_requests WHERE id = $1',
+            [requestId]
+        );
 
-        if (request.rows.length === 0) {
+        if (requestRes.rows.length === 0) {
             return res.status(404).json({ 
                 success: false, 
                 error: 'Invalid request ID' 
             });
         }
 
-        const requestor = await db.query('SELECT * FROM users WHERE id = $1', [request.rows[0].userId]);
+        const reqRow = requestRes.rows[0];
 
-        // Send email to requestor
-        await sendAcceptEmail(requestor.rows[0].email, request.rows[0].bloodType, req.user);
+        // Persist acceptance by this donor; prevent duplicate acceptances
+        const acceptanceRes = await db.query(
+            'INSERT INTO donation_acceptances ("requestId", "donorId") VALUES ($1, $2) ON CONFLICT ("requestId", "donorId") DO NOTHING RETURNING id',
+            [requestId, req.user.id]
+        );
+        if (!acceptanceRes.rows || acceptanceRes.rows.length === 0) {
+            return res.status(409).json({
+                success: false,
+                message: 'You have already accepted this request.'
+            });
+        }
+
+        // Resolve human-readable address from coordinates (best-effort)
+        let address;
+        if (typeof reqRow.latitude === 'number' && typeof reqRow.longitude === 'number') {
+            try {
+                address = await reverseGeocode(reqRow.latitude, reqRow.longitude);
+            } catch (e) {
+                req.logger.warn('Reverse geocoding failed during acceptRequest:', e.message);
+            }
+        }
+
+        // Fetch requestor details to include contact info for donor
+        const requestor = await db.query('SELECT * FROM users WHERE id = $1', [reqRow.userId]);
+        const requestorInfo = requestor.rows[0] || {};
+
+        // Prefer contact number embedded in the donation request message; fall back to user profile
+        const contactFromMessage = extractContactNumberFromMessage(reqRow.message);
+
+        const enrichedRequest = {
+            ...reqRow,
+            address,
+            requestorName: requestorInfo.username,
+            requestorEmail: requestorInfo.email,
+            requestorContactNumber: contactFromMessage || requestorInfo.contactNumber,
+        };
+
+        // Send email to requestor with donor details
+        try {
+            await sendAcceptEmail(requestorInfo.email, reqRow.bloodType, req.user);
+        } catch (e) {
+            req.logger.error('Failed to send accept email to requestor:', e.message);
+        }
+
+        // Send instructions to donor (with formatted address if available and requestor contact)
+        try {
+            await sendDonorInstructionEmail(req.user.email, enrichedRequest);
+        } catch (e) {
+            req.logger.error('Failed to send instructions email to donor:', e.message);
+        }
 
         req.logger.info('Request accepted successfuly');
         return res.status(200).json({
             success: true,
-            message: 'Request accepted successfuly'
+            message: 'Request accepted successfuly. Donation instructions have been sent to your email.'
         });
     } catch (error) {
         req.logger.error('Error Accepting request:', error.message);
@@ -1002,6 +1120,7 @@ module.exports = {
     updateDonationRequest,
     findNearbyDonors,
     getDonationRequestByUserId,
+    getDonationRequestById,
     getDonors,
     deleteRequest,
     findRequestByBloodType,
@@ -1011,4 +1130,42 @@ module.exports = {
     findRequestByPriority,
     findRequestByLocation,
     incrementViewCount,
+};
+
+// get donation request by id
+async function getDonationRequestById(req, res) {
+    const { requestId } = req.params;
+    try {
+        const result = await db.query(
+            'SELECT id, "userId", "bloodType", quantity, "isFulfilled", message, "requestingEntity", "requestingEntityId", created_at, updated_at, ST_Y(location::geometry) AS latitude, ST_X(location::geometry) AS longitude FROM donation_requests WHERE id = $1',
+            [requestId]
+        );
+        const donationRequest = result.rows[0];
+        if (!donationRequest) {
+            return res.status(404).json({ success: false, error: 'Donation request not found' });
+        }
+        // Best-effort: add human-readable address from coordinates
+        let address = null;
+        const lat = Number(donationRequest.latitude);
+        const lon = Number(donationRequest.longitude);
+        if (Number.isFinite(lat) && Number.isFinite(lon)) {
+            try {
+                address = await reverseGeocode(lat, lon);
+            } catch (e) {
+                // ignore geocoding errors
+            }
+        }
+        // Include acceptance status for current user
+        let acceptedByCurrentUser = false;
+        try {
+            const acc = await db.query('SELECT 1 FROM donation_acceptances WHERE "requestId" = $1 AND "donorId" = $2 LIMIT 1', [donationRequest.id, req.user.id]);
+            acceptedByCurrentUser = acc.rows.length > 0;
+        } catch (e) {}
+        req.logger && req.logger.info && req.logger.info('Fetched donation request by id successfully');
+        return res.status(200).json({ success: true, donationRequest: { ...donationRequest, address, acceptedByCurrentUser } });
+    } catch (error) {
+        req.logger && req.logger.error && req.logger.error('Error getting donation request by id:', error.message);
+        console.error('Error getting donation request by id:', error.message);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
 };

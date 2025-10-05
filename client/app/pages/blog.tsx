@@ -23,7 +23,7 @@ export default function BlogLandingPage() {
         .split(',')
         .map((s) => s.trim().toLowerCase())
         .filter(Boolean);
-    const isAdmin = false && adminEmails.includes(userEmail);
+    const isAdmin = adminEmails.includes(userEmail);
 
     const [blogs, setBlogs] = useState<BlogItem[]>([]);
     const [loading, setLoading] = useState<boolean>(true);

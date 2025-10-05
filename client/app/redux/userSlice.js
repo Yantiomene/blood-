@@ -5,7 +5,6 @@ export const fetchCurrentUser = createAsyncThunk(
   'user/fetchCurrentUser',
   async () => {
     const response = await getCurrentUser();
-    console.log("fetching current user from store...")
     return response.user;
   }
 );
@@ -14,7 +13,7 @@ export const updateUserProfile = createAsyncThunk(
   'user/updateUserProfile',
   async (userData) => {
     const response = await updateProfile(userData);
-    return response.user;
+    return response; // backend returns { success, message }
   }
 );
 
@@ -53,7 +52,8 @@ const userSlice = createSlice({
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.loading = false;
-        state.data = action.payload;
+        // backend update endpoint does not return user, so do not mutate state here
+        // UI should re-fetch profile after successful update
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;
