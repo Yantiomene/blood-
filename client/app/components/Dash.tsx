@@ -66,14 +66,18 @@ const Dashboard: React.FC = () => {
         fetchMine();
     }, [user?.id]);
 
+    const [acceptedCount, setAcceptedCount] = useState(0);
+    const [acceptedPendingCount, setAcceptedPendingCount] = useState(0);
+    const [acceptedFulfilledCount, setAcceptedFulfilledCount] = useState(0);
+
     const awaitingDonorsCount = useMemo(() => {
         return requestList.filter(r => !r.isFulfilled).length;
     }, [requestList]);
 
-    // NOTE: Backend does not persist "accepted" state yet; these will remain 0 until server adds tracking.
-    const acceptedCount = 0;
-    const acceptedFulfilledCount = 0;
-    const acceptedPendingCount = 0;
+    const onAcceptedUpdateCounters = () => {
+        setAcceptedCount(prev => prev + 1);
+        setAcceptedPendingCount(prev => prev + 1);
+    };
 
     const othersRequests = useMemo(() => {
         if (!user?.id) return requestList;
@@ -159,6 +163,7 @@ const Dashboard: React.FC = () => {
                                     userId={data.userId}
                                     message={data.message}
                                     address={data.address}
+                                    onAccepted={onAcceptedUpdateCounters}
                                 />
                             ))}
                             {loadingRequest === 'loading' && (
@@ -195,6 +200,7 @@ const Dashboard: React.FC = () => {
                                             userId={data.userId}
                                             message={data.message}
                                             address={data.address}
+                                            onAccepted={onAcceptedUpdateCounters}
                                         />
                                     ))}
                                 </div>
@@ -220,6 +226,7 @@ const Dashboard: React.FC = () => {
                                     userId={data.userId}
                                     message={data.message}
                                     address={data.address}
+                                    onAccepted={onAcceptedUpdateCounters}
                                 />
                             ))}
                             {loadingRequest === 'loading' && (

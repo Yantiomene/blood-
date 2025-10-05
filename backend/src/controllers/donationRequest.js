@@ -1,5 +1,5 @@
 const { validateLocationFormat, getNearbyHospitals, reverseGeocode } = require('../utils/geoUtils');
-const { sendNotificationEmail, sendDenyEmail, sendAcceptEmail } = require('../utils/email');
+const { sendNotificationEmail, sendDenyEmail, sendAcceptEmail, sendDonorInstructionEmail } = require('../utils/email');
 const db = require('../db');
 const wkx = require('wkx');
 const fs = require('fs');
@@ -938,25 +938,53 @@ const acceptRequest = async (req, res) => {
             });
         }
 
-        // Fetch request details
-        const request = await db.query('SELECT * FROM donation_requests WHERE id = $1', [requestId]);
+        // Fetch request details with coordinates for reverse geocoding
+        const requestRes = await db.query(
+            'SELECT id, "userId", "bloodType", quantity, "isFulfilled", message, "requestingEntity", "requestingEntityId", ST_Y(location::geometry) AS latitude, ST_X(location::geometry) AS longitude FROM donation_requests WHERE id = $1',
+            [requestId]
+        );
 
-        if (request.rows.length === 0) {
+        if (requestRes.rows.length === 0) {
             return res.status(404).json({ 
                 success: false, 
                 error: 'Invalid request ID' 
             });
         }
 
-        const requestor = await db.query('SELECT * FROM users WHERE id = $1', [request.rows[0].userId]);
+        const reqRow = requestRes.rows[0];
 
-        // Send email to requestor
-        await sendAcceptEmail(requestor.rows[0].email, request.rows[0].bloodType, req.user);
+        // Resolve human-readable address from coordinates (best-effort)
+        let address;
+        if (typeof reqRow.latitude === 'number' && typeof reqRow.longitude === 'number') {
+            try {
+                address = await reverseGeocode(reqRow.latitude, reqRow.longitude);
+            } catch (e) {
+                req.logger.warn('Reverse geocoding failed during acceptRequest:', e.message);
+            }
+        }
+
+        const enrichedRequest = { ...reqRow, address };
+
+        const requestor = await db.query('SELECT * FROM users WHERE id = $1', [reqRow.userId]);
+
+        // Send email to requestor with donor details
+        try {
+            await sendAcceptEmail(requestor.rows[0].email, reqRow.bloodType, req.user);
+        } catch (e) {
+            req.logger.error('Failed to send accept email to requestor:', e.message);
+        }
+
+        // Send instructions to donor (with formatted address if available)
+        try {
+            await sendDonorInstructionEmail(req.user.email, enrichedRequest);
+        } catch (e) {
+            req.logger.error('Failed to send instructions email to donor:', e.message);
+        }
 
         req.logger.info('Request accepted successfuly');
         return res.status(200).json({
             success: true,
-            message: 'Request accepted successfuly'
+            message: 'Request accepted successfuly. Donation instructions have been sent to your email.'
         });
     } catch (error) {
         req.logger.error('Error Accepting request:', error.message);

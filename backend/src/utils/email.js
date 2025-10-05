@@ -14,7 +14,8 @@ if (process.env.NODE_ENV === 'test') {
     sendPasswordResetEmail: (email, token) => mockEmailLogger('sendPasswordResetEmail', email, token),
     sendNotificationEmail: (to, subject, text, html) => mockEmailLogger('sendNotificationEmail', to, subject),
     sendDenyEmail: (email, reason) => mockEmailLogger('sendDenyEmail', email, reason),
-    sendAcceptEmail: (email, request) => mockEmailLogger('sendAcceptEmail', email, request)
+    sendAcceptEmail: (email, request) => mockEmailLogger('sendAcceptEmail', email, request),
+    sendDonorInstructionEmail: (email, request) => mockEmailLogger('sendDonorInstructionEmail', email, request)
   };
 } else {
   const transporter = nodemailer.createTransport({
@@ -354,6 +355,97 @@ if (process.env.NODE_ENV === 'test') {
     }
   }; // End of sendAcceptEmail function
 
+  // New: Send donor instruction email upon acceptance
+  const sendDonorInstructionEmail = async (donorEmail, request) => {
+    if (!donorEmail || !request) {
+      throw new Error('Missing required parameters for donor instruction email');
+    }
+
+    const {
+      bloodType,
+      quantity,
+      location,
+      address,
+      requestingEntity,
+      requestingEntityId
+    } = request;
+
+    const emailContent = `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Donation Instructions</title>
+      <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px; }
+        .container { max-width: 700px; margin: auto; background-color: #ffffff; padding: 24px; border-radius: 10px; box-shadow: 0 0 12px rgba(0,0,0,0.08); }
+        h1 { color: #d9534f; font-size: 24px; }
+        h2 { color: #5bc0de; font-size: 18px; margin-top: 24px; }
+        p, li { color: #333; line-height: 1.5; }
+        .details { background: #fafafa; border: 1px solid #eee; border-radius: 8px; padding: 12px; margin-top: 12px; }
+        .thank-you { margin-top: 20px; text-align: center; color: #5cb85c; font-weight: bold; }
+        ul { padding-left: 20px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1>Thank you for accepting the donation request!</h1>
+        <p>Here are the instructions to help you prepare and complete the donation smoothly.</p>
+
+        <div class="details">
+          <p><strong>Requested Blood Type:</strong> ${bloodType || 'N/A'}</p>
+          <p><strong>Quantity Needed:</strong> ${quantity || 'N/A'}</p>
+          <p><strong>Location:</strong> ${address || 'N/A'}</p>
+          <p><strong>Requesting Entity:</strong> ${requestingEntity || 'N/A'}${requestingEntityId ? ` (ID: ${requestingEntityId})` : ''}</p>
+        </div>
+
+        <h2>Before your donation</h2>
+        <ul>
+          <li>Bring a valid ID and any donor card if you have one.</li>
+          <li>Get a good night's sleep and eat a healthy, iron-rich meal.</li>
+          <li>Stay hydrated: drink plenty of water in the hours before donation.</li>
+          <li>Avoid alcohol for 24 hours before donation.</li>
+          <li>Wear clothing with sleeves that can be raised above the elbow.</li>
+          <li>Ensure you feel well and have no cold/flu symptoms.</li>
+          <li>If on medication or recently had a procedure, confirm your eligibility with the donation center.</li>
+          <li>If you have donated blood recently, observe the recommended interval between donations.</li>
+        </ul>
+
+        <h2>During your donation</h2>
+        <ul>
+          <li>Inform staff of the request reference if needed.</li>
+          <li>Relax and follow the guidance from the medical staff.</li>
+          <li>Let the staff know immediately if you feel unwell at any point.</li>
+        </ul>
+
+        <h2>After your donation</h2>
+        <ul>
+          <li>Rest for a short period and have a light snack provided at the center.</li>
+          <li>Continue to hydrate and avoid strenuous activities for the rest of the day.</li>
+          <li>Keep the bandage on for at least a few hours and avoid heavy lifting with that arm.</li>
+          <li>If you feel dizzy or unwell later, sit or lie down and drink fluids.</li>
+        </ul>
+
+        <div class="thank-you">Thank you for your life-saving contribution! — The Blood+ team</div>
+      </div>
+    </body>
+    </html>`;
+
+    const mailOptions = {
+      from: EMAIL,
+      to: donorEmail,
+      subject: 'Donation Instructions',
+      html: emailContent,
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+    } catch (error) {
+      console.error('Error sending donor instruction email:', error.message);
+      throw new Error('Failed to send donor instruction email');
+    }
+  };
+
 
   exportedEmail = {
     sendVerificationEmail,
@@ -361,6 +453,7 @@ if (process.env.NODE_ENV === 'test') {
     sendPasswordResetEmail,
     sendDenyEmail,
     sendAcceptEmail,
+    sendDonorInstructionEmail,
   };
 } // End of else block
 

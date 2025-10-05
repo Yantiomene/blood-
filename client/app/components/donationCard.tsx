@@ -17,13 +17,15 @@ interface DonationRequestData {
     address?: string;
 }
 
+type Props = DonationRequestData & { onAccepted?: () => void };
+
 const convertDateTime = (dateStr: Date) => {
     const date = new Date(dateStr).toDateString();
     const time = new Date(dateStr).toLocaleTimeString();
     return `${date} at ${time}`;
 }
 
-const DonationCard = (props: DonationRequestData) => {
+const DonationCard = (props: Props) => {
 
     const {
         id,
@@ -36,7 +38,8 @@ const DonationCard = (props: DonationRequestData) => {
         userId,
         message,
         address,
-    }: DonationRequestData = props
+        onAccepted,
+    }: Props = props
 
     const currentUser = useSelector((state: any) => state.user?.data || {});
     const isDonor = !!currentUser?.isDonor;
@@ -55,6 +58,9 @@ const DonationCard = (props: DonationRequestData) => {
             await acceptRequest(id);
             setAccepted(true);
             setAcceptMsg('You accepted this request. The requester has been notified via email.');
+            if (typeof onAccepted === 'function') {
+                onAccepted();
+            }
         } catch (e: any) {
             const msg = e?.response?.data?.message || e?.message || 'Failed to accept request.';
             setAcceptMsg(msg);

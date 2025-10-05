@@ -36,6 +36,7 @@ const RequestDetailPage: React.FC = () => {
   const [editQty, setEditQty] = useState<number>(0);
   const [editBloodType, setEditBloodType] = useState<string>('');
   const [editMessage, setEditMessage] = useState<string>('');
+  const [accepted, setAccepted] = useState(false);
   const currentUser = useSelector((state: any) => state.user?.data || {});
   const dispatch = useDispatch();
   const router = useRouter();
@@ -77,7 +78,7 @@ const RequestDetailPage: React.FC = () => {
 
   const isOwn = !!detail && typeof detail.userId === 'number' && currentUser?.id === detail.userId;
   const isDonor = !!currentUser?.isDonor;
-  const canAccept = !!detail && isDonor && !detail.isFulfilled && !isOwn;
+  const canAccept = !!detail && isDonor && !detail.isFulfilled && !isOwn && !accepted;
 
   const handleDecision = async () => {
     if (!detail || !decision) return;
@@ -85,6 +86,7 @@ const RequestDetailPage: React.FC = () => {
     try {
       if (decision === 'accept') {
         await acceptRequest(detail.id);
+        setAccepted(true);
       } else if (decision === 'deny') {
         await denyRequest(detail.id, message);
       }
