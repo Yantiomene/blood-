@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/utils/geoUtils.js</title>
+    <title>Code coverage report for src/utils/ai.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/utils</a> geoUtils.js</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/utils</a> ai.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">21.42% </span>
+                <span class="strong">15.58% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>18/84</span>
+                <span class='fraction'>12/77</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>2/2</span>
+                <span class='fraction'>2/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">20% </span>
+                <span class="strong">25% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>1/5</span>
+                <span class='fraction'>1/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">21.42% </span>
+                <span class="strong">15.58% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>18/84</span>
+                <span class='fraction'>12/77</span>
             </div>
         
             
@@ -139,15 +139,9 @@
 <a name='L74'></a><a href='#L74'>74</a>
 <a name='L75'></a><a href='#L75'>75</a>
 <a name='L76'></a><a href='#L76'>76</a>
-<a name='L77'></a><a href='#L77'>77</a>
-<a name='L78'></a><a href='#L78'>78</a>
-<a name='L79'></a><a href='#L79'>79</a>
-<a name='L80'></a><a href='#L80'>80</a>
-<a name='L81'></a><a href='#L81'>81</a>
-<a name='L82'></a><a href='#L82'>82</a>
-<a name='L83'></a><a href='#L83'>83</a>
-<a name='L84'></a><a href='#L84'>84</a>
-<a name='L85'></a><a href='#L85'>85</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L77'></a><a href='#L77'>77</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -160,8 +154,8 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -185,8 +179,6 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -200,10 +192,6 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -227,95 +215,83 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const axios = require('axios');
-const { GOOGLE_MAPS_API_KEY } = require('../constants');
+<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">const axios = require('axios');
 &nbsp;
-const validateLocationFormat = <span class="fstat-no" title="function not covered" >(location) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    if (!location || !Array.isArray(location) || location.length !== 2) {</span>
-<span class="cstat-no" title="statement not covered" >        throw new Error('Invalid location format. Please provide an array with [longitude, latitude].');</span>
-<span class="cstat-no" title="statement not covered" >    }</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    const [longitude, latitude] = location;</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    if (isNaN(longitude) || isNaN(latitude) || longitude &lt; -180 || longitude &gt; 180 || latitude &lt; -90 || latitude &gt; 90) {</span>
-<span class="cstat-no" title="statement not covered" >        throw new Error('Invalid longitude or latitude values.');</span>
-<span class="cstat-no" title="statement not covered" >    }</span>
-};
+const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
+const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL <span class="branch-0 cbranch-no" title="branch not covered" >|| 'deepseek-chat';</span>
+const DEEPSEEK_API_URL = process.env.DEEPSEEK_API_URL <span class="branch-0 cbranch-no" title="branch not covered" >|| 'https://api.deepseek.com/v1/chat/completions';</span>
 &nbsp;
-&nbsp;
-<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >async function getNearbyHospitals(latitude, longitude) {</span></span>
-<span class="cstat-no" title="statement not covered" >  const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&amp;key=${GOOGLE_MAPS_API_KEY}`;</span>
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >function buildPrompt(title) {</span></span>
+<span class="cstat-no" title="statement not covered" >  const system = 'You are an assistant that writes semantic, accessible HTML blog posts. Use clear headings, lists, quotes, and concise paragraphs. Avoid external scripts. Keep the tone informative and friendly.';</span>
+<span class="cstat-no" title="statement not covered" >  const user = `Write a well-structured HTML blog post based on this title. Include: hero header, intro, 3-5 sections with h2/h3, bullet points, a short quote block, and a concise conclusion. Keep it under 1200 words.</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >  try {</span>
-<span class="cstat-no" title="statement not covered" >    // Step 1: Get human-readable address</span>
-<span class="cstat-no" title="statement not covered" >    const geocodingResponse = await axios.get(geocodingUrl);</span>
-<span class="cstat-no" title="statement not covered" >    const address = geocodingResponse.data.results[0].formatted_address;</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // Step 2: Use Places API to find nearby hospitals</span>
-<span class="cstat-no" title="statement not covered" >    const placesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&amp;radius=5000&amp;type=hospital&amp;key=${GOOGLE_MAPS_API_KEY}`;</span>
-<span class="cstat-no" title="statement not covered" >    const placesResponse = await axios.get(placesUrl);</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    const hospitals = placesResponse.data.results.map((result) =&gt; ({</span>
-<span class="cstat-no" title="statement not covered" >      name: result.name,</span>
-<span class="cstat-no" title="statement not covered" >      address: result.vicinity,</span>
-<span class="cstat-no" title="statement not covered" >    }));</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    return { address, hospitals };</span>
-<span class="cstat-no" title="statement not covered" >  } catch (error) {</span>
-<span class="cstat-no" title="statement not covered" >    console.error('Error:', error.message);</span>
-<span class="cstat-no" title="statement not covered" >    throw new Error('Error fetching nearby hospitals');</span>
-<span class="cstat-no" title="statement not covered" >  }</span>
+<span class="cstat-no" title="statement not covered" >Title: ${title}</span>
+<span class="cstat-no" title="statement not covered" >Constraints:</span>
+<span class="cstat-no" title="statement not covered" >- Output only HTML (no markdown).</span>
+<span class="cstat-no" title="statement not covered" >- Use semantic tags (h1-h3, p, ul/ol, blockquote).</span>
+<span class="cstat-no" title="statement not covered" >- Avoid inline styles except minimal emphasis.`;</span>
+<span class="cstat-no" title="statement not covered" >  return { system, user };</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 &nbsp;
-// Reverse geocoding: [lat, lon] -&gt; address
-<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >async function reverseGeocode(latitude, longitude) {</span></span>
-<span class="cstat-no" title="statement not covered" >  const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&amp;key=${GOOGLE_MAPS_API_KEY}`;</span>
-<span class="cstat-no" title="statement not covered" >  try {</span>
-<span class="cstat-no" title="statement not covered" >    const resp = await axios.get(url);</span>
-<span class="cstat-no" title="statement not covered" >    if (!resp.data.results || resp.data.results.length === 0) {</span>
-<span class="cstat-no" title="statement not covered" >      throw new Error('No reverse geocoding results found');</span>
-<span class="cstat-no" title="statement not covered" >    }</span>
-<span class="cstat-no" title="statement not covered" >    const formattedAddress = resp.data.results[0].formatted_address;</span>
-<span class="cstat-no" title="statement not covered" >    return formattedAddress;</span>
-<span class="cstat-no" title="statement not covered" >  } catch (error) {</span>
-<span class="cstat-no" title="statement not covered" >    console.error('Error reverse geocoding:', error.message);</span>
-<span class="cstat-no" title="statement not covered" >    throw new Error('Error reverse geocoding the provided coordinates');</span>
-<span class="cstat-no" title="statement not covered" >  }</span>
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >function localFallbackHTML(title) {</span></span>
+<span class="cstat-no" title="statement not covered" >  return `</span>
+<span class="cstat-no" title="statement not covered" >  &lt;section class="hero bg-red-50 p-4 rounded"&gt;</span>
+<span class="cstat-no" title="statement not covered" >    &lt;h1&gt;${title}&lt;/h1&gt;</span>
+<span class="cstat-no" title="statement not covered" >    &lt;p&gt;Explore key insights, practical guidance, and highlights.&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >  &lt;/section&gt;</span>
+<span class="cstat-no" title="statement not covered" >  &lt;h2&gt;Overview&lt;/h2&gt;</span>
+<span class="cstat-no" title="statement not covered" >  &lt;p&gt;This article offers a concise overview and actionable takeaways.&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >  &lt;h2&gt;Key Points&lt;/h2&gt;</span>
+<span class="cstat-no" title="statement not covered" >  &lt;ul&gt;</span>
+<span class="cstat-no" title="statement not covered" >    &lt;li&gt;Context and relevance&lt;/li&gt;</span>
+<span class="cstat-no" title="statement not covered" >    &lt;li&gt;Practical guidance&lt;/li&gt;</span>
+<span class="cstat-no" title="statement not covered" >    &lt;li&gt;Common pitfalls&lt;/li&gt;</span>
+<span class="cstat-no" title="statement not covered" >    &lt;li&gt;Recommendations&lt;/li&gt;</span>
+<span class="cstat-no" title="statement not covered" >  &lt;/ul&gt;</span>
+<span class="cstat-no" title="statement not covered" >  &lt;h2&gt;Deep Dive&lt;/h2&gt;</span>
+<span class="cstat-no" title="statement not covered" >  &lt;p&gt;Short paragraphs that expand on the topic.&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >  &lt;blockquote&gt;“A brief, memorable insight related to the topic.”&lt;/blockquote&gt;</span>
+<span class="cstat-no" title="statement not covered" >  &lt;h2&gt;Conclusion&lt;/h2&gt;</span>
+<span class="cstat-no" title="statement not covered" >  &lt;p&gt;Summary and suggested next steps.&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >  `;</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 &nbsp;
-// Forward geocoding: address/place -&gt; { coords: [lon, lat], address }
-<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >async function geocodeAddress(address) {</span></span>
-<span class="cstat-no" title="statement not covered" >  if (!address || typeof address !== 'string' || !address.trim()) {</span>
-<span class="cstat-no" title="statement not covered" >    throw new Error('Address is required');</span>
-<span class="cstat-no" title="statement not covered" >  }</span>
-<span class="cstat-no" title="statement not covered" >  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&amp;key=${GOOGLE_MAPS_API_KEY}`;</span>
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >async function callDeepSeek(title) {</span></span>
+<span class="cstat-no" title="statement not covered" >  if (!DEEPSEEK_API_KEY) return { content: localFallbackHTML(title), provider: 'local_fallback' };</span>
+<span class="cstat-no" title="statement not covered" >  const { system, user } = buildPrompt(title);</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
-<span class="cstat-no" title="statement not covered" >    const resp = await axios.get(url);</span>
-<span class="cstat-no" title="statement not covered" >    if (!resp.data.results || resp.data.results.length === 0) {</span>
-<span class="cstat-no" title="statement not covered" >      throw new Error('No results found for the provided address');</span>
+<span class="cstat-no" title="statement not covered" >    const response = await axios.post(</span>
+<span class="cstat-no" title="statement not covered" >      DEEPSEEK_API_URL,</span>
+<span class="cstat-no" title="statement not covered" >      {</span>
+<span class="cstat-no" title="statement not covered" >        model: DEEPSEEK_MODEL,</span>
+<span class="cstat-no" title="statement not covered" >        messages: [</span>
+<span class="cstat-no" title="statement not covered" >          { role: 'system', content: system },</span>
+<span class="cstat-no" title="statement not covered" >          { role: 'user', content: user },</span>
+<span class="cstat-no" title="statement not covered" >        ],</span>
+<span class="cstat-no" title="statement not covered" >        temperature: 0.7,</span>
+<span class="cstat-no" title="statement not covered" >      },</span>
+<span class="cstat-no" title="statement not covered" >      {</span>
+<span class="cstat-no" title="statement not covered" >        headers: {</span>
+<span class="cstat-no" title="statement not covered" >          Authorization: `Bearer ${DEEPSEEK_API_KEY}`,</span>
+<span class="cstat-no" title="statement not covered" >          'Content-Type': 'application/json',</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+<span class="cstat-no" title="statement not covered" >        timeout: 15000,</span>
+<span class="cstat-no" title="statement not covered" >      }</span>
+<span class="cstat-no" title="statement not covered" >    );</span>
+<span class="cstat-no" title="statement not covered" >    const content = response?.data?.choices?.[0]?.message?.content || '';</span>
+<span class="cstat-no" title="statement not covered" >    if (!content.trim()) {</span>
+<span class="cstat-no" title="statement not covered" >      return { content: localFallbackHTML(title), provider: 'local_fallback' };</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
-<span class="cstat-no" title="statement not covered" >    const top = resp.data.results[0];</span>
-<span class="cstat-no" title="statement not covered" >    const { lat, lng } = top.geometry.location;</span>
-<span class="cstat-no" title="statement not covered" >    const formattedAddress = top.formatted_address;</span>
-<span class="cstat-no" title="statement not covered" >    // Return [lon, lat] and formatted address</span>
-<span class="cstat-no" title="statement not covered" >    return { coords: [lng, lat], address: formattedAddress };</span>
+<span class="cstat-no" title="statement not covered" >    return { content, provider: 'deepseek' };</span>
 <span class="cstat-no" title="statement not covered" >  } catch (error) {</span>
-<span class="cstat-no" title="statement not covered" >    console.error('Error geocoding address:', error.message);</span>
-<span class="cstat-no" title="statement not covered" >    throw new Error('Error geocoding the provided address');</span>
+<span class="cstat-no" title="statement not covered" >    console.error('[DeepSeek] generation failed:', error?.response?.data || error.message);</span>
+<span class="cstat-no" title="statement not covered" >    return { content: localFallbackHTML(title), provider: 'local_fallback' };</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 &nbsp;
 module.exports = {
-    validateLocationFormat,
-    getNearbyHospitals,
-    reverseGeocode,
-    geocodeAddress,
-};
-&nbsp;</pre></td></tr></table></pre>
+  generateBlogHTMLFromTitle: callDeepSeek,
+};</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->

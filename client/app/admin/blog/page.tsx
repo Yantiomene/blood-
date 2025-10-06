@@ -4,7 +4,7 @@ import Header from '@/app/components/Header';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getBlogs, createBlog, updateBlog, deleteBlog } from '@/app/api/blog';
+import { getBlogs, createBlog, updateBlog, deleteBlog, generateBlogAI } from '@/app/api/blog';
 import { generateContentFromTitle, stripHtml } from '@/app/utils/generateBlogContent';
 import { fetchCurrentUser } from '@/app/redux/userSlice';
 import { Provider } from 'react-redux';
@@ -40,6 +40,8 @@ export default function BlogAdminPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [autoWritingId, setAutoWritingId] = useState<number | null>(null);
+  const [statusMsg, setStatusMsg] = useState<string | null>(null);
+  const [genProviderById, setGenProviderById] = useState<Record<number, string>>({});
 
   const [showCreate, setShowCreate] = useState<boolean>(false);
   const [creating, setCreating] = useState<boolean>(false);
@@ -137,10 +139,30 @@ export default function BlogAdminPage() {
   const handleAutoWrite = async (b: BlogItem) => {
     try {
       setError(null);
+      setStatusMsg(null);
       setAutoWritingId(b.id);
-      const generated = generateContentFromTitle(b.title);
-      const res = await updateBlog(b.id, { content: generated });
-      setBlogs((prev) => prev.map((x) => x.id === b.id ? { ...x, content: res.blog?.content || generated } : x));
+      // Prefer backend AI generation (admin-only). Falls back to local generator on failure.
+      try {
+        const res = await generateBlogAI(b.id);
+        const provider = res?.provider || 'unknown';
+        const updatedContent = res?.blog?.content || '';
+        if (updatedContent) {
+          setBlogs((prev) => prev.map((x) => x.id === b.id ? { ...x, content: updatedContent } : x));
+          setGenProviderById((prev) => ({ ...prev, [b.id]: provider }));
+          setStatusMsg(`Content generated via ${provider}.`);
+          return;
+        }
+        // If backend returned but without content, fall through to local
+        throw new Error('AI provider returned no content');
+      } catch (aiErr) {
+        console.warn('AI generation failed, falling back to local:', aiErr);
+        const generated = generateContentFromTitle(b.title);
+        const res = await updateBlog(b.id, { content: generated });
+        const finalContent = res?.blog?.content || generated;
+        setBlogs((prev) => prev.map((x) => x.id === b.id ? { ...x, content: finalContent } : x));
+        setGenProviderById((prev) => ({ ...prev, [b.id]: 'local' }));
+        setStatusMsg('Content generated via local fallback.');
+      }
     } catch (err) {
       console.error('Auto-write failed', err);
       setError('Failed to auto-write content. Ensure you are logged in as admin.');
@@ -167,6 +189,11 @@ export default function BlogAdminPage() {
                   <button onClick={refreshBlogs} className="px-4 py-2 rounded border border-red-300 text-red-700 hover:bg-red-100">Refresh</button>
                 </div>
               </div>
+              {statusMsg && (
+                <div className="mt-3 p-2 rounded bg-blue-50 border border-blue-200 text-blue-800">
+                  {statusMsg}
+                </div>
+              )}
               {showCreate && (
                 <form onSubmit={handleCreate} className="mt-4 grid gap-3">
                   {/* form fields unchanged */}
@@ -207,8 +234,11 @@ export default function BlogAdminPage() {
                         disabled={autoWritingId === b.id}
                         className="px-3 py-1 rounded border border-blue-300 text-blue-700 hover:bg-blue-50 disabled:opacity-60"
                       >
-                        {autoWritingId === b.id ? 'Writing…' : 'Auto-write content'}
+                        {autoWritingId === b.id ? 'Writing…' : 'Auto-write via AI'}
                       </button>
+                      {genProviderById[b.id] && (
+                        <span className="ml-2 px-2 py-1 text-xs rounded bg-gray-100 border border-gray-200 text-gray-600">{`provider: ${genProviderById[b.id]}`}</span>
+                      )}
                     </div>
                   )}
                 </article>

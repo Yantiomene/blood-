@@ -1,6 +1,6 @@
 const { Router } = require('express');
 
-const { getBlogs, createBlog, getBlogsById, updateBlog, deleteBlog, likeBlog, getBlogComments, createBlogComment, deleteBlogComment, likeBlogComment } = require('../controllers/blog');
+const { getBlogs, createBlog, getBlogsById, updateBlog, deleteBlog, likeBlog, getBlogComments, createBlogComment, deleteBlogComment, likeBlogComment, generateBlogContentAI } = require('../controllers/blog');
 const { userAuth, adminOnly } = require('../middlewares/auth-middleware');
 
 const router = Router();
@@ -17,5 +17,7 @@ router.get('/:id/comments', getBlogComments);
 router.post('/:id/comments', userAuth, createBlogComment);
 router.delete('/:id/comments/:commentId', userAuth, adminOnly, deleteBlogComment);
 router.post('/:id/comments/:commentId/like', likeBlogComment);
+// Admin-only AI content generation
+router.post('/:id/generate', userAuth, adminOnly, generateBlogContentAI);
 
 module.exports = router;

@@ -1,5 +1,6 @@
 // Import necessary modules
 const db = require('../db'); // Import your database connection module
+const { generateBlogHTMLFromTitle } = require('../utils/ai');
 const { validationResult } = require('express-validator');
 
 
@@ -215,6 +216,34 @@ exports.likeBlogComment = async (req, res) => {
     } catch (error) {
         console.error('Error liking comment:', error.message);
         res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+};
+
+// Admin-only: generate blog content with AI by title and save
+exports.generateBlogContentAI = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const existing = await db.query('SELECT * FROM blogs WHERE id = $1', [id]);
+        if (existing.rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Blog not found' });
+        }
+        const blog = existing.rows[0];
+        const title = blog.title;
+        if (!title || !title.trim()) {
+            return res.status(400).json({ success: false, message: 'Blog title is required to generate content' });
+        }
+
+        const { content, provider } = await generateBlogHTMLFromTitle(title);
+
+        const updateRes = await db.query(
+            'UPDATE blogs SET content = $1, updated_at = now() WHERE id = $2 RETURNING *',
+            [content, id]
+        );
+
+        return res.status(200).json({ success: true, blog: updateRes.rows[0], provider });
+    } catch (error) {
+        console.error('Error generating blog content:', error.message);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
     }
 };
 

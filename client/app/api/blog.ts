@@ -126,3 +126,14 @@ export async function deleteBlogComment(id: number, commentId: number) {
     throw error;
   }
 }
+
+// Admin-only: generate blog content via AI (DeepSeek)
+export async function generateBlogAI(id: number) {
+  try {
+    const response = await axios.post(`${apiUrl}/${id}/generate`, {});
+    return response.data; // { success, blog, provider }
+  } catch (error) {
+    console.error('Failed to generate blog via AI:', error);
+    throw error;
+  }
+}

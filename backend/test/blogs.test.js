@@ -49,6 +49,21 @@ describe('Blogs Routes', () => {
     createdBlogId = res.body.blog.id;
   });
 
+  it('should generate blog content via AI (admin only, falls back if no key)', async () => {
+    const res = await request(app)
+      .post(`/blogs/${createdBlogId}/generate`)
+      .set('Cookie', authCookie)
+      .send({});
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.blog).toBeDefined();
+    expect(typeof res.body.blog.content).toBe('string');
+    expect(res.body.blog.content.length).toBeGreaterThan(20);
+    // provider present: 'deepseek' or 'local_fallback'
+    expect(['deepseek', 'local_fallback']).toContain(res.body.provider);
+  });
+
   it('should get blog by id', async () => {
     const res = await request(app)
       .get(`/blogs/getBlog/${createdBlogId}`);

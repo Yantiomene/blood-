@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>82/82</span>
+                <span class='fraction'>88/88</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>82/82</span>
+                <span class='fraction'>88/88</span>
             </div>
         
             
@@ -145,7 +145,19 @@
 <a name='L80'></a><a href='#L80'>80</a>
 <a name='L81'></a><a href='#L81'>81</a>
 <a name='L82'></a><a href='#L82'>82</a>
-<a name='L83'></a><a href='#L83'>83</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -241,6 +253,7 @@ const {
   passwordResetRequest,
   resetPassword,
   requestNewToken,
+  geocodeAddress,
 } = require("../controllers/auth");
 const {
   createDonationRequest,
@@ -257,6 +270,7 @@ const {
   findRequestByPriority,
   findRequestByLocation,
   incrementViewCount,
+  getDonationRequestById,
 } = require("../controllers/donationRequest");
 const {
   registerValidation,
@@ -266,7 +280,7 @@ const {
 const {
   validationMiddleware,
 } = require("../middlewares/validations-middleware");
-const { userAuth } = require("../middlewares/auth-middleware");
+const { userAuth, verifiedOnly } = require("../middlewares/auth-middleware");
 const router = Router();
 &nbsp;
 // user
@@ -287,26 +301,30 @@ router.post(
   resetPassword
 );
 router.put("/user/location", userAuth, updateUserLocation);
+// utility
+router.post("/geocode", userAuth, geocodeAddress);
 &nbsp;
 // requests
-router.post("/donationRequest", userAuth, createDonationRequest);
-router.get("/donationRequest", userAuth, getDonationRequests);
-router.get("/donationRequest/:userId", userAuth, getDonationRequestByUserId);
-router.put("/donationRequest/:requestId", userAuth, updateDonationRequest);
-router.delete("/donationRequest/:requestId", userAuth, deleteRequest);
+router.post("/donationRequest", userAuth, verifiedOnly, createDonationRequest);
+router.get("/donationRequest", userAuth, verifiedOnly, getDonationRequests);
+router.get("/donationRequest/:userId", userAuth, verifiedOnly, getDonationRequestByUserId);
+router.put("/donationRequest/:requestId", userAuth, verifiedOnly, updateDonationRequest);
+router.delete("/donationRequest/:requestId", userAuth, verifiedOnly, deleteRequest);
+// get single donation request by id (distinct path to avoid conflict with /donationRequest/:userId)
+router.get("/donationRequest/id/:requestId", userAuth, verifiedOnly, getDonationRequestById);
 // find requests
-router.get("/donationReq", userAuth, findRequestByBloodType);
-router.post("/donationReqByDate", userAuth, findRequestByDate);
-router.get("/donationReqByPriority/:urgent", userAuth, findRequestByPriority);
-router.post("/donationReqByLocation", userAuth, findRequestByLocation);
+router.get("/donationReq", userAuth, verifiedOnly, findRequestByBloodType);
+router.post("/donationReqByDate", userAuth, verifiedOnly, findRequestByDate);
+router.get("/donationReqByPriority/:urgent", userAuth, verifiedOnly, findRequestByPriority);
+router.post("/donationReqByLocation", userAuth, verifiedOnly, findRequestByLocation);
 // request interactions
-router.post("/denyRequest", userAuth, denyRequest);
-router.post("/acceptRequest/:requestId", userAuth, acceptRequest);
-router.get("/incrementView/:requestId", userAuth, incrementViewCount);
+router.post("/denyRequest", userAuth, verifiedOnly, denyRequest);
+router.post("/acceptRequest/:requestId", userAuth, verifiedOnly, acceptRequest);
+router.get("/incrementView/:requestId", userAuth, verifiedOnly, incrementViewCount);
 &nbsp;
 // donors
-router.post("/donors/find", userAuth, findNearbyDonors);
-router.get("/donors", userAuth, getDonors);
+router.post("/donors/find", userAuth, verifiedOnly, findNearbyDonors);
+router.get("/donors", userAuth, verifiedOnly, getDonors);
 &nbsp;
 module.exports = router;
 &nbsp;</pre></td></tr></table></pre>
@@ -316,7 +334,7 @@ module.exports = router;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-09-19T18:58:50.539Z
+                at 2025-10-06T17:53:04.187Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
