@@ -95,6 +95,28 @@ export async function addBlogComment(id: number, content: string) {
   }
 }
 
+// Create a reply comment by passing parentId
+export async function addBlogReply(id: number, content: string, parentId: number) {
+  try {
+    const response = await axios.post(`${apiUrl}/${id}/comments`, { content, parentId });
+    return response.data; // { success, comment }
+  } catch (error) {
+    console.error('Failed to add reply:', error);
+    throw error;
+  }
+}
+
+// Like a specific comment
+export async function likeComment(blogId: number, commentId: number) {
+  try {
+    const response = await axios.post(`${apiUrl}/${blogId}/comments/${commentId}/like`, {});
+    return response.data; // { success, comment: { id, likes_count } }
+  } catch (error) {
+    console.error('Failed to like comment:', error);
+    throw error;
+  }
+}
+
 export async function deleteBlogComment(id: number, commentId: number) {
   try {
     const response = await axios.delete(`${apiUrl}/${id}/comments/${commentId}`);

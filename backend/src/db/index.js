@@ -89,6 +89,8 @@ if (NODE_ENV === 'test') {
         blog_id INTEGER REFERENCES blogs(id) ON DELETE CASCADE,
         user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
         content TEXT NOT NULL,
+        parent_id INTEGER REFERENCES blog_comments(id) ON DELETE CASCADE,
+        likes_count INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT now()
       );
 

@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
 import Header from '@/app/components/Header';
-import { getBlogById, likeBlog, getBlogComments, addBlogComment } from '@/app/api/blog';
+import { getBlogById, likeBlog, getBlogComments, addBlogComment, addBlogReply, likeComment } from '@/app/api/blog';
 
 interface BlogItem {
   id: number;
@@ -22,6 +22,8 @@ interface BlogComment {
   user_id?: number | null;
   content: string;
   created_at?: string;
+  parent_id?: number | null;
+  likes_count?: number;
 }
 
 export default function BlogDetail({ params }: { params: { id: string } }) {
@@ -33,6 +35,8 @@ export default function BlogDetail({ params }: { params: { id: string } }) {
   const [likes, setLikes] = useState<number>(0);
   const [comments, setComments] = useState<BlogComment[]>([]);
   const [commentInput, setCommentInput] = useState<string>('');
+  const [replyInputs, setReplyInputs] = useState<Record<number, string>>({});
+  const [replyOpen, setReplyOpen] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     let mounted = true;
@@ -101,6 +105,37 @@ export default function BlogDetail({ params }: { params: { id: string } }) {
     }
   };
 
+  const toggleReply = (commentId: number) => {
+    setReplyOpen((prev) => ({ ...prev, [commentId]: !prev[commentId] }));
+  };
+
+  const submitReply = async (parentId: number) => {
+    const text = (replyInputs[parentId] || '').trim();
+    if (!text) return;
+    try {
+      const res = await addBlogReply(id, text, parentId);
+      const created: BlogComment = res?.comment || { id: Date.now(), content: text, parent_id: parentId } as BlogComment;
+      setComments((prev) => [created, ...prev]);
+      setReplyInputs((prev) => ({ ...prev, [parentId]: '' }));
+      setReplyOpen((prev) => ({ ...prev, [parentId]: false }));
+    } catch (e) {
+      console.error('Add reply failed', e);
+      alert('You need to be logged in to reply.');
+    }
+  };
+
+  const handleLikeComment = async (commentId: number) => {
+    try {
+      const res = await likeComment(id, commentId);
+      const updated = res?.comment;
+      setComments((prev) => prev.map((c) => c.id === commentId ? { ...c, likes_count: updated?.likes_count ?? ((c.likes_count || 0) + 1) } : c));
+    } catch (e) {
+      console.error('Comment like failed', e);
+      // Optimistic update
+      setComments((prev) => prev.map((c) => c.id === commentId ? { ...c, likes_count: (c.likes_count || 0) + 1 } : c));
+    }
+  };
+
   if (loading) return <>
     <Header isLoggedin={auth} />
     <main className="container mx-auto py-8"><p>Loading…</p></main>
@@ -157,12 +192,49 @@ export default function BlogDetail({ params }: { params: { id: string } }) {
             <p className="text-gray-500">No comments yet. Be the first to share your thoughts.</p>
           ) : (
             <ul className="space-y-3">
-              {comments.map((c) => (
+              {comments.filter(c => !c.parent_id).map((c) => (
                 <li key={c.id} className="border rounded p-3 bg-gray-50">
                   <p>{c.content}</p>
+                  <div className="mt-2 flex items-center gap-3">
+                    <button onClick={() => handleLikeComment(c.id)} className="px-2 py-1 rounded border border-gray-300 text-sm hover:bg-gray-100">
+                      Like ({c.likes_count || 0})
+                    </button>
+                    <button onClick={() => toggleReply(c.id)} className="px-2 py-1 rounded border border-gray-300 text-sm hover:bg-gray-100">
+                      Reply
+                    </button>
+                  </div>
+                  {replyOpen[c.id] && (
+                    <div className="mt-2 flex gap-2">
+                      <input
+                        type="text"
+                        value={replyInputs[c.id] || ''}
+                        onChange={(e) => setReplyInputs((prev) => ({ ...prev, [c.id]: e.target.value }))}
+                        placeholder="Write a reply…"
+                        className="flex-1 border rounded px-3 py-2"
+                      />
+                      <button onClick={() => submitReply(c.id)} className="px-3 py-2 rounded bg-gray-800 text-white hover:bg-gray-900">Reply</button>
+                    </div>
+                  )}
                   {c.created_at && (
                     <p className="text-xs text-gray-400 mt-1">{new Date(c.created_at).toLocaleString()}</p>
                   )}
+
+                  {/* Replies */}
+                  <ul className="mt-3 space-y-2 pl-4 border-l-2 border-gray-200">
+                    {comments.filter(rc => rc.parent_id === c.id).map((rc) => (
+                      <li key={rc.id} className="rounded p-2 bg-white">
+                        <p>{rc.content}</p>
+                        <div className="mt-1 flex items-center gap-3">
+                          <button onClick={() => handleLikeComment(rc.id)} className="px-2 py-1 rounded border border-gray-300 text-xs hover:bg-gray-100">
+                            Like ({rc.likes_count || 0})
+                          </button>
+                        </div>
+                        {rc.created_at && (
+                          <p className="text-[10px] text-gray-400 mt-1">{new Date(rc.created_at).toLocaleString()}</p>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
                 </li>
               ))}
             </ul>

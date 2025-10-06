@@ -161,14 +161,21 @@ exports.getBlogComments = async (req, res) => {
 exports.createBlogComment = async (req, res) => {
     try {
         const { id } = req.params; // blog id
-        const { content } = req.body;
+        const { content, parentId } = req.body;
         if (!content || !content.trim()) {
             return res.status(400).json({ success: false, message: 'Content is required' });
         }
         const userId = req.user ? req.user.id : null;
+        if (parentId) {
+            // Ensure parent comment exists and belongs to same blog
+            const parent = await db.query('SELECT * FROM blog_comments WHERE id = $1 AND blog_id = $2', [parentId, id]);
+            if (parent.rows.length === 0) {
+                return res.status(400).json({ success: false, message: 'Invalid parent comment' });
+            }
+        }
         const result = await db.query(
-            'INSERT INTO blog_comments (blog_id, user_id, content) VALUES ($1, $2, $3) RETURNING *',
-            [id, userId, content.trim()]
+            'INSERT INTO blog_comments (blog_id, user_id, content, parent_id) VALUES ($1, $2, $3, $4) RETURNING *',
+            [id, userId, content.trim(), parentId || null]
         );
         res.status(201).json({ success: true, comment: result.rows[0] });
     } catch (error) {
@@ -189,6 +196,24 @@ exports.deleteBlogComment = async (req, res) => {
         res.status(200).json({ success: true, message: 'Comment deleted' });
     } catch (error) {
         console.error('Error deleting comment:', error.message);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+};
+
+// Like a comment
+exports.likeBlogComment = async (req, res) => {
+    try {
+        const { commentId } = req.params;
+        const result = await db.query(
+            'UPDATE blog_comments SET likes_count = COALESCE(likes_count, 0) + 1 WHERE id = $1 RETURNING id, likes_count, blog_id',
+            [commentId]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Comment not found' });
+        }
+        res.status(200).json({ success: true, comment: result.rows[0] });
+    } catch (error) {
+        console.error('Error liking comment:', error.message);
         res.status(500).json({ success: false, error: 'Internal server error' });
     }
 };
