@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
 import Header from '@/app/components/Header';
-import { getBlogById } from '@/app/api/blog';
+import { getBlogById, likeBlog, getBlogComments, addBlogComment } from '@/app/api/blog';
 
 interface BlogItem {
   id: number;
@@ -13,6 +13,15 @@ interface BlogItem {
   content: string;
   image?: string | null;
   updated_at?: string;
+  likes_count?: number;
+}
+
+interface BlogComment {
+  id: number;
+  blog_id?: number;
+  user_id?: number | null;
+  content: string;
+  created_at?: string;
 }
 
 export default function BlogDetail({ params }: { params: { id: string } }) {
@@ -22,7 +31,7 @@ export default function BlogDetail({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [likes, setLikes] = useState<number>(0);
-  const [comments, setComments] = useState<string[]>([]);
+  const [comments, setComments] = useState<BlogComment[]>([]);
   const [commentInput, setCommentInput] = useState<string>('');
 
   useEffect(() => {
@@ -31,7 +40,14 @@ export default function BlogDetail({ params }: { params: { id: string } }) {
       try {
         setLoading(true);
         const data = await getBlogById(id);
-        if (mounted) setBlog(data?.blog ?? (Array.isArray(data) ? data[0] : data));
+        const b: BlogItem = data?.blog ?? (Array.isArray(data) ? data[0] : data);
+        if (mounted) {
+          setBlog(b);
+          setLikes(b?.likes_count || 0);
+        }
+        // Load comments
+        const cdata = await getBlogComments(id);
+        if (mounted) setComments(Array.isArray(cdata?.comments) ? cdata.comments : []);
       } catch (err) {
         console.error('Failed to load blog:', err);
         if (mounted) setError('Failed to load blog');
@@ -59,15 +75,30 @@ export default function BlogDetail({ params }: { params: { id: string } }) {
     }
   };
 
-  const handleLike = () => {
-    setLikes((n) => n + 1);
+  const handleLike = async () => {
+    try {
+      const res = await likeBlog(id);
+      const count = res?.blog?.likes_count ?? likes + 1;
+      setLikes(count);
+    } catch (e) {
+      console.error('Like failed', e);
+      // Fallback to optimistic update
+      setLikes((n) => n + 1);
+    }
   };
 
-  const addComment = () => {
+  const addComment = async () => {
     const text = commentInput.trim();
     if (!text) return;
-    setComments((prev) => [text, ...prev]);
-    setCommentInput('');
+    try {
+      const res = await addBlogComment(id, text);
+      const created: BlogComment = res?.comment || { id: Date.now(), content: text } as BlogComment;
+      setComments((prev) => [created, ...prev]);
+      setCommentInput('');
+    } catch (e) {
+      console.error('Add comment failed', e);
+      alert('You need to be logged in to comment.');
+    }
   };
 
   if (loading) return <>
@@ -126,8 +157,13 @@ export default function BlogDetail({ params }: { params: { id: string } }) {
             <p className="text-gray-500">No comments yet. Be the first to share your thoughts.</p>
           ) : (
             <ul className="space-y-3">
-              {comments.map((c, idx) => (
-                <li key={idx} className="border rounded p-3 bg-gray-50">{c}</li>
+              {comments.map((c) => (
+                <li key={c.id} className="border rounded p-3 bg-gray-50">
+                  <p>{c.content}</p>
+                  {c.created_at && (
+                    <p className="text-xs text-gray-400 mt-1">{new Date(c.created_at).toLocaleString()}</p>
+                  )}
+                </li>
               ))}
             </ul>
           )}

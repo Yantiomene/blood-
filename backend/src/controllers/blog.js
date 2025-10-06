@@ -127,3 +127,69 @@ exports.deleteBlog = async (req, res) => {
     }
 };
 
+// Increment likes_count for a blog
+exports.likeBlog = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await db.query(
+            'UPDATE blogs SET likes_count = COALESCE(likes_count, 0) + 1, updated_at = now() WHERE id = $1 RETURNING id, likes_count',
+            [id]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Blog not found' });
+        }
+        res.status(200).json({ success: true, blog: result.rows[0] });
+    } catch (error) {
+        console.error('Error liking blog:', error.message);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+};
+
+// Get comments for a blog
+exports.getBlogComments = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await db.query('SELECT * FROM blog_comments WHERE blog_id = $1 ORDER BY created_at DESC', [id]);
+        res.status(200).json({ success: true, comments: result.rows });
+    } catch (error) {
+        console.error('Error fetching comments:', error.message);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+};
+
+// Add a comment to a blog
+exports.createBlogComment = async (req, res) => {
+    try {
+        const { id } = req.params; // blog id
+        const { content } = req.body;
+        if (!content || !content.trim()) {
+            return res.status(400).json({ success: false, message: 'Content is required' });
+        }
+        const userId = req.user ? req.user.id : null;
+        const result = await db.query(
+            'INSERT INTO blog_comments (blog_id, user_id, content) VALUES ($1, $2, $3) RETURNING *',
+            [id, userId, content.trim()]
+        );
+        res.status(201).json({ success: true, comment: result.rows[0] });
+    } catch (error) {
+        console.error('Error creating comment:', error.message);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+};
+
+// Delete a comment (admin only)
+exports.deleteBlogComment = async (req, res) => {
+    try {
+        const { commentId } = req.params;
+        const existing = await db.query('SELECT * FROM blog_comments WHERE id = $1', [commentId]);
+        if (existing.rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Comment not found' });
+        }
+        await db.query('DELETE FROM blog_comments WHERE id = $1', [commentId]);
+        res.status(200).json({ success: true, message: 'Comment deleted' });
+    } catch (error) {
+        console.error('Error deleting comment:', error.message);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+};
+

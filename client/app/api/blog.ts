@@ -63,3 +63,44 @@ export async function deleteBlog(id: number) {
         throw error;
     }
 }
+
+// Persisted interactions
+export async function likeBlog(id: number) {
+  try {
+    const response = await axios.post(`${apiUrl}/${id}/like`, {});
+    return response.data; // { success, blog: { id, likes_count } }
+  } catch (error) {
+    console.error('Failed to like blog:', error);
+    throw error;
+  }
+}
+
+export async function getBlogComments(id: number) {
+  try {
+    const response = await axios.get(`${apiUrl}/${id}/comments`);
+    return response.data; // { success, comments }
+  } catch (error) {
+    console.error('Failed to get comments:', error);
+    throw error;
+  }
+}
+
+export async function addBlogComment(id: number, content: string) {
+  try {
+    const response = await axios.post(`${apiUrl}/${id}/comments`, { content });
+    return response.data; // { success, comment }
+  } catch (error) {
+    console.error('Failed to add comment:', error);
+    throw error;
+  }
+}
+
+export async function deleteBlogComment(id: number, commentId: number) {
+  try {
+    const response = await axios.delete(`${apiUrl}/${id}/comments/${commentId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to delete comment:', error);
+    throw error;
+  }
+}

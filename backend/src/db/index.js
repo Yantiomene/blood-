@@ -78,8 +78,18 @@ if (NODE_ENV === 'test') {
         title VARCHAR(255) NOT NULL,
         content TEXT NOT NULL,
         image VARCHAR(255),
+        likes_count INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT now(),
         updated_at TIMESTAMP DEFAULT now()
+      );
+
+      -- Blog comments
+      CREATE TABLE IF NOT EXISTS blog_comments (
+        id SERIAL PRIMARY KEY,
+        blog_id INTEGER REFERENCES blogs(id) ON DELETE CASCADE,
+        user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        content TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT now()
       );
 
       -- Track donor acceptances of donation requests
