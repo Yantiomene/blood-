@@ -50,6 +50,46 @@ NB: you may not be able to make POST requests which are relevant for login, regi
 
 The server is running at [http://localhost:8000](http://localhost:8000)
 
+### AI Content Generation (DeepSeek)
+
+To enable AI-generated blog content via the admin route `POST /api/blogs/:id/generate`, configure the following environment variables in your `.env`:
+
+```
+# Admins (must include your email to access admin-only routes)
+ADMIN_EMAILS=admin@example.com
+
+# DeepSeek configuration
+DEEPSEEK_API_KEY=your_deepseek_api_key
+# Optional: endpoint override. If unset, the server tries .com then .cn automatically.
+DEEPSEEK_API_URL=https://api.deepseek.com/v1/chat/completions
+# Optional: model (defaults to deepseek-chat)
+DEEPSEEK_MODEL=deepseek-chat
+```
+
+Notes:
+- If `DEEPSEEK_API_KEY` is missing, the server falls back to local HTML generation.
+- If the configured endpoint is unreachable (e.g., `ENOTFOUND`), the server auto-falls back between `.com` and `.cn` domains.
+- On success, the response includes `{ provider: 'deepseek' }`. On fallback, `{ provider: 'local_fallback' }`.
+
+### AI Content Generation (Gemini — preferred)
+
+You can alternatively use Gemini as the primary provider. Set the following in `.env`:
+
+```
+# Admins (must include your email to access admin-only routes)
+ADMIN_EMAILS=admin@example.com
+
+# Gemini configuration
+GEMINI_API_KEY=your_gemini_api_key
+# Optional: model (defaults to gemini-1.5-flash)
+GEMINI_MODEL=gemini-1.5-flash
+```
+
+Notes:
+- If `GEMINI_API_KEY` is present, the server uses Gemini first.
+- If Gemini fails or is unreachable, the server falls back to DeepSeek (if configured), then to local HTML.
+- The response includes `{ provider: 'gemini' }` on success; otherwise it shows the fallback provider.
+
 ## Installation
 
 1. After pulling the repo, install the dependencies by running:

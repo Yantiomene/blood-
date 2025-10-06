@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getBlogs, createBlog, updateBlog, deleteBlog, generateBlogAI } from '@/app/api/blog';
-import { generateContentFromTitle, stripHtml } from '@/app/utils/generateBlogContent';
+import { generateContentFromTitle, stripHtml, formatAIContentToHtml } from '@/app/utils/generateBlogContent';
 import { fetchCurrentUser } from '@/app/redux/userSlice';
 import { Provider } from 'react-redux';
 import store from '@/app/redux/store';
@@ -145,9 +145,12 @@ export default function BlogAdminPage() {
       try {
         const res = await generateBlogAI(b.id);
         const provider = res?.provider || 'unknown';
-        const updatedContent = res?.blog?.content || '';
-        if (updatedContent) {
-          setBlogs((prev) => prev.map((x) => x.id === b.id ? { ...x, content: updatedContent } : x));
+        const rawContent = res?.blog?.content || '';
+        const formatted = formatAIContentToHtml(rawContent);
+        if (formatted) {
+          // persist formatted HTML
+          await updateBlog(b.id, { content: formatted });
+          setBlogs((prev) => prev.map((x) => x.id === b.id ? { ...x, content: formatted } : x));
           setGenProviderById((prev) => ({ ...prev, [b.id]: provider }));
           setStatusMsg(`Content generated via ${provider}.`);
           return;

@@ -1,16 +1,14 @@
 const axios = require('axios');
+const https = require('https');
+const dns = require('dns');
+// Prefer IPv4 for external API calls to avoid IPv6 ENETUNREACH on some networks
+try { dns.setDefaultResultOrder && dns.setDefaultResultOrder('ipv4first'); } catch (_) {}
 
-const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
-const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
-// Prefer configured URL; otherwise try .com, then .cn domains in order
-const CANDIDATE_URLS = (
-  process.env.DEEPSEEK_API_URL
-    ? [process.env.DEEPSEEK_API_URL]
-    : [
-        'https://api.deepseek.com/v1/chat/completions',
-        'https://api.deepseek.cn/v1/chat/completions',
-      ]
-);
+
+
+// Gemini (Google Generative Language API) configuration
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
 function buildPrompt(title) {
   const system = 'You are an assistant that writes semantic, accessible HTML blog posts. Use clear headings, lists, quotes, and concise paragraphs. Avoid external scripts. Keep the tone informative and friendly.';
@@ -47,46 +45,61 @@ function localFallbackHTML(title) {
   `;
 }
 
-async function callDeepSeek(title) {
-  if (!DEEPSEEK_API_KEY) return { content: localFallbackHTML(title), provider: 'local_fallback' };
-  const { system, user } = buildPrompt(title);
-  const payload = {
-    model: DEEPSEEK_MODEL,
-    messages: [
-      { role: 'system', content: system },
-      { role: 'user', content: user },
-    ],
-    temperature: 0.7,
-  };
-  const headers = {
-    Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
-    'Content-Type': 'application/json',
-  };
 
-  for (const url of CANDIDATE_URLS) {
-    try {
-      const response = await axios.post(url, payload, { headers, timeout: 15000 });
-      const content = response?.data?.choices?.[0]?.message?.content || '';
-      if (!content.trim()) {
-        console.warn(`[DeepSeek] Empty content from ${url}. Will try next or fallback.`);
-        continue; // try next candidate
+
+async function callGemini(title) {
+  if (!GEMINI_API_KEY) return { content: localFallbackHTML(title), provider: 'local_fallback' };
+  const { system, user } = buildPrompt(title);
+  try {
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+    const response = await axios.post(
+      endpoint,
+      {
+        // Minimal payload aligned with working curl example
+        contents: [{ parts: [{ text: user }] }],
+      },
+      {
+        timeout: 50000,
+        // Force IPv4 lookup to avoid ENETUNREACH on IPv6-only resolution
+        lookup: (hostname, options, cb) => dns.lookup(hostname, { family: 4 }, cb),
+        headers: {
+          'x-goog-api-key': GEMINI_API_KEY,
+          'Content-Type': 'application/json',
+        },
       }
-      const provider = url.includes('deepseek') ? 'deepseek' : 'ai_provider';
-      return { content, provider };
-    } catch (error) {
-      const msg = error?.response?.data || error.message;
-      console.error(`[DeepSeek] generation failed via ${url}:`, msg);
-      // If hostname not found or network error, try next candidate
-      const errCode = error?.code || '';
-      const isNetwork = ['ENOTFOUND', 'ECONNRESET', 'ETIMEDOUT'].includes(errCode);
-      if (isNetwork) continue; // try next
-      // For 4xx/5xx responses, do not retry other domains; fallback
-      break;
+    );
+
+    const parts = response?.data?.candidates?.[0]?.content?.parts || [];
+    const content = parts.map(p => p.text || '').join('').trim();
+    if (!content) {
+      console.warn('[Gemini] Empty content; falling back to local');
+      return { content: localFallbackHTML(title), provider: 'local_fallback' };
     }
+    return { content, provider: 'gemini' };
+  } catch (error) {
+    const isTimeout = error?.code === 'ECONNABORTED' || /timeout/i.test(error?.message || '');
+    if (isTimeout) {
+      console.error('[Gemini] generation failed: request timed out');
+    } else {
+      console.error('[Gemini] generation failed:', error?.response?.data || error.message);
+    }
+    return { content: localFallbackHTML(title), provider: 'local_fallback' };
   }
+}
+
+async function generateBlogHTMLFromTitle(title) {
+  // Prefer Gemini when configured
+  if (GEMINI_API_KEY) {
+    return await callGemini(title);
+  }
+  // Fallback to DeepSeek if available
+  if (DEEPSEEK_API_KEY) {
+    return await callDeepSeek(title);
+  }
+  // Final fallback: local generator
   return { content: localFallbackHTML(title), provider: 'local_fallback' };
 }
 
 module.exports = {
-  generateBlogHTMLFromTitle: callDeepSeek,
+  generateBlogHTMLFromTitle,
 };

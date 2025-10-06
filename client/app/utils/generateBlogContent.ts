@@ -149,3 +149,92 @@ export const generateContentFromTitle = (title: string): string => {
 };
 
 export const stripHtml = (s: string): string => s.replace(/<[^>]*>/g, '');
+
+// Format raw AI text into semantic, styled HTML suited for blog rendering
+export const formatAIContentToHtml = (raw: string): string => {
+  const text = (raw || '').trim();
+  if (!text) return '';
+
+  const lines = text.split(/\r?\n+/).map(l => l.trim());
+  const blocks: string[] = [];
+
+  // helpers
+  const isHeading = (l: string) => {
+    if (!l) return false;
+    if (l.length > 120) return false;
+    if (/^©\s?\d{4}/.test(l)) return false;
+    // treat lines without sentence-ending punctuation as headings
+    return !/[.!?]$/.test(l) || /:\s*$/.test(l);
+  };
+  const isQuote = (l: string) => /^".*"$/.test(l) || /^—\s/.test(l);
+  const isByline = (l: string) => /^By\s/.test(l) || /\|\s*\w+\s+\d{1,2},\s*\d{4}$/.test(l);
+
+  let i = 0;
+  // Title and subtitle
+  if (lines[i]) {
+    blocks.push(`<h1>${lines[i]}</h1>`);
+    i++;
+  }
+  if (lines[i] && isHeading(lines[i])) {
+    blocks.push(`<h2 class="lead">${lines[i]}</h2>`);
+    i++;
+  }
+  if (lines[i] && isByline(lines[i])) {
+    blocks.push(`<div class="byline">${lines[i]}</div>`);
+    i++;
+  }
+
+  // group remaining into sections
+  while (i < lines.length) {
+    const line = lines[i];
+    if (!line) { i++; continue; }
+
+    // heading start of a section
+    if (isHeading(line)) {
+      const level = blocks.some(b => b.startsWith('<h2')) ? 'h3' : 'h2';
+      blocks.push(`<${level}>${line.replace(/:\s*$/, '')}</${level}>`);
+      i++;
+      // collect subsequent list or paragraph lines
+      const listItems: string[] = [];
+      while (i < lines.length && lines[i] && !isHeading(lines[i])) {
+        const cur = lines[i];
+        // treat "Label: value" as a list item
+        if (/^[A-Z][A-Za-z\s]+:\s+/.test(cur)) {
+          const [label, rest] = cur.split(/:\s+/, 2);
+          listItems.push(`<li><span class="li-label">${label}:</span> ${rest}</li>`);
+          i++;
+          continue;
+        }
+        if (isQuote(cur)) {
+          blocks.push(`<blockquote>${cur.replace(/^—\s*/, '— ')}</blockquote>`);
+          i++;
+          continue;
+        }
+        // regular paragraph
+        blocks.push(`<p>${cur}</p>`);
+        i++;
+      }
+      if (listItems.length) {
+        blocks.push(`<ul class="list-disc pl-6 space-y-1">${listItems.join('')}</ul>`);
+      }
+      continue;
+    }
+
+    // standalone quote or paragraph
+    if (isQuote(line)) {
+      blocks.push(`<blockquote>${line.replace(/^—\s*/, '— ')}</blockquote>`);
+      i++;
+      continue;
+    }
+    blocks.push(`<p>${line}</p>`);
+    i++;
+  }
+
+  // footer copyright if present
+  const last = lines[lines.length - 1];
+  if (last && /^©\s?\d{4}/.test(last)) {
+    blocks.push(`<hr /><p class="copyright">${last}</p>`);
+  }
+
+  return blocks.join('\n');
+};

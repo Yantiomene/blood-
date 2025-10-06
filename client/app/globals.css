@@ -25,3 +25,68 @@ body {
     text-wrap: balance;
   }
 }
+
+/* Custom typography styles for blog content */
+.prose {
+  color: rgb(31 41 55); /* gray-800 */
+  line-height: 1.75;
+}
+.prose h1 {
+  font-size: 2rem;
+  line-height: 2.25rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  color: rgb(185 28 28); /* red-700 */
+}
+.prose h2 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 600;
+  margin: 1.5rem 0 0.75rem;
+  color: rgb(153 27 27); /* red-800 */
+}
+.prose h3 {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.5rem;
+}
+.prose p {
+  margin: 0.75rem 0;
+}
+.prose ul {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+}
+.prose li {
+  margin: 0.25rem 0;
+}
+.prose .li-label {
+  font-weight: 600;
+}
+.prose blockquote {
+  margin: 1rem 0;
+  padding-left: 1rem;
+  border-left: 4px solid rgb(229 62 62);
+  color: rgb(75 85 99); /* gray-600 */
+  font-style: italic;
+}
+.prose hr {
+  border: none;
+  border-top: 1px solid rgb(229 231 235);
+  margin: 1.5rem 0;
+}
+.prose .lead {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  color: rgb(220 38 38); /* red-600 */
+  margin-bottom: 0.5rem;
+}
+.prose .byline {
+  font-size: 0.875rem;
+  color: rgb(107 114 128); /* gray-500 */
+}
+.prose .copyright {
+  font-size: 0.875rem;
+  color: rgb(107 114 128);
+}
