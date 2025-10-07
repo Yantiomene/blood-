@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getBlogs, createBlog, updateBlog, deleteBlog, generateBlogAI } from '@/app/api/blog';
-import { generateContentFromTitle, stripHtml, formatAIContentToHtml } from '@/app/utils/generateBlogContent';
+import { generateContentFromTitle, stripHtml, formatAIContentToHtml, getBlogPreviewText } from '@/app/utils/generateBlogContent';
 import { fetchCurrentUser } from '@/app/redux/userSlice';
 import { Provider } from 'react-redux';
 import store from '@/app/redux/store';
@@ -224,7 +224,7 @@ export default function BlogAdminPage() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={b.image} alt={b.title} className="w-full h-40 object-cover rounded mb-3" />
                   )}
-                  <p className="text-gray-700 line-clamp-4">{stripHtml(b.content || '')}</p>
+                  <p className="text-gray-700 line-clamp-4">{getBlogPreviewText(b.content || '', b.title, 220)}</p>
                   {b.updated_at && (
                     <p className="text-xs text-gray-400 mt-3">Updated: {new Date(b.updated_at).toLocaleString()}</p>
                   )}

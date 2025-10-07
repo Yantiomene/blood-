@@ -238,3 +238,26 @@ export const formatAIContentToHtml = (raw: string): string => {
 
   return blocks.join('\n');
 };
+
+// Create a clean excerpt for previews, removing title and common headings
+export const getBlogPreviewText = (content: string, title?: string, maxChars: number = 220): string => {
+  const plain = stripHtml(content || '').trim();
+  if (!plain) return '';
+
+  let text = plain;
+  if (title) {
+    const esc = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    text = text.replace(new RegExp(`^\n?\s*${esc}\s*`, 'i'), '');
+  }
+  // Remove common heading labels that might appear at the start
+  text = text.replace(/^\s*(Overview|Why it matters|Quick tips|Take action)\s*/i, '');
+
+  // Collapse whitespace
+  text = text.replace(/\s+/g, ' ').trim();
+
+  // Truncate to desired length with word boundary
+  if (text.length > maxChars) {
+    text = text.slice(0, maxChars).replace(/\s+\S*$/, '') + '…';
+  }
+  return text;
+};

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { getBlogs } from '@/app/api/blog';
+import { getBlogPreviewText } from '@/app/utils/generateBlogContent';
 import { fetchCurrentUser } from '../redux/userSlice';
 
 interface BlogItem {
@@ -84,7 +85,7 @@ export default function BlogLandingPage() {
     unoptimized={true}
   />
 )}
-                    <p className="text-gray-700 line-clamp-4">{b.content}</p>
+                    <p className="text-gray-700 line-clamp-4">{getBlogPreviewText(b.content || '', b.title, 220)}</p>
                     <p className="text-sm text-gray-600 mt-2">This story could inspire a lifesaving action — keep reading.</p>
                     <a href={`/pages/blog/${b.id}`} className="mt-2 inline-block text-red-700 hover:text-red-800 underline" aria-label={`Read more about ${b.title}`}>
                       Read more
