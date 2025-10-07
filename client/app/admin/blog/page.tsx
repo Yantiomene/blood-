@@ -4,7 +4,7 @@ import Header from '@/app/components/Header';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getBlogs, createBlog, updateBlog, deleteBlog, generateBlogAI } from '@/app/api/blog';
+import { getBlogs, createBlog, updateBlog, deleteBlog, generateBlogAI, uploadBlogImageBase64 } from '@/app/api/blog';
 import { generateContentFromTitle, stripHtml, formatAIContentToHtml, getBlogPreviewText } from '@/app/utils/generateBlogContent';
 import { fetchCurrentUser } from '@/app/redux/userSlice';
 import { Provider } from 'react-redux';
@@ -46,6 +46,10 @@ export default function BlogAdminPage() {
   const [showCreate, setShowCreate] = useState<boolean>(false);
   const [creating, setCreating] = useState<boolean>(false);
   const [form, setForm] = useState<{ title: string; content: string; image: string }>({ title: '', content: '', image: '' });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editForm, setEditForm] = useState<{ title: string; content: string; image?: string | null }>({ title: '', content: '', image: null });
+  const [editImageFile, setEditImageFile] = useState<File | null>(null);
 
   useEffect(() => {
     // Ensure we load current user data for admin gating
@@ -98,9 +102,18 @@ export default function BlogAdminPage() {
     setCreating(true);
     setError(null);
     try {
-      await createBlog({ title: form.title.trim(), content: form.content.trim(), image: form.image.trim() || null });
+      let finalImageUrl: string | null = null;
+      if (imageFile) {
+        const uploadRes = await uploadBlogImageBase64(imageFile);
+        if (!uploadRes?.success || !uploadRes.url) throw new Error('Image upload failed');
+        finalImageUrl = uploadRes.url || null;
+      } else if (form.image.trim()) {
+        finalImageUrl = form.image.trim();
+      }
+      await createBlog({ title: form.title.trim(), content: form.content.trim(), image: finalImageUrl });
       await refreshBlogs();
       setForm({ title: '', content: '', image: '' });
+      setImageFile(null);
       setShowCreate(false);
     } catch (err) {
       console.error('Create failed', err);
@@ -121,14 +134,29 @@ export default function BlogAdminPage() {
     }
   };
 
-  const handleEdit = async (b: BlogItem) => {
-    const newTitle = prompt('Edit title', b.title);
-    if (newTitle === null) return;
-    const newContent = prompt('Edit content', b.content);
-    if (newContent === null) return;
+  const beginEdit = (b: BlogItem) => {
+    setEditingId(b.id);
+    setEditForm({ title: b.title, content: b.content, image: b.image || null });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditForm({ title: '', content: '', image: null });
+    setEditImageFile(null);
+  };
+
+  const saveEdit = async (b: BlogItem, imageFile?: File | null) => {
     try {
-      await updateBlog(b.id, { title: newTitle, content: newContent });
-      setBlogs((prev) => prev.map((x) => x.id === b.id ? { ...x, title: newTitle, content: newContent } : x));
+      setError(null);
+      let finalImageUrl = editForm.image || null;
+      if (imageFile) {
+        const uploadRes = await uploadBlogImageBase64(imageFile);
+        if (!uploadRes?.success || !uploadRes.url) throw new Error('Image upload failed');
+        finalImageUrl = uploadRes.url || null;
+      }
+      await updateBlog(b.id, { title: editForm.title.trim(), content: editForm.content.trim(), image: finalImageUrl });
+      await refreshBlogs();
+      cancelEdit();
     } catch (err) {
       console.error('Update failed', err);
       setError('Failed to update blog');
@@ -199,7 +227,60 @@ export default function BlogAdminPage() {
               )}
               {showCreate && (
                 <form onSubmit={handleCreate} className="mt-4 grid gap-3">
-                  {/* form fields unchanged */}
+                  <label className="block">
+                    <span className="text-sm font-medium text-gray-700">Title</span>
+                    <input
+                      type="text"
+                      className="mt-1 w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-300"
+                      value={form.title}
+                      onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                      placeholder="Enter blog title"
+                      required
+                    />
+                  </label>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <label className="block">
+                      <span className="text-sm font-medium text-gray-700">Upload Image (optional)</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="mt-1 w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-300"
+                        onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="text-sm font-medium text-gray-700">Or Image URL</span>
+                      <input
+                        type="url"
+                        className="mt-1 w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-300"
+                        value={form.image}
+                        onChange={(e) => setForm((f) => ({ ...f, image: e.target.value }))}
+                        placeholder="https://example.com/image.jpg"
+                      />
+                    </label>
+                  </div>
+                  <label className="block">
+                    <span className="text-sm font-medium text-gray-700">Content</span>
+                    <textarea
+                      className="mt-1 w-full min-h-[140px] rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-300"
+                      value={form.content}
+                      onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
+                      placeholder="Write your blog content here"
+                      required
+                    />
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="submit"
+                      disabled={creating}
+                      className="px-4 py-2 rounded bg-red-700 text-white hover:bg-red-800 disabled:opacity-60"
+                    >{creating ? 'Creating…' : 'Create Post'}</button>
+                    <button
+                      type="button"
+                      onClick={() => setShowCreate(false)}
+                      className="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-100"
+                    >Cancel</button>
+                  </div>
                 </form>
               )}
             </section>
@@ -224,13 +305,58 @@ export default function BlogAdminPage() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={b.image} alt={b.title} className="w-full h-40 object-cover rounded mb-3" />
                   )}
-                  <p className="text-gray-700 line-clamp-4">{getBlogPreviewText(b.content || '', b.title, 220)}</p>
+                  {editingId === b.id ? (
+                    <div className="mt-3 grid gap-3">
+                      <label className="block">
+                        <span className="text-sm font-medium text-gray-700">Title</span>
+                        <input
+                          type="text"
+                          className="mt-1 w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                          value={editForm.title}
+                          onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
+                        />
+                      </label>
+                      <label className="block">
+                        <span className="text-sm font-medium text-gray-700">Content</span>
+                        <textarea
+                          className="mt-1 w-full min-h-[120px] rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                          value={editForm.content}
+                          onChange={(e) => setEditForm((f) => ({ ...f, content: e.target.value }))}
+                        />
+                      </label>
+                      <div className="grid md:grid-cols-2 gap-3">
+                        <label className="block">
+                          <span className="text-sm font-medium text-gray-700">Replace Image (optional)</span>
+                          <input type="file" accept="image/*" className="mt-1 w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                            onChange={(e) => setEditImageFile(e.target.files?.[0] || null)} />
+                        </label>
+                        <label className="block">
+                          <span className="text-sm font-medium text-gray-700">Current/Alt Image URL</span>
+                          <input type="url" className="mt-1 w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                            value={editForm.image || ''}
+                            onChange={(e) => setEditForm((f) => ({ ...f, image: e.target.value }))} />
+                        </label>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => saveEdit(b, editImageFile)}
+                          className="px-3 py-1 rounded bg-amber-600 text-white hover:bg-amber-700"
+                        >Save</button>
+                        <button type="button" onClick={cancelEdit} className="px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-100">Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-gray-700 line-clamp-4">{getBlogPreviewText(b.content || '', b.title, 220)}</p>
+                  )}
                   {b.updated_at && (
                     <p className="text-xs text-gray-400 mt-3">Updated: {new Date(b.updated_at).toLocaleString()}</p>
                   )}
                   {isAdmin && (
                     <div className="mt-3 flex gap-2">
-                      <button onClick={() => handleEdit(b)} className="px-3 py-1 rounded border border-amber-300 text-amber-700 hover:bg-amber-50">Edit</button>
+                      {editingId === b.id ? null : (
+                        <button onClick={() => beginEdit(b)} className="px-3 py-1 rounded border border-amber-300 text-amber-700 hover:bg-amber-50">Edit</button>
+                      )}
                       <button onClick={() => handleDelete(b.id)} className="px-3 py-1 rounded border border-red-300 text-red-700 hover:bg-red-50">Delete</button>
                       <button
                         onClick={() => handleAutoWrite(b)}

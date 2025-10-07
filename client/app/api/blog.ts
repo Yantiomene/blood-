@@ -137,3 +137,24 @@ export async function generateBlogAI(id: number) {
     throw error;
   }
 }
+
+// Admin-only: upload image via base64 JSON
+export async function uploadBlogImageBase64(file: File) {
+  const filename = file.name;
+  const dataUrl: string = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+  try {
+    const response = await axios.post(`${apiUrl}/upload`, {
+      imageBase64: dataUrl,
+      filename,
+    });
+    return response.data as { success: boolean; url?: string };
+  } catch (error) {
+    console.error('Failed to upload image:', error);
+    throw error;
+  }
+}

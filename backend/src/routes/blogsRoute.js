@@ -1,6 +1,6 @@
 const { Router } = require('express');
 
-const { getBlogs, createBlog, getBlogsById, updateBlog, deleteBlog, likeBlog, getBlogComments, createBlogComment, deleteBlogComment, likeBlogComment, generateBlogContentAI } = require('../controllers/blog');
+const { getBlogs, createBlog, getBlogsById, updateBlog, deleteBlog, likeBlog, getBlogComments, createBlogComment, deleteBlogComment, likeBlogComment, generateBlogContentAI, uploadBlogImage } = require('../controllers/blog');
 const { userAuth, adminOnly } = require('../middlewares/auth-middleware');
 
 const router = Router();
@@ -19,5 +19,8 @@ router.delete('/:id/comments/:commentId', userAuth, adminOnly, deleteBlogComment
 router.post('/:id/comments/:commentId/like', likeBlogComment);
 // Admin-only AI content generation
 router.post('/:id/generate', userAuth, adminOnly, generateBlogContentAI);
+
+// Admin-only image upload endpoint (base64 JSON)
+router.post('/upload', userAuth, adminOnly, uploadBlogImage);
 
 module.exports = router;

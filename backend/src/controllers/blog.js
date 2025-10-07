@@ -2,6 +2,8 @@
 const db = require('../db'); // Import your database connection module
 const { generateBlogHTMLFromTitle } = require('../utils/ai');
 const { validationResult } = require('express-validator');
+const path = require('path');
+const fs = require('fs');
 
 
 // Define a route to get all blog articles
@@ -244,6 +246,41 @@ exports.generateBlogContentAI = async (req, res) => {
     } catch (error) {
         console.error('Error generating blog content:', error.message);
         return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+};
+
+// Upload blog image (admin only) and return accessible URL
+exports.uploadBlogImage = async (req, res) => {
+    try {
+        const { imageBase64, filename } = req.body || {};
+        if (!imageBase64 || !filename) {
+            return res.status(400).json({ success: false, message: 'Missing imageBase64 or filename' });
+        }
+
+        // Validate extension
+        const ext = path.extname(filename).toLowerCase();
+        if (!['.png', '.jpg', '.jpeg', '.gif', '.webp'].includes(ext)) {
+            return res.status(400).json({ success: false, message: 'Unsupported file type' });
+        }
+
+        // Strip data URL prefix if present
+        const base64Data = imageBase64.replace(/^data:image\/[a-zA-Z0-9.+-]+;base64,/, '');
+
+        const uploadsDir = path.resolve(__dirname, '..', '..', 'uploads', 'blog_images');
+        if (!fs.existsSync(uploadsDir)) {
+            fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+
+        const safeBase = path.basename(filename, ext).replace(/[^a-z0-9-_]+/gi, '_');
+        const finalName = `${Date.now()}_${safeBase}${ext}`;
+        const filePath = path.join(uploadsDir, finalName);
+        fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
+
+        const publicUrl = `/uploads/blog_images/${finalName}`;
+        return res.status(200).json({ success: true, url: publicUrl });
+    } catch (error) {
+        console.error('Error uploading image:', error.message);
+        res.status(500).json({ success: false, error: 'Internal server error' });
     }
 };
 
