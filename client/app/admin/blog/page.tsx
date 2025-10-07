@@ -58,8 +58,10 @@ export default function BlogAdminPage() {
 
   useEffect(() => {
     // If user is not admin (once email known), redirect to public blog page
-    // We also handle the case where adminEmails may be empty and thus isAdmin is false
-    if (userEmail && !isAdmin) {
+    // Also redirect unauthenticated users immediately
+    if (auth === false) {
+      router.replace('/site/blog');
+    } else if (userEmail && !isAdmin) {
       router.replace('/site/blog');
     }
   }, [userEmail, isAdmin, router]);

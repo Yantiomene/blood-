@@ -266,7 +266,9 @@ exports.uploadBlogImage = async (req, res) => {
         // Strip data URL prefix if present
         const base64Data = imageBase64.replace(/^data:image\/[a-zA-Z0-9.+-]+;base64,/, '');
 
-        const uploadsDir = path.resolve(__dirname, '..', '..', 'uploads', 'blog_images');
+        // Save directly into Next.js public directory so files are served at /blog_images
+        const projectRoot = path.resolve(__dirname, '..', '..', '..');
+        const uploadsDir = path.join(projectRoot, 'client', 'public', 'blog_images');
         if (!fs.existsSync(uploadsDir)) {
             fs.mkdirSync(uploadsDir, { recursive: true });
         }
@@ -276,7 +278,8 @@ exports.uploadBlogImage = async (req, res) => {
         const filePath = path.join(uploadsDir, finalName);
         fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
 
-        const publicUrl = `/uploads/blog_images/${finalName}`;
+        // Public URL is served by Next.js from /public/blog_images
+        const publicUrl = `/blog_images/${finalName}`;
         return res.status(200).json({ success: true, url: publicUrl });
     } catch (error) {
         console.error('Error uploading image:', error.message);
