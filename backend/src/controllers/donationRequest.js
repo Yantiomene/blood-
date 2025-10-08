@@ -14,6 +14,25 @@ function extractContactNumberFromMessage(msg) {
 }
 
 
+// Validate quantity in milliliters: integer, >= 500 ml, with an upper bound to avoid unrealistic requests.
+function validateQuantityMl(raw) {
+    const n = Number(raw);
+    if (!Number.isFinite(n)) {
+        return { error: 'Quantity must be a number in ml.' };
+    }
+    if (!Number.isInteger(n)) {
+        return { error: 'Quantity must be an integer in ml (no decimals).' };
+    }
+    if (n < 500) {
+        return { error: 'Quantity must be at least 500 ml.' };
+    }
+    // Set a reasonable upper bound (e.g., 2000 ml) to prevent unrealistic requests
+    if (n > 2000) {
+        return { error: 'Quantity must not exceed 2000 ml.' };
+    }
+    return { value: n };
+}
+
 const createDonationRequest = async (req, res) => {
     const { bloodType, quantity, location, message } = req.body;
     const userId = req.user.id;
@@ -25,6 +44,11 @@ const createDonationRequest = async (req, res) => {
                 error: 'Blood type, quantity, message and location are required',
             });
         }
+        const qValidation = validateQuantityMl(quantity);
+        if (qValidation.error) {
+            return res.status(400).json({ success: false, error: qValidation.error });
+        }
+        const quantityMl = qValidation.value;
         validateLocationFormat(location);
 
         let locationValue;
@@ -38,7 +62,7 @@ const createDonationRequest = async (req, res) => {
         // Insert the donation request into the database
         const result = await db.query(
             'INSERT INTO donation_requests ("userId", "bloodType", quantity, location, "isFulfilled", "requestingEntity", "requestingEntityId", "message") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-            [userId, bloodType, quantity, locationValue, false, 'User', userId, message]
+            [userId, bloodType, quantityMl, locationValue, false, 'User', userId, message]
         );
 
         const createdDonationRequest = result.rows[0];
@@ -196,8 +220,12 @@ const updateDonationRequest = async (req, res) => {
         const updateValues = [];
 
         if (quantity !== undefined) {
+            const qValidation = validateQuantityMl(quantity);
+            if (qValidation.error) {
+                return res.status(400).json({ success: false, error: qValidation.error });
+            }
             updateFields.push('"quantity"');
-            updateValues.push(quantity);
+            updateValues.push(qValidation.value);
         }
 
         if (bloodType !== undefined) {

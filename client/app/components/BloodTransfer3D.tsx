@@ -261,8 +261,25 @@ const BloodTransfer3D: React.FC = () => {
           drop.position.copy(p);
           drop.lookAt(tAhead);
 
-          // Animate particles
+          // Update droplet glow intensity
           const time = performance.now() * 0.001;
+          dropLight.intensity = 0.8 + Math.sin(time * 8) * 0.3; // Pulsing glow
+
+          // Update trail positions
+          const trailPos = trail.geometry.attributes.position.array;
+          for (let i = trailCount - 1; i > 0; i--) {
+            // Shift positions back
+            trailPos[i * 3] = trailPos[(i - 1) * 3];
+            trailPos[i * 3 + 1] = trailPos[(i - 1) * 3 + 1];
+            trailPos[i * 3 + 2] = trailPos[(i - 1) * 3 + 2];
+          }
+          // Set newest position to droplet location
+          trailPos[0] = p.x;
+          trailPos[1] = p.y;
+          trailPos[2] = p.z;
+          trail.geometry.attributes.position.needsUpdate = true;
+
+          // Animate particles
           const positions = particleSystem.geometry.attributes.position.array;
 
           for (let i = 0; i < particleCount; i++) {
@@ -270,7 +287,7 @@ const BloodTransfer3D: React.FC = () => {
             let particleT = ((time * 0.2) + (i * 0.04)) % 1;  // Slower, more spread out
             const pos = curve.getPointAt(particleT);
             
-            positions[i * 3] = pos.x + (Math.sin(time * 3 + i * 0.5) * 0.015);     
+            positions[i * 3] = pos.x + (Math.sin(time * 3 + i * 0.4) * 0.015);     
             positions[i * 3 + 1] = pos.y + (Math.cos(time * 2 + i * 0.3) * 0.015); 
             positions[i * 3 + 2] = pos.z;                                      
           }
@@ -309,11 +326,11 @@ const BloodTransfer3D: React.FC = () => {
           });
           const aura = new THREE.Mesh(auraGeometry, auraMaterial);
           aura.rotation.x = -Math.PI / 2;
-          aura.position.set(2.1, -1.2, 0); // Position under recipient
+          aura.position.set(1.1, -1.2, 0); // Position under recipient
           scene.add(aura);
 
           // Create energy particles around recipient
-          const energyCount = 10;
+          const energyCount = 4;
           const energyGeometry = new THREE.BufferGeometry();
           const energyPositions = new Float32Array(energyCount * 3);
           const energyColors = new Float32Array(energyCount * 3);
