@@ -421,6 +421,61 @@ const BloodTransfer3D: React.FC = () => {
               energyPos[i * 3 + 1] = baseY + Math.sin(time * 2 + i) * 0.2; // Floating up and down
             }
             energyParticles.geometry.attributes.position.needsUpdate = true;
+            // Create heartbeat visualization
+            const heartbeatCurve = new THREE.Shape();
+            // Simple heart shape using curves
+            heartbeatCurve.moveTo(0, 0.3);
+            heartbeatCurve.bezierCurveTo(0, 0.5, -0.3, 0.5, -0.3, 0.3);
+            heartbeatCurve.bezierCurveTo(-0.3, 0, 0, -0.3, 0, -0.6);
+            heartbeatCurve.bezierCurveTo(0, -0.3, 0.3, 0, 0.3, 0.3);
+            heartbeatCurve.bezierCurveTo(0.3, 0.5, 0, 0.5, 0, 0.3);
+
+            const heartGeometry = new THREE.ShapeGeometry(heartbeatCurve);
+            const donorHeartMat = new THREE.MeshBasicMaterial({ 
+              color: 0xff4444,
+              transparent: true,
+              opacity: 0.8,
+              side: THREE.DoubleSide
+            });
+            const recipientHeartMat = new THREE.MeshBasicMaterial({ 
+              color: 0x888888,
+              transparent: true,
+              opacity: 0.6,
+              side: THREE.DoubleSide
+            });
+
+            // Donor heartbeat indicator
+            const donorHeart = new THREE.Mesh(heartGeometry, donorHeartMat);
+            donorHeart.position.set(-3.5, 0.8, 0.5);
+            donorHeart.scale.set(0.4, 0.4, 0.4);
+            scene.add(donorHeart);
+
+            // Recipient heartbeat indicator
+            const recipientHeart = new THREE.Mesh(heartGeometry, recipientHeartMat);
+            recipientHeart.position.set(3.5, 0.8, 0.5);
+            recipientHeart.scale.set(0.4, 0.4, 0.4);
+            scene.add(recipientHeart);
+
+            // Heartbeat pulse rings
+            const createPulseRing = () => {
+              const ringGeo = new THREE.RingGeometry(0.3, 0.35, 32);
+              const ringMat = new THREE.MeshBasicMaterial({
+                color: 0xff4444,
+                transparent: true,
+                opacity: 0,
+                side: THREE.DoubleSide
+              });
+              return new THREE.Mesh(ringGeo, ringMat);
+            };
+
+            const donorPulse = createPulseRing();
+            donorPulse.position.copy(donorHeart.position);
+            scene.add(donorPulse);
+
+            const recipientPulse = createPulseRing();
+            recipientPulse.position.copy(recipientHeart.position);
+            scene.add(recipientPulse);
+
             // Animate floating text based on blood flow progress
             if (t > 0.15 && t < 0.85) {
               // Hope appears first (15-40% progress)
@@ -442,6 +497,56 @@ const BloodTransfer3D: React.FC = () => {
               hopeText.material.opacity *= 0.95;
               lifeText.material.opacity *= 0.95;
               chanceText.material.opacity *= 0.95;
+            }
+
+            // Heartbeat animation
+            const heartbeatSpeed = 2.5; // Beats per second
+            const beat = Math.sin(time * heartbeatSpeed * Math.PI * 2);
+            const beatTrigger = beat > 0.7; // Pulse when sine wave peaks
+
+            // Donor heartbeat - strong and steady
+            const donorBeatScale = 1 + (beat > 0.5 ? (beat - 0.5) * 0.3 : 0);
+            donorHeart.scale.set(0.4 * donorBeatScale, 0.4 * donorBeatScale, 0.4);
+            donorHeartMat.opacity = 0.7 + (beat > 0.5 ? (beat - 0.5) * 0.4 : 0);
+
+            // Donor pulse ring expansion
+            if (beatTrigger && donorPulse.scale.x < 1.2) {
+              donorPulse.scale.set(0.4, 0.4, 1);
+              donorPulse.material.opacity = 0.8;
+            }
+            donorPulse.scale.x += 0.03;
+            donorPulse.scale.y += 0.03;
+            donorPulse.material.opacity = Math.max(0, donorPulse.material.opacity - 0.02);
+            if (donorPulse.scale.x > 2.5) {
+              donorPulse.scale.set(0.4, 0.4, 1);
+            }
+
+            // Recipient heartbeat - starts weak, gets stronger with blood transfer
+            const recipientHealthFactor = Math.min(transformProgress * 1.5, 1);
+            const recipientBeatStrength = 0.5 + (recipientHealthFactor * 0.5); // Starts at 50%, reaches 100%
+            const recipientBeat = Math.sin(time * heartbeatSpeed * Math.PI * 2 * recipientBeatStrength);
+            const recipientBeatScale = 1 + (recipientBeat > 0.5 ? (recipientBeat - 0.5) * 0.2 * recipientHealthFactor : 0);
+
+            recipientHeart.scale.set(0.4 * recipientBeatScale, 0.4 * recipientBeatScale, 0.4);
+            recipientHeartMat.opacity = 0.4 + (recipientHealthFactor * 0.3) + (recipientBeat > 0.5 ? (recipientBeat - 0.5) * 0.3 : 0);
+
+            // Recipient heart color transitions from gray to red
+            recipientHeartMat.color.setRGB(
+              0.5 + (recipientHealthFactor * 0.5), // R: 0.5 to 1.0
+              0.3 * (1 - recipientHealthFactor * 0.7), // G: fades down
+              0.3 * (1 - recipientHealthFactor * 0.7)  // B: fades down
+            );
+
+            // Recipient pulse ring - gets stronger with health
+            if (beatTrigger && recipientPulse.scale.x < 1.2) {
+              recipientPulse.scale.set(0.4, 0.4, 1);
+              recipientPulse.material.opacity = 0.4 + (recipientHealthFactor * 0.4);
+            }
+            recipientPulse.scale.x += 0.02 + (recipientHealthFactor * 0.01);
+            recipientPulse.scale.y += 0.02 + (recipientHealthFactor * 0.01);
+            recipientPulse.material.opacity = Math.max(0, recipientPulse.material.opacity - 0.015);
+            if (recipientPulse.scale.x > 2.5) {
+              recipientPulse.scale.set(0.4, 0.4, 1);
             }
 
             // Subtle scale pulsing
