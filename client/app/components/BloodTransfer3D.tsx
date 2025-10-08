@@ -364,6 +364,46 @@ const BloodTransfer3D: React.FC = () => {
           const energyParticles = new THREE.Points(energyGeometry, energyMaterial);
           scene.add(energyParticles);
 
+          // Create floating text sprites
+          const createTextSprite = (message: string, color: string = '#ffffff') => {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = 512;
+            canvas.height = 128;
+            
+            if (context) {
+              context.font = 'Bold 60px Arial, sans-serif';
+              context.fillStyle = color;
+              context.textAlign = 'center';
+              context.textBaseline = 'middle';
+              context.fillText(message, 256, 64);
+            } 
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const spriteMaterial = new THREE.SpriteMaterial({ 
+              map: texture,
+              transparent: true,
+              opacity: 0
+            });
+            const sprite = new THREE.Sprite(spriteMaterial);
+            sprite.scale.set(2, 0.5, 1);
+            
+            return sprite;
+          };
+
+          // Create text elements
+          const hopeText = createTextSprite('Hope', '#60a5fa');
+          hopeText.position.set(-1.5, 2.2, 0);
+          scene.add(hopeText);
+
+          const lifeText = createTextSprite('Life', '#ef4444');
+          lifeText.position.set(0, 2.5, 0);
+          scene.add(lifeText);
+
+          const chanceText = createTextSprite('Second Chance', '#22c55e');
+          chanceText.position.set(1.8, 2.2, 0);
+          scene.add(chanceText);
+
           // Animate healing aura and energy particles
           if (transformProgress > 0.4) { // Show effects after 40% progress
             const auraIntensity = Math.min((transformProgress - 0.4) / 0.6, 1);
@@ -381,6 +421,34 @@ const BloodTransfer3D: React.FC = () => {
               energyPos[i * 3 + 1] = baseY + Math.sin(time * 2 + i) * 0.2; // Floating up and down
             }
             energyParticles.geometry.attributes.position.needsUpdate = true;
+            // Animate floating text based on blood flow progress
+            if (t > 0.15 && t < 0.85) {
+              // Hope appears first (15-40% progress)
+              const hopeProgress = Math.min(Math.max((t - 0.15) / 0.25, 0), 1);
+              hopeText.material.opacity = hopeProgress * 0.5;
+              hopeText.position.y = 2.2 + Math.sin(time * 2) * 0.1;
+              
+              // Life appears in middle (35-60% progress)
+              const lifeProgress = Math.min(Math.max((t - 0.35) / 0.25, 0), 1);
+              lifeText.material.opacity = lifeProgress * 0.5;
+              lifeText.position.y = 2.5 + Math.sin(time * 2.5 + 1) * 0.15;
+              
+              // Second Chance appears last (55-80% progress)
+              const chanceProgress = Math.min(Math.max((t - 0.55) / 0.25, 0), 1);
+              chanceText.material.opacity = chanceProgress * 0.5;
+              chanceText.position.y = 2.2 + Math.sin(time * 2 + 2) * 0.1;
+            } else {
+              // Fade out when droplet resets
+              hopeText.material.opacity *= 0.95;
+              lifeText.material.opacity *= 0.95;
+              chanceText.material.opacity *= 0.95;
+            }
+
+            // Subtle scale pulsing
+            const textScale = 1 + Math.sin(time * 3) * 0.05;
+            hopeText.scale.set(2 * textScale, 1 * textScale, 0.5);
+            lifeText.scale.set(2 * textScale, 1 * textScale, 0.5);
+            chanceText.scale.set(2 * textScale, 1 * textScale, 0.5);
           }
           
           // Subtle breathing animation
