@@ -71,6 +71,14 @@ jobs:
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
+      - name: Enable npm cache (backend)
+        if: ${{ hashFiles('backend/package-lock.json') != '' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
       - name: Wait for Postgres
         env:
           PGPASSWORD: postgres
