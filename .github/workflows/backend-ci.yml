@@ -28,7 +28,7 @@ jobs:
         id: filter
         uses: dorny/paths-filter@v3
         with:
-          filters:
+          filters: |
             backend:
               - 'backend/**'
             client:

@@ -1,0 +1,33 @@
+{
+  "ref": "refs/heads/local-ci",
+  "before": "0000000000000000000000000000000000000000",
+  "after": "1111111111111111111111111111111111111111",
+  "repository": {
+    "id": 1,
+    "name": "blood",
+    "full_name": "local/blood",
+    "private": false,
+    "owner": { "name": "local", "login": "local" }
+  },
+  "pusher": { "name": "local" },
+  "sender": { "login": "local" },
+  "created": false,
+  "deleted": false,
+  "forced": false,
+  "commits": [
+    {
+      "id": "1111111111111111111111111111111111111111",
+      "message": "Local push to test backend changes",
+      "author": { "name": "local", "email": "local@example.com" },
+      "added": ["backend/src/utils/ai.js"],
+      "modified": ["backend/test/donation.test.js"],
+      "removed": []
+    }
+  ],
+  "head_commit": {
+    "id": "1111111111111111111111111111111111111111",
+    "message": "Local push to test backend changes",
+    "timestamp": "2025-01-01T00:00:00Z",
+    "author": { "name": "local" }
+  }
+}
