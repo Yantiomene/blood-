@@ -14,7 +14,7 @@ describe('Donation Routes', () => {
 
   const testDonationRequest = {
     bloodType: 'A+',
-    quantity: 1,
+    quantity: 500,
     location: [77.594562, 12.971598], // [lon, lat]
     message: 'Need urgent help',
   };
@@ -71,7 +71,7 @@ describe('Donation Routes', () => {
       .put(`/api/donationRequest/${createdRequestId}`)
       .set('Cookie', authCookie)
       .send({
-        quantity: 2,
+        quantity: 600,
         bloodType: 'B+',
         location: [77.594562, 12.971598], // [lon, lat]
         isFulfilled: true,

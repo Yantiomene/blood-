@@ -103,6 +103,11 @@ const getDonationRequests = async (req, res) => {
 
         const whereSql = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : '';
 
+        // Avoid PostGIS-specific functions when running in test environment (pg-mem)
+        const coordSelect = NODE_ENV === 'test'
+            ? 'NULL::float AS latitude, NULL::float AS longitude'
+            : 'ST_Y(location::geometry) AS latitude, ST_X(location::geometry) AS longitude';
+
         const dataQuery = `
             SELECT 
                 id,
@@ -115,8 +120,7 @@ const getDonationRequests = async (req, res) => {
                 "requestingEntityId",
                 created_at,
                 updated_at,
-                ST_Y(location::geometry) AS latitude,
-                ST_X(location::geometry) AS longitude
+                ${coordSelect}
             FROM donation_requests
             ${whereSql}
             ORDER BY created_at DESC

@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">4.37% </span>
+                <span class="strong">4.57% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>22/503</span>
+                <span class='fraction'>23/503</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">66.66% </span>
+                <span class="strong">80% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>2/3</span>
+                <span class='fraction'>4/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">7.14% </span>
+                <span class="strong">21.42% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>1/14</span>
+                <span class='fraction'>3/14</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">4.37% </span>
+                <span class="strong">4.57% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>22/503</span>
+                <span class='fraction'>23/503</span>
             </div>
         
             
@@ -566,26 +566,27 @@
 <a name='L501'></a><a href='#L501'>501</a>
 <a name='L502'></a><a href='#L502'>502</a>
 <a name='L503'></a><a href='#L503'>503</a>
-<a name='L504'></a><a href='#L504'>504</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<a name='L504'></a><a href='#L504'>504</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1065,10 +1066,9 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const nodemailer = require('nodemailer');
 const { EMAIL, PASSWORD, SERVER_URL } = require('../constants');
 &nbsp;
@@ -1076,12 +1076,12 @@ let exportedEmail;
 &nbsp;
 // In test environment, skip email sending to avoid hanging Jest
 if (process.env.NODE_ENV === 'test') {
-  const mockEmailLogger = <span class="fstat-no" title="function not covered" >(operation, ...args) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    console.log(`[TEST] ${operation} called with:`, args);</span>
+  const mockEmailLogger = (operation, ...args) =&gt; {
+    console.log(`[TEST] ${operation} called with:`, args);
   };
 &nbsp;
   exportedEmail = {
-    sendVerificationEmail: <span class="fstat-no" title="function not covered" >(email, code) =&gt; mockEmailLogger('sendVerificationEmail', email, code),</span>
+    sendVerificationEmail: (email, code) =&gt; mockEmailLogger('sendVerificationEmail', email, code),
     sendPasswordResetEmail: <span class="fstat-no" title="function not covered" >(email, token) =&gt; mockEmailLogger('sendPasswordResetEmail', email, token),</span>
     sendNotificationEmail: <span class="fstat-no" title="function not covered" >(to, subject, text, html) =&gt; mockEmailLogger('sendNotificationEmail', to, subject),</span>
     sendDenyEmail: <span class="fstat-no" title="function not covered" >(email, reason) =&gt; mockEmailLogger('sendDenyEmail', email, reason),</span>
@@ -1579,7 +1579,7 @@ module.exports = exportedEmail;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-06T17:53:04.187Z
+                at 2025-10-18T12:30:12.686Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

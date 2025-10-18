@@ -5,8 +5,14 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "devStart": "nodemon server.js"
+    "devStart": "nodemon server.js",
+    "test": "echo \"Run tests in sub-projects (backend, client, frontend)\" && exit 1",
+    "client:verify": "npm --prefix client run ci:verify",
+    "backend:test": "npm --prefix backend test -- --runInBand --detectOpenHandles --verbose",
+    "frontend:test": "CI=true npm --prefix frontend test -- --watchAll=false",
+    "db:up": "docker compose -f backend/docker-compose.yml up -d",
+    "db:down": "docker compose -f backend/docker-compose.yml down",
+    "ci:verify-all": "npm run db:up && npm run backend:test && npm run client:verify && npm run frontend:test && npm run db:down"
   },
   "author": "",
   "license": "ISC",
