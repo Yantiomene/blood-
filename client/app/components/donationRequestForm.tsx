@@ -47,7 +47,7 @@ const DonationRequestForm: React.FC = () => {
         if (user?.address && !addressInput) {
             setAddressInput(user.address);
         }
-    }, [user?.contactNumber, user?.address]);
+    }, [user?.contactNumber, user?.address, phoneCountry, addressInput]);
 
     const inputStyles = "appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
     const fieldStyles = "mb-4 flex items-center gap-4";

@@ -64,7 +64,7 @@ export default function BlogAdminPage() {
     } else if (userEmail && !isAdmin) {
       router.replace('/site/blog');
     }
-  }, [userEmail, isAdmin, router]);
+  }, [auth, userEmail, isAdmin, router]);
 
   useEffect(() => {
     let mounted = true;

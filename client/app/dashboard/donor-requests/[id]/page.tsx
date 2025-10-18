@@ -94,7 +94,7 @@ const RequestDetailPage: React.FC = () => {
       if (!currentUser?.id) {
         dispatch(fetchCurrentUser() as any);
       }
-    }, []);
+    }, [currentUser?.id, dispatch]);
 
     useEffect(() => {
       const fetchDetail = async () => {

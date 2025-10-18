@@ -7,6 +7,7 @@ import { fetchCurrentUser, updateUserProfile } from '../redux/userSlice';
 import { useRouter } from 'next/navigation';
 import { geocode as geocodeAPI, getCurrentUser as getCurrentUserAPI } from '../api/user';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import type { CountryCode } from 'libphonenumber-js';
 
 interface UserData {
     username: string;
@@ -93,7 +94,7 @@ interface UserData {
          // Try to infer phone country from existing E.164 number
          try {
            const pn = parsePhoneNumberFromString(user?.contactNumber || '');
-           if (pn?.country) setPhoneCountry(prev => prev || pn.country);
+          if (pn?.country) setPhoneCountry(prev => prev || pn.country || '');
          } catch {}
      }, [user]);
 
@@ -127,8 +128,7 @@ interface UserData {
          setMessage('Requesting location permission...');
          try {
              // Pre-check permission where supported to provide clearer guidance
-             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-             const navAny: any = navigator as any;
+                          const navAny: any = navigator as any;
              if (navAny.permissions && typeof navAny.permissions.query === 'function') {
                  try {
                      const status = await navAny.permissions.query({ name: 'geolocation' as PermissionName });
@@ -199,7 +199,7 @@ interface UserData {
              if (formattedContact) {
                let pn;
                try {
-                 pn = phoneCountry ? parsePhoneNumberFromString(formattedContact, phoneCountry) : parsePhoneNumberFromString(formattedContact);
+                 pn = phoneCountry ? parsePhoneNumberFromString(formattedContact, { defaultCountry: phoneCountry as CountryCode }) : parsePhoneNumberFromString(formattedContact);
                } catch {}
                if (!pn || !pn.isValid()) {
                  setPhoneError('Invalid phone number for the selected country. Please check and try again.');
