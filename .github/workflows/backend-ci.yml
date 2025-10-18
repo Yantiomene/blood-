@@ -5,13 +5,11 @@ on:
     paths:
       - 'backend/**'
       - 'client/**'
-      - 'frontend/**'
       - '.github/workflows/backend-ci.yml'
   pull_request:
     paths:
       - 'backend/**'
       - 'client/**'
-      - 'frontend/**'
 
 jobs:
   changes:
@@ -19,7 +17,6 @@ jobs:
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       client: ${{ steps.filter.outputs.client }}
-      frontend: ${{ steps.filter.outputs.frontend }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,8 +30,6 @@ jobs:
               - 'backend/**'
             client:
               - 'client/**'
-            frontend:
-              - 'frontend/**'
 
   test-and-migrate:
     name: Backend tests and migrations
@@ -170,31 +165,3 @@ jobs:
 
       - name: Build
         run: npm run build
-
-  legacy-frontend-verify:
-    name: Legacy frontend (CRA) build and tests
-    runs-on: ubuntu-latest
-    needs: changes
-    if: needs.changes.outputs.frontend == 'true'
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install dependencies
-        run: npm ci --no-audit --no-fund
-
-      - name: Build
-        run: npm run build
-
-      - name: Run tests (CRA)
-        env:
-          CI: true
-        run: npm test -- --watchAll=false --passWithNoTests
