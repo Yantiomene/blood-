@@ -16,10 +16,14 @@ const DonationRequestForm = () => {
     })
     const [requestError, setRequestError] = useState('');
     const [requestSuccess, setRequestSuccess] = useState('');
++   const [quantityError, setQuantityError] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+-       setFormData({ ...formData, [name]: value });
++       const next = { ...formData, [name]: name === 'quantity' ? Number(value) : value };
++       setFormData(next);
++       if (name === 'quantity') setQuantityError(validateQuantity(value));
     };
     
     const handleLocationChange = (e) => {
@@ -28,8 +32,23 @@ const DonationRequestForm = () => {
         setFormData({ ...formData, location: [longitude, latitude] });
     };
 
++   const validateQuantity = (val) => {
++       const qty = Number(val);
++       if (!Number.isFinite(qty)) return 'Quantity must be a number in ml.';
++       if (!Number.isInteger(qty)) return 'Quantity must be an integer in ml.';
++       if (qty < 500) return 'Quantity must be at least 500 ml.';
++       if (qty > 5000) return 'Quantity must not exceed 5000 ml.';
++       return '';
++   };
++
     const handleSubmit = async (event) => {
         event.preventDefault();
++       const qtyErr = validateQuantity(formData.quantity);
++       if (qtyErr) {
++           setQuantityError(qtyErr);
++           setRequestError(qtyErr);
++           return;
++       }
         try {
             const response = await makeDonationRequest(formData);
             setRequestError('');
@@ -82,8 +101,12 @@ const DonationRequestForm = () => {
                         value={formData.quantity}
                         placeholder="Enter your quantity in ml"
                         onChange={handleChange}
++                       min={500}
++                       max={5000}
++                       step={50}
                         required={true}
                     />
++                   {quantityError && <p className="text-red-500 text-xs mt-1">{quantityError}</p>}
                 </div>
 
                 <div className={fieldStyles}>

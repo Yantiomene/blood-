@@ -476,6 +476,44 @@ const BloodTransfer3D: React.FC = () => {
             recipientPulse.position.copy(recipientHeart.position);
             scene.add(recipientPulse);
 
+            // Create EKG-style heartbeat line visualization
+            const ekgPoints = [];
+            const ekgSegments = 100;
+            for (let i = 0; i < ekgSegments; i++) {
+              ekgPoints.push(new THREE.Vector3(
+                -4 + (i / ekgSegments) * 8, // Spans from left to right
+                -1.3,
+                0.8
+              ));
+            }
+
+            const ekgCurve = new THREE.CatmullRomCurve3(ekgPoints);
+            const ekgGeometry = new THREE.TubeGeometry(ekgCurve, ekgSegments, 0.015, 8, false);
+            const ekgMaterial = new THREE.MeshBasicMaterial({
+              color: 0x22c55e,
+              transparent: true,
+              opacity: 0.7
+            });
+            const ekgLine = new THREE.Mesh(ekgGeometry, ekgMaterial);
+            scene.add(ekgLine);
+
+            // Heartbeat spike indicators
+            const spikeGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.5, 8);
+            const spikeMaterial = new THREE.MeshBasicMaterial({
+              color: 0x22c55e,
+              transparent: true,
+              opacity: 0
+            });
+
+            const leftSpike = new THREE.Mesh(spikeGeometry, spikeMaterial.clone());
+            leftSpike.position.set(-3.5, -1.3, 0.8);
+            scene.add(leftSpike);
+
+            const rightSpike = new THREE.Mesh(spikeGeometry, spikeMaterial.clone());
+            rightSpike.position.set(3.5, -1.3, 0.8);
+            scene.add(rightSpike);
+          
+
             // Animate floating text based on blood flow progress
             if (t > 0.15 && t < 0.85) {
               // Hope appears first (15-40% progress)
@@ -503,6 +541,32 @@ const BloodTransfer3D: React.FC = () => {
             const heartbeatSpeed = 2.5; // Beats per second
             const beat = Math.sin(time * heartbeatSpeed * Math.PI * 2);
             const beatTrigger = beat > 0.7; // Pulse when sine wave peaks
+
+            // EKG line pulse effect
+            ekgMaterial.opacity = 0.5 + Math.sin(time * heartbeatSpeed * Math.PI * 2) * 0.3;
+            ekgMaterial.emissive = new THREE.Color(0x22c55e);
+            ekgMaterial.emissiveIntensity = beat > 0.7 ? 0.5 : 0;
+
+            // Heartbeat spikes at donor and recipient positions
+            if (beatTrigger) {
+              // Donor spike
+              leftSpike.material.opacity = 0.9;
+              // Declare recipientHealthFactor before its first use
+              const recipientHealthFactor = Math.min(transformProgress * 1.5, 1);
+              leftSpike.scale.y = 1 + recipientHealthFactor * 0.5;
+              
+              // Recipient spike - grows stronger with health
+              rightSpike.material.opacity = 0.5 + (recipientHealthFactor * 0.4);
+              rightSpike.scale.y = 0.6 + (recipientHealthFactor * 0.7);
+            }
+
+            // Fade out spikes
+            leftSpike.material.opacity = Math.max(0, leftSpike.material.opacity - 0.05);
+            rightSpike.material.opacity = Math.max(0, rightSpike.material.opacity - 0.04);
+
+            // Subtle vertical position pulse
+            leftSpike.position.y = -1.3 + (leftSpike.material.opacity * 0.2);
+            rightSpike.position.y = -1.3 + (rightSpike.material.opacity * 0.15);
 
             // Donor heartbeat - strong and steady
             const donorBeatScale = 1 + (beat > 0.5 ? (beat - 0.5) * 0.3 : 0);
@@ -555,7 +619,7 @@ const BloodTransfer3D: React.FC = () => {
             lifeText.scale.set(2 * textScale, 1 * textScale, 0.5);
             chanceText.scale.set(2 * textScale, 1 * textScale, 0.5);
           }
-          
+
           // Subtle breathing animation
           const breathe = Math.sin(performance.now() * 0.002) * 0.03 + 1;
           donor.torso.scale.y = breathe;

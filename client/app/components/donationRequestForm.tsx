@@ -32,7 +32,7 @@ const DonationRequestForm: React.FC = () => {
     const [phoneError, setPhoneError] = useState<string>('');
     const [isLocating, setIsLocating] = useState(false);
     const [isGeocoding, setIsGeocoding] = useState(false);
-
+    const [quantityError, setQuantityError] = useState<string>("");
     const [requestError, setRequestError] = useState('');
     const [requestSuccess, setRequestSuccess] = useState('');
 
@@ -40,7 +40,7 @@ const DonationRequestForm: React.FC = () => {
         // Pre-fill phone country from profile contact if available
         try {
             const pn = parsePhoneNumberFromString(user?.contactNumber || '');
-            if (pn?.country) setPhoneCountry(prev => prev || pn.country);
+            if (pn?.country && !phoneCountry) setPhoneCountry(pn.country as string);
             if (user?.contactNumber) setContactNumber(user.contactNumber);
         } catch {}
         // Pre-fill address from profile if available
@@ -54,9 +54,19 @@ const DonationRequestForm: React.FC = () => {
     const labelStyles = "block text-gray-700 text-sm font-bold mb-2";
     const buttonStyles = "inline-block w-full text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline";
 
+    const validateQuantity = (val: any): string => {
+        const qty = Number(val);
+        if (!Number.isFinite(qty)) return "Quantity must be a number in ml.";
+        if (!Number.isInteger(qty)) return "Quantity must be an integer in ml.";
+        if (qty < 500) return "Quantity must be at least 500 ml.";
+        if (qty > 5000) return "Quantity must not exceed 5000 ml.";
+        return "";
+    };
     const handleChange = (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement> | React.ChangeEvent<HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value } as any);
+        const next: any = { ...formData, [name]: name === 'quantity' ? Number(value) : value };
+        setFormData(next);
+        if (name === 'quantity') setQuantityError(validateQuantity(value));
     };
 
     const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,6 +110,13 @@ const DonationRequestForm: React.FC = () => {
         setRequestError('');
         setRequestSuccess('');
         setPhoneError('');
+        // client-side quantity validation aligned with backend
+        const qtyErr = validateQuantity(formData.quantity);
+        if (qtyErr) {
+            setQuantityError(qtyErr);
+            setRequestError(qtyErr);
+            return;
+        }
         try {
             // Validate basic fields
             if (!formData.bloodType) {
@@ -142,7 +159,7 @@ const DonationRequestForm: React.FC = () => {
             if (formattedContact) {
                 let pn;
                 try {
-                    pn = phoneCountry ? parsePhoneNumberFromString(formattedContact, phoneCountry) : parsePhoneNumberFromString(formattedContact);
+                    pn = phoneCountry ? parsePhoneNumberFromString(formattedContact, { defaultCountry: phoneCountry as any }) : parsePhoneNumberFromString(formattedContact);
                 } catch {}
                 if (!pn || !pn.isValid()) {
                     setPhoneError('Invalid phone number for the selected country.');
@@ -211,7 +228,12 @@ const DonationRequestForm: React.FC = () => {
                         value={formData.quantity}
                         placeholder="Enter your quantity in ml"
                         onChange={handleChange}
+                        min={500}
+                        max={5000}
+                        step={50}
+                        required
                     />
+                    {quantityError && <p className="text-red-500 text-xs mt-1">{quantityError}</p>}
                 </div>
 
                 <div className={fieldStyles}>
