@@ -31,17 +31,16 @@ const Header: React.FC<{ isLoggedin: boolean }> = ({ isLoggedin }) => {
                     </ul>
                     <ul className="flex space-x-4 items-center">
                         {isLoggedin && <NavItem href="/dashboard" isActive={pathname === '/dashboard'}>Dashboard</NavItem>}
--                        {isLoggedin && <NavItem href="/dashboard/messages" isActive={pathname?.startsWith('/dashboard/messages')}>Messages</NavItem>}
-+                        {isLoggedin && (
-+                          <NavItem href="/dashboard/messages" isActive={pathname?.startsWith('/dashboard/messages')}>
-+                            <span className="inline-flex items-center" aria-label="Messages" title="Messages">
-+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5">
-+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
-+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7l9 6 9-6" />
-+                              </svg>
-+                            </span>
-+                          </NavItem>
-+                        )}
+                        {isLoggedin && (
+                          <NavItem href="/dashboard/messages" isActive={pathname?.startsWith('/dashboard/messages')}>
+                            <span className="inline-flex items-center" aria-label="Messages" title="Messages">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7l9 6 9-6" />
+                              </svg>
+                            </span>
+                          </NavItem>
+                        )}
                         {!isLoggedin && <NavItem href="/login" isActive={pathname === '/login'}>Login</NavItem>}
                         {!isLoggedin && <NavItem href="/register" isActive={pathname === '/register'}>Register</NavItem>}
                     </ul>

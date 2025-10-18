@@ -54,7 +54,7 @@ const MessagesListInner: React.FC = () => {
         setUserCache((prev) => ({ ...prev, ...Object.fromEntries(entries) }));
       } catch (err: any) {
         console.error('Failed to load conversations:', err);
-        if (mounted) setError('加载会话失败，请稍后重试');
+        if (mounted) setError('Failed to load conversations. Please try again later');
       } finally {
         if (mounted) setLoading(false);
       }
@@ -70,24 +70,24 @@ const MessagesListInner: React.FC = () => {
       <Header isLoggedin={auth} />
       <main className="container mx-auto py-8 min-h-screen">
         <h1 className="text-3xl font-bold mb-2">{title}</h1>
-        <p className="text-gray-600 mb-6">查看并继续你的会话。</p>
-        {loading && <div className="text-gray-500">加载中...</div>}
+        <p className="text-gray-600 mb-6">View and continue your conversations.</p>
+        {loading && <div className="text-gray-500">Loading...</div>}
         {error && <div className="text-red-600">{error}</div>}
         {!loading && !error && (
           <div className="grid gap-3">
             {conversations.length === 0 && (
-              <div className="text-gray-700">你当前没有会话。</div>
+              <div className="text-gray-700">You currently have no conversations.</div>
             )}
             {conversations.map((c) => {
               const partnerId = c.senderId === currentUserId ? c.receiverId : c.senderId;
               const partner = userCache[partnerId];
-              const partnerLabel = partner?.username || partner?.email || `用户 #${partnerId}`;
+              const partnerLabel = partner?.username || partner?.email || `User #${partnerId}`;
               return (
                 <Link key={c.id} href={`/dashboard/messages/${c.id}`} className="block rounded border border-gray-200 p-4 hover:bg-gray-50">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="font-semibold">会话：{partnerLabel}</div>
-                      <div className="text-sm text-gray-600">会话ID：{c.id}</div>
+                      <div className="font-semibold">Conversation: {partnerLabel}</div>
+                      <div className="text-sm text-gray-600">Conversation ID: {c.id}</div>
                     </div>
                     <div className="text-xs text-gray-500">{c.updated_at ? new Date(c.updated_at).toLocaleString() : ''}</div>
                   </div>

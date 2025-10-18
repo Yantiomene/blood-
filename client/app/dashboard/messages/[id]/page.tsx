@@ -61,14 +61,14 @@ const ConversationInner: React.FC = () => {
           try {
             const ures = await getUserById(String(otherId));
             const u = ures?.user || ures;
-            setPartnerLabel(u?.username || u?.email || `用户 #${otherId}`);
+            setPartnerLabel(u?.username || u?.email || `User #${otherId}`);
           } catch {
-            setPartnerLabel(`用户 #${otherId}`);
+            setPartnerLabel(`User #${otherId}`);
           }
         }
       } catch (err: any) {
         console.error('Failed to load conversation:', err);
-        if (mounted) setError('加载会话失败，请稍后重试');
+        if (mounted) setError('Failed to load conversation. Please try again later');
       } finally {
         if (mounted) setLoading(false);
       }
@@ -81,7 +81,7 @@ const ConversationInner: React.FC = () => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages.length]);
 
-  const title = useMemo(() => partnerLabel ? `与 ${partnerLabel} 的会话` : '会话', [partnerLabel]);
+  const title = useMemo(() => partnerLabel ? `Conversation with ${partnerLabel}` : 'Conversation', [partnerLabel]);
 
   const send = async () => {
     if (!input.trim() || !partnerId || !currentUserId) return;
@@ -91,8 +91,8 @@ const ConversationInner: React.FC = () => {
       if (msg) setMessages((prev) => [...prev, msg]);
       setInput('');
     } catch (err) {
-      console.error('发送失败:', err);
-      alert('消息发送失败，请稍后重试');
+      console.error('Send failed:', err);
+      alert('Failed to send message. Please try again later');
     }
   };
 
@@ -123,11 +123,11 @@ const ConversationInner: React.FC = () => {
               <input
                 type="text"
                 className="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-300"
-                placeholder="输入消息..."
+                placeholder="Type a message..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
               />
-              <button onClick={send} className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">发送</button>
+              <button onClick={send} className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">Send</button>
             </div>
           </div>
         )}
