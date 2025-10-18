@@ -93,20 +93,30 @@ const DonationCard = (props: Props) => {
     };
 
     return (
-        <div
-            className={`"bg-white p-4 shadow rounded " ${isFulfilled ? 'bg-green-200' : 'bg-white'}`}
-        >
-            <h3 className='text-lg font-bold mb-2'>
-                Request for <span>{quantity}</span> ml of <span className='bg-red-500 p-2 text-white text-sm' style={{ borderRadius: "100px 0 100px 100px" }}>{bloodType}</span>
-            </h3>
+        <div className={`bg-white p-4 shadow rounded ${isFulfilled ? 'bg-green-200' : 'bg-white'}`}>
+            <div className="flex items-start justify-between mb-2">
+                <h3 className='text-lg font-bold'>
+                    Request for <span>{quantity}</span> ml of <span className='bg-red-500 p-2 text-white text-sm' style={{ borderRadius: "100px 0 100px 100px" }}>{bloodType}</span>
+                </h3>
+                <button
+                    onClick={onShare}
+                    aria-label="Share request"
+                    title="Share"
+                    className="p-1 w-8 h-8 cursor-pointer border rounded-full text-sm flex items-center justify-center active:border-slate-300 hover:bg-slate-100 text-slate-600"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                        <circle cx="4" cy="12" r="2" />
+                        <circle cx="20" cy="4" r="2" />
+                        <circle cx="20" cy="20" r="2" />
+                        <path d="M6 12l10-8M6 12l10 8" />
+                    </svg>
+                </button>
+            </div>
             <p>Requested on <span>{convertDateTime(created_at)}</span></p>
             <p>Updated on <span>{convertDateTime(updated_at)}</span></p>
             <p>Location: <span className='text-gray-700'>{address || location || 'Unknown'}</span></p>
             <p><span className='px-2 py-1 text-xs rounded-lg bg-yellow-200'>{isFulfilled ? 'donation received' : 'awaiting donors'}</span></p>
-            <div className="mt-3 flex items-center gap-2">
-                <button onClick={onShare} className="px-3 py-2 rounded bg-slate-200 hover:bg-slate-300 text-slate-800">Share</button>
-                {shareMsg && <span className="text-xs text-gray-600">{shareMsg}</span>}
-            </div>
+            {shareMsg && <p className="text-xs text-gray-600 mt-1">{shareMsg}</p>}
 
             {accepted && (
                 <p className="mt-2">

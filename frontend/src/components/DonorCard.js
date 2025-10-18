@@ -148,54 +148,39 @@ showMessage({ heading: "Success", text: `${response.message}` })
               </h1>
             </div>
           </div>
-          {editable && (
-            <div className="top-right flex items-center gap-2">
-              <span
-                className={
-                  menuButtonStyle +
-                  " active:border-blue-300 hover:bg-blue-100 text-blue-400"
-                }
-                onClick={() => setShowUpdateMenu(true)}
-              >
-                E
-              </span>
-              <span
-                className={
-                  menuButtonStyle +
-                  " active:border-red-300 hover:bg-red-100 text-red-400"
-                }
-                onClick={() => setShowDeleteMenu(true)}
-              >
-                X
-              </span>
-            </div>
-          )}
-+          <div className="top-right flex items-center gap-2">
-+            <span
-+              className={menuButtonStyle + " active:border-slate-300 hover:bg-slate-100 text-slate-600"}
-+              onClick={onShare}
-+            >
-+              S
-+            </span>
-+            {editable && (
-+              <>
-+                <span
-+                  className={menuButtonStyle + " active:border-blue-300 hover:bg-blue-100 text-blue-400"}
-+                  onClick={() => setShowUpdateMenu(true)}
-+                >
-+                  E
-+                </span>
-+                <span
-+                  className={menuButtonStyle + " active:border-red-300 hover:bg-red-100 text-red-400"}
-+                  onClick={() => setShowDeleteMenu(true)}
-+                >
-+                  X
-+                </span>
-+              </>
-+            )}
-+          </div>
+          <div className="top-right flex items-center gap-2">
+            <button
+              className={menuButtonStyle + " active:border-slate-300 hover:bg-slate-100 text-slate-600"}
+              onClick={onShare}
+              aria-label="Share request"
+              title="Share"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                <circle cx="4" cy="12" r="2" />
+                <circle cx="20" cy="4" r="2" />
+                <circle cx="20" cy="20" r="2" />
+                <path d="M6 12l10-8M6 12l10 8" />
+              </svg>
+            </button>
+            {editable && (
+              <>
+                <span
+                  className={menuButtonStyle + " active:border-blue-300 hover:bg-blue-100 text-blue-400"}
+                  onClick={() => setShowUpdateMenu(true)}
+                >
+                  E
+                </span>
+                <span
+                  className={menuButtonStyle + " active:border-red-300 hover:bg-red-100 text-red-400"}
+                  onClick={() => setShowDeleteMenu(true)}
+                >
+                  X
+                </span>
+              </>
+            )}
+          </div>
         </div>
-+        {shareMsg && <p className="text-xs text-gray-600 mt-1">{shareMsg}</p>}
+        {shareMsg && <p className="text-xs text-gray-600 mt-1">{shareMsg}</p>}
         <div className="card__middle">
           {message && (
             <p className="card__text bg-slate-100 text-slate-500 truncate py-1 px-2 my-4 text-sm rounded">
