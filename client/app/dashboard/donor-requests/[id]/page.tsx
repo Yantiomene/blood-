@@ -143,7 +143,7 @@ const RequestDetailPage: React.FC = () => {
         if (message.trim()) {
           try {
             await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/createMessage`, {
-              recipientId: detail.userId,
+              receiverId: detail.userId,
               content: message,
               messageType: 'text',
             }, { withCredentials: true });
@@ -172,7 +172,7 @@ const RequestDetailPage: React.FC = () => {
         // Send a thank-you message to the donor via messages API (if donor info is available)
         try {
           await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/createMessage`, {
-            recipientId: detail.userId, // requestor id; if we tracked donor acceptance we could send to donor
+            receiverId: detail.userId, // requestor id; if we tracked donor acceptance we could send to donor
             content: message,
             messageType: 'text',
           }, { withCredentials: true });
