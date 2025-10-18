@@ -7,15 +7,22 @@ describe('Blogs Routes', () => {
   let authCookie;
   let createdBlogId;
 
-  const credentials = {
-    email: 'john@example.com', // from seed user
-    password: 'password',
-  };
+  // Create a dynamic user for auth (avoid seed dependency)
+  const makeUnique = (prefix) => `${prefix}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+  const testEmail = `${makeUnique('blog_user')}@example.com`;
+  const testUsername = makeUnique('blog_username');
+  const testPassword = 'password';
 
   beforeAll(async () => {
+    // Register user
+    await request(app)
+      .post('/api/register')
+      .send({ username: testUsername, email: testEmail, password: testPassword, bloodType: 'A+' });
+
+    // Login and capture cookie
     const loginResponse = await request(app)
       .post('/api/login')
-      .send(credentials);
+      .send({ email: testEmail, password: testPassword });
     authCookie = loginResponse.headers['set-cookie'];
   });
 

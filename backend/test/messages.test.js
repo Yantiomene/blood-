@@ -5,28 +5,38 @@ const { redisClient } = require('../src/utils/redis');
 
 describe('Messaging Routes', () => {
   let authCookie;
-  let senderId; // seed user id
+  let senderId; // dynamic sender id
   let receiverId; // test-created user id
   let conversationId;
   let messageId;
 
-  const seedCredentials = {
-    email: 'john@example.com', // from seed user
-    password: 'password',
-  };
-
+  // remove seed usage; create users dynamically
   const makeUnique = (prefix) => `${prefix}_${Date.now()}_${Math.floor(Math.random()*1000)}`;
 
   beforeAll(async () => {
-    // Login as seed user to obtain auth cookie
+    // Register dynamic sender
+    const senderEmail = `${makeUnique('sender')}@example.com`;
+    const senderUsername = makeUnique('sender_user');
+    const senderPassword = 'senderpassword';
+
+    await request(app)
+      .post('/api/register')
+      .send({
+        username: senderUsername,
+        email: senderEmail,
+        password: senderPassword,
+        bloodType: 'A+',
+      });
+
+    // Login as sender to obtain auth cookie
     const loginResponse = await request(app)
       .post('/api/login')
-      .send(seedCredentials);
+      .send({ email: senderEmail, password: senderPassword });
     authCookie = loginResponse.headers['set-cookie'];
 
-    // Fetch seed user's id reliably from DB
-    const seedUserRes = await db.query('SELECT id FROM users WHERE email = $1', [seedCredentials.email]);
-    senderId = seedUserRes.rows[0]?.id;
+    // Fetch sender's id from DB
+    const senderRes = await db.query('SELECT id FROM users WHERE email = $1', [senderEmail]);
+    senderId = senderRes.rows[0]?.id;
 
     // Ensure there is a second user to message
     const receiverEmail = `${makeUnique('receiver')}@example.com`;
@@ -62,7 +72,7 @@ describe('Messaging Routes', () => {
       .send({
         senderId,
         receiverId,
-        content: 'Hello from seed to receiver',
+        content: 'Hello from sender to receiver',
         messageType: 'text',
       });
 
