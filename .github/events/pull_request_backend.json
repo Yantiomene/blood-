@@ -1,0 +1,44 @@
+{
+  "action": "opened",
+  "number": 101,
+  "pull_request": {
+    "id": 301,
+    "number": 101,
+    "state": "open",
+    "title": "Local PR: backend changes",
+    "body": "Test PR to trigger backend job in CI via Act",
+    "locked": false,
+    "head": {
+      "label": "local:feature/backend-ci",
+      "ref": "feature/backend-ci",
+      "sha": "3333333333333333333333333333333333333333",
+      "repo": {
+        "id": 1,
+        "name": "blood",
+        "full_name": "local/blood",
+        "private": false,
+        "owner": { "login": "local" }
+      }
+    },
+    "base": {
+      "label": "local:main",
+      "ref": "main",
+      "sha": "1111111111111111111111111111111111111111",
+      "repo": {
+        "id": 1,
+        "name": "blood",
+        "full_name": "local/blood",
+        "private": false,
+        "owner": { "login": "local" }
+      }
+    }
+  },
+  "repository": {
+    "id": 1,
+    "name": "blood",
+    "full_name": "local/blood",
+    "private": false,
+    "owner": { "login": "local" }
+  },
+  "sender": { "login": "local" }
+}
