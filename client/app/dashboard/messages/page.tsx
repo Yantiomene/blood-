@@ -31,21 +31,21 @@ const MessagesListInner: React.FC = () => {
     let mounted = true;
     const loadConversations = async () => {
       if (!currentUserId) return;
+      setLoading(true);
       try {
-        setLoading(true);
-        setError(null);
         const data = await getConversationsByUser(currentUserId);
-        const list: ConversationItem[] = Array.isArray(data?.conversations) ? data.conversations : (Array.isArray(data) ? data : []);
         if (!mounted) return;
+        const list: ConversationItem[] = Array.isArray(data?.conversations) ? data.conversations : (Array.isArray(data) ? data : []);
         setConversations(list);
-        // Prefetch partner user infos
+        setError(null);
+        // Prefetch partner user infos for labels
         const uniquePartnerIds = Array.from(new Set(list.map((c) => (c.senderId === currentUserId ? c.receiverId : c.senderId))));
         const entries: [number, UserInfo][] = [];
         for (const pid of uniquePartnerIds) {
           try {
             const res = await getUserById(String(pid));
-            const user = res?.user || res || { id: pid };
-            entries.push([pid, { id: pid, username: user?.username, email: user?.email }]);
+            const u = res?.user || res || { id: pid };
+            entries.push([pid, { id: pid, username: u?.username, email: u?.email }]);
           } catch {
             entries.push([pid, { id: pid }]);
           }
@@ -54,7 +54,17 @@ const MessagesListInner: React.FC = () => {
         setUserCache((prev) => ({ ...prev, ...Object.fromEntries(entries) }));
       } catch (err: any) {
         console.error('Failed to load conversations:', err);
-        if (mounted) setError('Failed to load conversations. Please try again later');
+        if (!mounted) return;
+        const status = err?.response?.status;
+        // Gracefully degrade to empty list on common failures
+        if (status === 404 || status === 401) {
+          setConversations([]);
+          setError(null);
+        } else {
+          // Handle network or server errors by showing empty state instead of blocking UX
+          setConversations([]);
+          setError(null);
+        }
       } finally {
         if (mounted) setLoading(false);
       }

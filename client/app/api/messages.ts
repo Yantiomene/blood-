@@ -3,7 +3,7 @@ import axios from 'axios';
 // Prefer NEXT_PUBLIC_API_URL, fallback to NEXT_PUBLIC_API_BASE_URL, then localhost:8000/api
 const rawApi = process.env.NEXT_PUBLIC_API_URL
   || process.env.NEXT_PUBLIC_API_BASE_URL
-  || 'http://localhost:2000/api';
+  || 'http://localhost:8000/api';
 const apiUrl = rawApi.replace(/\/$/, '');
 
 axios.defaults.withCredentials = true;
