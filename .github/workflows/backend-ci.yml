@@ -98,8 +98,13 @@ jobs:
           psql -h 127.0.0.1 -U postgres -d postgres -c "CREATE DATABASE blooddb OWNER blooduser;" || true
           psql -h 127.0.0.1 -U postgres -d blooddb -c "CREATE EXTENSION IF NOT EXISTS postgis;"
 
-      - name: Install dependencies
+      - name: Install dependencies (backend, with lockfile)
+        if: ${{ hashFiles('backend/package-lock.json') != '' }}
         run: npm ci --no-audit --no-fund
+
+      - name: Install dependencies (backend, no lockfile)
+        if: ${{ hashFiles('backend/package-lock.json') == '' }}
+        run: npm install --no-audit --no-fund
 
       - name: Create .env for backend
         run: |
