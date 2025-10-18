@@ -68,8 +68,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
 
       - name: Enable npm cache (backend)
         if: ${{ hashFiles('backend/package-lock.json') != '' }}
@@ -184,8 +182,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
