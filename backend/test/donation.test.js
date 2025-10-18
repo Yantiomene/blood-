@@ -7,10 +7,11 @@ describe('Donation Routes', () => {
   let authCookie;
   let createdRequestId;
 
-  const credentials = {
-    email: 'john@example.com', // from seed user
-    password: 'password',
-  };
+  // Dynamically create a verified user for tests (avoid seed dependency)
+  const makeUnique = (prefix) => `${prefix}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+  const testUserEmail = `${makeUnique('donation_user')}@example.com`;
+  const testUsername = makeUnique('donation_username');
+  const testPassword = 'password';
 
   const testDonationRequest = {
     bloodType: 'A+',
@@ -20,9 +21,17 @@ describe('Donation Routes', () => {
   };
 
   beforeAll(async () => {
+    // Register and mark verified
+    await request(app)
+      .post('/api/register')
+      .send({ username: testUsername, email: testUserEmail, password: testPassword, bloodType: 'A+' });
+
+    await db.query('UPDATE users SET "isVerified" = $1 WHERE email = $2', [true, testUserEmail]);
+
+    // Login and capture auth cookie
     const loginResponse = await request(app)
       .post('/api/login')
-      .send(credentials);
+      .send({ email: testUserEmail, password: testPassword });
     authCookie = loginResponse.headers['set-cookie'];
   });
 
