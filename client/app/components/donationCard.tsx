@@ -49,6 +49,7 @@ const DonationCard = (props: Props) => {
     const [accepting, setAccepting] = useState(false);
     const [accepted, setAccepted] = useState(!!props.acceptedByCurrentUser);
     const [acceptMsg, setAcceptMsg] = useState<string>("");
+    const [shareMsg, setShareMsg] = useState<string>("");
 
     const canAccept = isDonor && !isFulfilled && !isOwn && !accepted;
 
@@ -69,6 +70,27 @@ const DonationCard = (props: Props) => {
             setAccepting(false);
         }
     };
+    const onShare = async () => {
+        try {
+            setShareMsg("");
+            const url = typeof window !== 'undefined' ? `${window.location.origin}/dashboard/donor-requests/${id}` : '';
+            const title = `Blood+ Request #${id}`;
+            const text = `Need ${quantity} ml of ${bloodType}. Can you help?`;
+            if ((navigator as any).share) {
+                await (navigator as any).share({ title, text, url });
+                setShareMsg('Thanks for sharing!');
+            } else {
+                try {
+                    await navigator.clipboard.writeText(`${text} ${url}`);
+                    setShareMsg('Link copied. Share it on your apps!');
+                } catch {}
+                const tw = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+                window.open(tw, '_blank', 'noopener');
+            }
+        } catch (e: any) {
+            setShareMsg(e?.message || 'Failed to share.');
+        }
+    };
 
     return (
         <div
@@ -81,6 +103,10 @@ const DonationCard = (props: Props) => {
             <p>Updated on <span>{convertDateTime(updated_at)}</span></p>
             <p>Location: <span className='text-gray-700'>{address || location || 'Unknown'}</span></p>
             <p><span className='px-2 py-1 text-xs rounded-lg bg-yellow-200'>{isFulfilled ? 'donation received' : 'awaiting donors'}</span></p>
+            <div className="mt-3 flex items-center gap-2">
+                <button onClick={onShare} className="px-3 py-2 rounded bg-slate-200 hover:bg-slate-300 text-slate-800">Share</button>
+                {shareMsg && <span className="text-xs text-gray-600">{shareMsg}</span>}
+            </div>
 
             {accepted && (
                 <p className="mt-2">

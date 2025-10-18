@@ -19,6 +19,7 @@ const DonationCard = (props) => {
   const [usernameError, setUsernameError] = useState(null);
   const [showDeleteMenu, setShowDeleteMenu] = useState(false);
   const [showUpdateMenu, setShowUpdateMenu] = useState(false);
++ const [shareMsg, setShareMsg] = useState('');
   // view card details
   const handleViewCard = async (cardId) => {
     try {
@@ -28,7 +29,28 @@ const DonationCard = (props) => {
       dispatch(showMessage({ heading: "Error", text: "Failed to fetch donation details" }));
     }
   };
-
++
++ const onShare = async () => {
++   try {
++     setShareMsg('');
++     const url = typeof window !== 'undefined' ? `${window.location.origin}/dashboard/donor-requests/${props.id}` : '';
++     const title = `Blood+ Request #${props.id}`;
++     const text = `Need ${props.quantity} ml of ${props.bloodType}. Can you help?`;
++     if (navigator.share) {
++       await navigator.share({ title, text, url });
++       setShareMsg('Thanks for sharing!');
++     } else {
++       try {
++         await navigator.clipboard.writeText(`${text} ${url}`);
++         setShareMsg('Link copied. Share it on your apps!');
++       } catch {}
++       const tw = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
++       window.open(tw, '_blank', 'noopener');
++     }
++   } catch (e) {
++     setShareMsg(e?.message || 'Failed to share.');
++   }
++ };
   // delete card
   const handleDeleteCard = async (cardId) => {
     try {
@@ -148,62 +170,32 @@ showMessage({ heading: "Success", text: `${response.message}` })
               </span>
             </div>
           )}
-          {showDeleteMenu ? (
-            <Overlay showWindow={setShowDeleteMenu}>
-              <div className="p-4 md:w-[30vw] bg-white">
-                <h2 className="text-2xl text-red-400 mb-2">
-                  Delete request for{" "}
-                  <b>
-                    {quantity}ml of {bloodType}
-                  </b>
-                </h2>
-                <p className="leading-4 mb-4">
-                  Are you sure you want to delete this request?
-                </p>
-                <div className="flex gap-2 flex-row-reverse">
-                  <button
-                    className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg"
-                    onClick={() => handleDeleteCard(id)}
-                  >
-                    Confirm
-                  </button>
-                  <button
-                    className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-500 rounded-lg"
-                    onClick={() => setShowDeleteMenu(false)}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </Overlay>
-          ) : showUpdateMenu ? (
-            <Overlay showWindow={setShowUpdateMenu}>
-              <div className="p-4 md:w-[30vw] bg-white">
-                <h2 className="text-2xl text-blue-400 mb-2">
-                  Update request for{" "}
-                  <b>
-                    {quantity}ml of {bloodType}
-                  </b>
-                </h2>
-                <p className="leading-4 mb-4">update the request details</p>
-                <div className="flex gap-2 flex-row-reverse">
-                  <button
-                    className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg"
-                    onClick={() => handleUpdateCard(id)}
-                  >
-                    Update
-                  </button>
-                  <button
-                    className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-500 rounded-lg"
-                    onClick={() => setShowUpdateMenu(false)}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </Overlay>
-          ) : null}
++          <div className="top-right flex items-center gap-2">
++            <span
++              className={menuButtonStyle + " active:border-slate-300 hover:bg-slate-100 text-slate-600"}
++              onClick={onShare}
++            >
++              S
++            </span>
++            {editable && (
++              <>
++                <span
++                  className={menuButtonStyle + " active:border-blue-300 hover:bg-blue-100 text-blue-400"}
++                  onClick={() => setShowUpdateMenu(true)}
++                >
++                  E
++                </span>
++                <span
++                  className={menuButtonStyle + " active:border-red-300 hover:bg-red-100 text-red-400"}
++                  onClick={() => setShowDeleteMenu(true)}
++                >
++                  X
++                </span>
++              </>
++            )}
++          </div>
         </div>
++        {shareMsg && <p className="text-xs text-gray-600 mt-1">{shareMsg}</p>}
         <div className="card__middle">
           {message && (
             <p className="card__text bg-slate-100 text-slate-500 truncate py-1 px-2 my-4 text-sm rounded">
