@@ -2,18 +2,29 @@ const db = require('../db');
 
 // function to create a new message
 exports.createMessage = async (req, res) => {
-    const { conversationId, senderId, receiverId, content, messageType, metadata, event } = req.body;
+    const { conversationId, senderId: bodySenderId, receiverId, content, messageType, metadata, event } = req.body;
 
     try {
-
-        // Check if required fields are provided
-        if (!receiverId || !senderId || !content || !messageType) {
-            return res.status(400).json({ success: false, error: 'receiverId, senderId, content and messageType are required' });
+        // Enforce that the authenticated user is the sender
+        const authSenderId = req.user && req.user.id;
+        if (!authSenderId) {
+            return res.status(401).json({ success: false, error: 'Unauthorized' });
+        }
+        if (bodySenderId && bodySenderId !== authSenderId) {
+            return res.status(403).json({ success: false, error: 'senderId mismatch with authenticated user' });
         }
 
+        // Check if required fields are provided
+        if (!receiverId || !content) {
+            return res.status(400).json({ success: false, error: 'receiverId and content are required' });
+        }
+
+        // messageType defaults to 'text' if not provided
+        const msgType = messageType || 'text';
+
         // Check if senderId and receiverId correspond to existing users
-        const sender = await db.query('SELECT * FROM users WHERE id = $1', [senderId]);
-        const receiver = await db.query('SELECT * FROM users WHERE id = $1', [receiverId]);
+        const sender = await db.query('SELECT id FROM users WHERE id = $1', [authSenderId]);
+        const receiver = await db.query('SELECT id FROM users WHERE id = $1', [receiverId]);
 
         // If either senderId or receiverId does not correspond to an existing user, return error
         if (!sender.rows.length || !receiver.rows.length) {
@@ -22,16 +33,26 @@ exports.createMessage = async (req, res) => {
 
         let newConversationId = conversationId; // Initialize with provided conversation ID
 
-        // If conversation ID provided, check if it belongs to an existing conversation
+        // Canonicalize participant ordering to avoid duplicate conversations in reverse order
+        const p1 = Math.min(authSenderId, receiverId);
+        const p2 = Math.max(authSenderId, receiverId);
+
+        // If conversation ID provided, ensure it belongs to an existing conversation
         if (conversationId) {
-            const conversationExists = await db.query('SELECT * FROM conversations WHERE id = $1', [conversationId]);
+            const conversationExists = await db.query('SELECT id, "senderId", "receiverId" FROM conversations WHERE id = $1', [conversationId]);
             if (!conversationExists.rows.length) {
                 return res.status(400).json({ success: false, error: 'Conversation does not exist' });
             }
         } else {
-            // If conversation ID not provided, create a new conversation
-            const conversation = await db.query('INSERT INTO conversations ("senderId", "receiverId") VALUES ($1, $2) RETURNING *', [senderId, receiverId]);
-            newConversationId = conversation.rows[0].id;
+            // Try to find an existing conversation for these two users (in canonical order)
+            const existing = await db.query('SELECT id FROM conversations WHERE "senderId" = $1 AND "receiverId" = $2', [p1, p2]);
+            if (existing.rows.length) {
+                newConversationId = existing.rows[0].id;
+            } else {
+                // If conversation ID not provided and none exists, create a new conversation in canonical order
+                const conversation = await db.query('INSERT INTO conversations ("senderId", "receiverId") VALUES ($1, $2) RETURNING id', [p1, p2]);
+                newConversationId = conversation.rows[0].id;
+            }
         }
 
         // Insert message into messages table
@@ -39,7 +60,7 @@ exports.createMessage = async (req, res) => {
             INSERT INTO messages ("conversationId", "senderId", "recipientId", content, "messageType", metadata, event) 
             VALUES ($1, $2, $3, $4, $5, $6, $7) 
             RETURNING *;
-        `, [newConversationId, senderId, receiverId, content, messageType, metadata, event]);
+        `, [newConversationId, authSenderId, receiverId, content, msgType, metadata || null, event || null]);
 
         req.logger.info(`Message created: ${message.rows[0].id}`);
         res.status(201).json({ success: true, message: message.rows[0], conversationId: newConversationId });
@@ -191,11 +212,11 @@ exports.updateMessage = async (req, res) => {
 
         updateValues.push(messageId);
 
-        // Update the message
+        // Update the message using parameterized placeholders
         const updatedMessage = await db.query(`
             UPDATE messages
-            SET ${updateFields.map((field, index) => `"${field}" = ${index + 1}`).join(', ')}
-            WHERE id = ${updateValues.length}
+            SET ${updateFields.map((field, index) => `"${field}" = $${index + 1}`).join(', ')}
+            WHERE id = $${updateValues.length}
             RETURNING *;
         `, updateValues);
 

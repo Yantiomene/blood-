@@ -105,15 +105,7 @@ if (NODE_ENV === 'test') {
       CREATE UNIQUE INDEX IF NOT EXISTS donation_acceptances_unique ON donation_acceptances ("requestId", "donorId");
     `);
 
-    // Seed baseline user matching seed file
-    const bcrypt = require('bcryptjs');
-    const hashed = bcrypt.hashSync('password', 10);
-    await pool.query(
-      `INSERT INTO users (username, email, password, "bloodType", location, "contactNumber", "isDonor", "isHospital", "isBloodBank", "isBloodCamp", "associatedEntityId", "isVerified")
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
-       ON CONFLICT (email) DO NOTHING`,
-      ['john_doe', 'john@example.com', hashed, 'A+', null, '123456789', true, false, false, false, null, true]
-    );
+
   };
 
   // Run bootstrap immediately

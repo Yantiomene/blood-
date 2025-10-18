@@ -30,6 +30,7 @@ const {
   findRequestByLocation,
   incrementViewCount,
   getDonationRequestById,
+  getAcceptancesForRequest,
 } = require("../controllers/donationRequest");
 const {
   registerValidation,
@@ -71,6 +72,8 @@ router.put("/donationRequest/:requestId", userAuth, verifiedOnly, updateDonation
 router.delete("/donationRequest/:requestId", userAuth, verifiedOnly, deleteRequest);
 // get single donation request by id (distinct path to avoid conflict with /donationRequest/:userId)
 router.get("/donationRequest/id/:requestId", userAuth, verifiedOnly, getDonationRequestById);
+// list acceptances for a request with donor + conversation info
+router.get("/donationRequest/:requestId/acceptances", userAuth, verifiedOnly, getAcceptancesForRequest);
 // find requests
 router.get("/donationReq", userAuth, verifiedOnly, findRequestByBloodType);
 router.post("/donationReqByDate", userAuth, verifiedOnly, findRequestByDate);

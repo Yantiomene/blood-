@@ -30,16 +30,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">80% </span>
+                <span class="strong">85.71% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>4/5</span>
+                <span class='fraction'>6/7</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">21.42% </span>
+                <span class="strong">35.71% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>3/14</span>
+                <span class='fraction'>5/14</span>
             </div>
         
             
@@ -566,26 +566,26 @@
 <a name='L501'></a><a href='#L501'>501</a>
 <a name='L502'></a><a href='#L502'>502</a>
 <a name='L503'></a><a href='#L503'>503</a>
-<a name='L504'></a><a href='#L504'>504</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
+<a name='L504'></a><a href='#L504'>504</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1066,9 +1066,9 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const nodemailer = require('nodemailer');
 const { EMAIL, PASSWORD, SERVER_URL } = require('../constants');
 &nbsp;
@@ -1085,8 +1085,8 @@ if (process.env.NODE_ENV === 'test') {
     sendPasswordResetEmail: <span class="fstat-no" title="function not covered" >(email, token) =&gt; mockEmailLogger('sendPasswordResetEmail', email, token),</span>
     sendNotificationEmail: <span class="fstat-no" title="function not covered" >(to, subject, text, html) =&gt; mockEmailLogger('sendNotificationEmail', to, subject),</span>
     sendDenyEmail: <span class="fstat-no" title="function not covered" >(email, reason) =&gt; mockEmailLogger('sendDenyEmail', email, reason),</span>
-    sendAcceptEmail: <span class="fstat-no" title="function not covered" >(email, request) =&gt; mockEmailLogger('sendAcceptEmail', email, request),</span>
-    sendDonorInstructionEmail: <span class="fstat-no" title="function not covered" >(email, request) =&gt; mockEmailLogger('sendDonorInstructionEmail', email, request)</span>
+    sendAcceptEmail: (email, request) =&gt; mockEmailLogger('sendAcceptEmail', email, request),
+    sendDonorInstructionEmail: (email, request) =&gt; mockEmailLogger('sendDonorInstructionEmail', email, request)
   };
 }<span class="branch-0 cbranch-no" title="branch not covered" > else {</span>
 <span class="cstat-no" title="statement not covered" >  const transporter = nodemailer.createTransport({</span>
@@ -1579,7 +1579,7 @@ module.exports = exportedEmail;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-18T12:36:14.516Z
+                at 2025-10-18T18:00:32.135Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

@@ -985,8 +985,11 @@ const acceptRequest = async (req, res) => {
         }
 
         // Fetch request details with coordinates for reverse geocoding
+        const coordSelect = NODE_ENV === 'test'
+            ? 'NULL::float AS latitude, NULL::float AS longitude'
+            : 'ST_Y(location::geometry) AS latitude, ST_X(location::geometry) AS longitude';
         const requestRes = await db.query(
-            'SELECT id, "userId", "bloodType", quantity, "isFulfilled", message, "requestingEntity", "requestingEntityId", ST_Y(location::geometry) AS latitude, ST_X(location::geometry) AS longitude FROM donation_requests WHERE id = $1',
+            `SELECT id, "userId", "bloodType", quantity, "isFulfilled", message, "requestingEntity", "requestingEntityId", ${coordSelect} FROM donation_requests WHERE id = $1`,
             [requestId]
         );
 
@@ -1000,15 +1003,44 @@ const acceptRequest = async (req, res) => {
         const reqRow = requestRes.rows[0];
 
         // Persist acceptance by this donor; prevent duplicate acceptances
-        const acceptanceRes = await db.query(
-            'INSERT INTO donation_acceptances ("requestId", "donorId") VALUES ($1, $2) ON CONFLICT ("requestId", "donorId") DO NOTHING RETURNING id',
+        const existingAcc = await db.query(
+            'SELECT id FROM donation_acceptances WHERE "requestId" = $1 AND "donorId" = $2 LIMIT 1',
             [requestId, req.user.id]
         );
-        if (!acceptanceRes.rows || acceptanceRes.rows.length === 0) {
+        if (existingAcc.rows && existingAcc.rows.length > 0) {
             return res.status(409).json({
                 success: false,
                 message: 'You have already accepted this request.'
             });
+        }
+         const acceptanceRes = await db.query(
+             'INSERT INTO donation_acceptances ("requestId", "donorId") VALUES ($1, $2) ON CONFLICT ("requestId", "donorId") DO NOTHING RETURNING id',
+             [requestId, req.user.id]
+         );
+         if (!acceptanceRes.rows || acceptanceRes.rows.length === 0) {
+             return res.status(409).json({
+                 success: false,
+                 message: 'You have already accepted this request.'
+             });
+         }
+
+        // Ensure a conversation exists between donor and requestor
+        const donorId = req.user.id;
+        const requestorId = reqRow.userId;
+        let conversationId;
+        // Try to find existing conversation in either order
+        const existingConv = await db.query(
+            'SELECT id FROM conversations WHERE ("senderId" = $1 AND "receiverId" = $2) OR ("senderId" = $2 AND "receiverId" = $1) LIMIT 1',
+            [donorId, requestorId]
+        );
+        if (existingConv.rows.length) {
+            conversationId = existingConv.rows[0].id;
+        } else {
+            // Create with canonical ordering to avoid duplicates
+            const p1 = Math.min(donorId, requestorId);
+            const p2 = Math.max(donorId, requestorId);
+            const newConv = await db.query('INSERT INTO conversations ("senderId", "receiverId") VALUES ($1, $2) RETURNING id', [p1, p2]);
+            conversationId = newConv.rows[0].id;
         }
 
         // Resolve human-readable address from coordinates (best-effort)
@@ -1053,7 +1085,8 @@ const acceptRequest = async (req, res) => {
         req.logger.info('Request accepted successfuly');
         return res.status(200).json({
             success: true,
-            message: 'Request accepted successfuly. Donation instructions have been sent to your email.'
+            message: 'Request accepted successfuly. Donation instructions have been sent to your email.',
+            conversationId,
         });
     } catch (error) {
         req.logger.error('Error Accepting request:', error.message);
@@ -1162,6 +1195,7 @@ module.exports = {
     findRequestByPriority,
     findRequestByLocation,
     incrementViewCount,
+    getAcceptancesForRequest,
 };
 
 // get donation request by id
@@ -1201,3 +1235,46 @@ async function getDonationRequestById(req, res) {
         return res.status(500).json({ success: false, error: 'Internal server error' });
     }
 };
+
+async function getAcceptancesForRequest(req, res) {
+    const { requestId } = req.params;
+
+    try {
+        if (!requestId) {
+            return res.status(400).json({ success: false, error: 'Request ID is required' });
+        }
+        // Verify the request exists and is owned by the authenticated user
+        const reqRes = await db.query('SELECT id, "userId" FROM donation_requests WHERE id = $1', [requestId]);
+        if (!reqRes.rows.length) {
+            return res.status(404).json({ success: false, error: 'Donation request not found' });
+        }
+        const ownerUserId = reqRes.rows[0].userId;
+        if (ownerUserId !== req.user.id) {
+            return res.status(403).json({ success: false, error: 'Forbidden: you do not own this request' });
+        }
+
+        // List all acceptances with donor info and corresponding conversation id (if any)
+        const sql = `
+            SELECT da.id AS "acceptanceId", da.created_at,
+                   u.id AS "donorId", u.username, u.email, u."bloodType", u."contactNumber",
+                   c.id AS "conversationId"
+            FROM donation_acceptances da
+            JOIN users u ON u.id = da."donorId"
+            LEFT JOIN conversations c ON (
+              (c."senderId" = da."donorId" AND c."receiverId" = $1::int)
+              OR
+              (c."senderId" = $1::int AND c."receiverId" = da."donorId")
+            )
+            WHERE da."requestId" = $2::int
+            ORDER BY da.created_at DESC
+        `;
+        const result = await db.query(sql, [ownerUserId, requestId]);
+
+        req.logger.info('Fetched acceptances for request successfully');
+        return res.status(200).json({ success: true, acceptances: result.rows });
+    } catch (error) {
+        req.logger.error('Error fetching acceptances:', error.message);
+        console.error('Error fetching acceptances:', error.message);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+}
