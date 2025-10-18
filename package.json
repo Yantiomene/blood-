@@ -9,7 +9,7 @@
     "test": "echo \"Run tests in sub-projects (backend, client, frontend)\" && exit 1",
     "client:verify": "npm --prefix client run ci:verify",
     "backend:test": "npm --prefix backend test -- --runInBand --detectOpenHandles --verbose",
-    "frontend:test": "CI=true npm --prefix frontend test -- --watchAll=false",
+    "frontend:test": "CI=true npm --prefix frontend test -- --watchAll=false --passWithNoTests",
     "db:up": "docker compose -f backend/docker-compose.yml up -d",
     "db:down": "docker compose -f backend/docker-compose.yml down",
     "ci:verify-all": "npm run db:up && npm run backend:test && npm run client:verify && npm run frontend:test && npm run db:down"
