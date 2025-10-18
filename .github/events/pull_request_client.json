@@ -1,0 +1,44 @@
+{
+  "action": "opened",
+  "number": 42,
+  "pull_request": {
+    "id": 101,
+    "number": 42,
+    "state": "open",
+    "title": "Local PR: client changes",
+    "body": "Test PR to trigger client job in CI via Act",
+    "locked": false,
+    "head": {
+      "label": "local:feature/client-ci",
+      "ref": "feature/client-ci",
+      "sha": "2222222222222222222222222222222222222222",
+      "repo": {
+        "id": 1,
+        "name": "blood",
+        "full_name": "local/blood",
+        "private": false,
+        "owner": { "login": "local" }
+      }
+    },
+    "base": {
+      "label": "local:main",
+      "ref": "main",
+      "sha": "1111111111111111111111111111111111111111",
+      "repo": {
+        "id": 1,
+        "name": "blood",
+        "full_name": "local/blood",
+        "private": false,
+        "owner": { "login": "local" }
+      }
+    }
+  },
+  "repository": {
+    "id": 1,
+    "name": "blood",
+    "full_name": "local/blood",
+    "private": false,
+    "owner": { "login": "local" }
+  },
+  "sender": { "login": "local" }
+}
