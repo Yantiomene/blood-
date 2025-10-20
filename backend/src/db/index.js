@@ -68,6 +68,7 @@ if (NODE_ENV === 'test') {
         status VARCHAR(50),
         metadata JSONB,
         event JSONB,
+        is_read BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT now(),
         updated_at TIMESTAMP DEFAULT now()
       );
