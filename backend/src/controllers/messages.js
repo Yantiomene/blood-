@@ -251,3 +251,62 @@ exports.deleteMessage = async (req, res) => {
         res.status(500).json({success: false, error: error.message });
     }
 }
+
+
+exports.getUnreadCount = async (req, res) => {
+    try {
+        const userId = req.user && req.user.id;
+        if (!userId) {
+            return res.status(401).json({ success: false, error: 'Unauthorized' });
+        }
+
+        const result = await db.query(
+            'SELECT COUNT(*)::int AS count FROM messages WHERE "recipientId" = $1 AND "is_read" = FALSE',
+            [userId]
+        );
+        const count = (result.rows && result.rows[0] && (result.rows[0].count ?? 0)) || 0;
+        req.logger && req.logger.info && req.logger.info(`Unread count for user ${userId}: ${count}`);
+        return res.status(200).json({ success: true, count });
+    } catch (error) {
+        req.logger && req.logger.error && req.logger.error('Error getting unread count:', error.message);
+        console.error('Error getting unread count:', error.message);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+};
+
+exports.markConversationRead = async (req, res) => {
+    const { id: conversationId } = req.params;
+
+    try {
+        const userId = req.user && req.user.id;
+        if (!userId) {
+            return res.status(401).json({ success: false, error: 'Unauthorized' });
+        }
+        if (!conversationId) {
+            return res.status(400).json({ success: false, error: 'Conversation ID is required' });
+        }
+
+        // Validate conversation and membership
+        const conv = await db.query('SELECT id, "senderId", "receiverId" FROM conversations WHERE id = $1', [conversationId]);
+        if (!conv.rows.length) {
+            return res.status(404).json({ success: false, error: 'Conversation not found' });
+        }
+        const row = conv.rows[0];
+        const isParticipant = (row.senderId === userId) || (row.receiverId === userId);
+        if (!isParticipant) {
+            return res.status(403).json({ success: false, error: 'Not a participant of the conversation' });
+        }
+
+        const updated = await db.query(
+            'UPDATE messages SET "is_read" = TRUE, "updated_at" = NOW() WHERE "conversationId" = $1 AND "recipientId" = $2 AND "is_read" = FALSE',
+            [conversationId, userId]
+        );
+        const updatedCount = updated.rowCount || 0;
+        req.logger && req.logger.info && req.logger.info(`Marked ${updatedCount} messages as read in conversation ${conversationId} for user ${userId}`);
+        return res.status(200).json({ success: true, updated: updatedCount });
+    } catch (error) {
+        req.logger && req.logger.error && req.logger.error('Error marking conversation read:', error.message);
+        console.error('Error marking conversation read:', error.message);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+};

@@ -76,3 +76,26 @@ export async function deleteMessage(messageId: number | string): Promise<any> {
     throw error;
   }
 }
+
+export async function getUnreadMessageCount(): Promise<number> {
+  try {
+    const response = await axios.get(`${apiUrl}/messages/unread-count`, { withCredentials: true });
+    const data = response.data || {};
+    const count = typeof data.count !== 'undefined' ? Number(data.count) : 0;
+    return Number.isFinite(count) ? count : 0;
+  } catch (error) {
+    console.error('Failed to get unread message count:', error);
+    return 0;
+  }
+}
+
+// Mark all messages for current user as read in a conversation
+export async function markConversationAsRead(conversationId: number | string): Promise<any> {
+  try {
+    const response = await axios.put(`${apiUrl}/conversations/${conversationId}/read`, {}, { withCredentials: true });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to mark conversation as read:', error);
+    throw error;
+  }
+}

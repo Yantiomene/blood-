@@ -12,6 +12,7 @@ const path = require('path');
 const fs = require('fs');
 const db = require('./db');
 const app = express();
+const { startDelayedMessageNotifications } = require('./jobs/messageNotifications');
 
 
 // Log incoming requests
@@ -166,6 +167,9 @@ if (process.env.NODE_ENV !== 'test') {
 if (process.env.NODE_ENV !== 'test') {
   // Trigger non-blocking bootstrap for blogs seed
   bootstrapBlogsSeed().catch((err) => logger.warn(`Blog bootstrap error: ${err.message}`));
+
+  // Start delayed notifications background job
+  startDelayedMessageNotifications();
 
   server.listen(PORT, () => {
       console.log(`Server is running at http://localhost:${PORT}`);
