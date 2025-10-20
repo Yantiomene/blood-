@@ -245,104 +245,118 @@ const MessagesListInner: React.FC = () => {
         {loading && <div className="text-gray-500">Loading...</div>}
         {error && <div className="text-red-600">{error}</div>}
         {!loading && !error && (
-          <div className="grid gap-3" role="list" aria-label="Conversations">
-            {conversations.length === 0 && (
-              <div className="text-gray-700" role="status" aria-live="polite">You currently have no conversations.</div>
-            )}
-            {conversations.map((c, index) => {
-              const partnerId = c.senderId === currentUserId ? c.receiverId : c.senderId;
-              const partner = userCache[partnerId];
-              const partnerLabel = partner?.username || partner?.email || `User #${partnerId}`;
-              const unreadCount = unreadMap[c.id] || 0;
-              const lastContent: string | undefined = (c as any).last_message_content;
-              const lastTimeRaw: string | undefined = (c as any).last_message_updated_at || c.updated_at || c.created_at;
-              const lastTime = lastTimeRaw ? new Date(lastTimeRaw).toLocaleString() : '';
-              const preview = lastContent ? (lastContent.length > 80 ? `${lastContent.slice(0, 77)}...` : lastContent) : '';
-              return (
-                <button
-                  key={c.id}
-                  onClick={() => { setSelectedConversationId(c.id); setDialogOpen(true); }}
-                  className="w-full text-left rounded border border-gray-200 p-4 hover:bg-gray-50"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div>
-                        <div className="font-semibold flex items-center gap-2">
-                          <span>{index + 1} - {partnerLabel}</span>
-                          {unreadCount > 0 && (
-                            <span
-                              className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-2 rounded-full bg-red-600 text-white text-xs font-semibold"
-                              aria-label={`${unreadCount} unread messages`}
-                            >
-                              {unreadCount > 99 ? '99+' : unreadCount}
-                            </span>
-                          )}
-                        </div>
-                        {preview && (
-                          <div className="text-sm text-gray-600 mt-1" title={lastContent}>
-                            {preview}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-xs text-gray-500">{lastTime}</div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        )}
-
-        {dialogOpen && selectedConversationId && (
-          <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
-            <div className="bg-white w-[90vw] max-w-[700px] rounded shadow-lg border border-gray-200">
-              <div className="px-4 py-3 border-b flex items-center justify-between">
-                <div className="font-semibold">
-                  {(() => {
-                    const idx = conversations.findIndex((x) => x.id === selectedConversationId);
-                    const rank = idx >= 0 ? idx + 1 : '' as any;
-                    return `${rank ? rank + ' - ' : ''}${dialogPartnerLabel || 'Conversation'}`;
-                  })()}
-                </div>
-                <button
-                  onClick={() => { setDialogOpen(false); setSelectedConversationId(null); setDialogMessages([]); setDialogInput(''); }}
-                  className="text-sm text-gray-600 hover:text-gray-900"
-                  aria-label="Close conversation dialog"
-                >
-                  Close
-                </button>
-              </div>
-
-              <div className="p-4 h-[60vh] overflow-y-auto">
-                {dialogLoading && <div className="text-gray-500">Loading...</div>}
-                {dialogError && <div className="text-red-600">{dialogError}</div>}
-                {!dialogLoading && !dialogError && (
-                  <div>
-                    {dialogMessages.map((m) => {
-                      const outgoing = m.senderId === currentUserId;
-                      return (
-                        <div key={m.id} className={`flex mb-2 ${outgoing ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`px-3 py-2 rounded max-w-[70%] ${outgoing ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-900'}`}>
-                            <div className="text-sm whitespace-pre-wrap">{m.content}</div>
-                            <div className="text-[10px] opacity-70 mt-1">{m.updated_at ? new Date(m.updated_at).toLocaleString() : ''}</div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                    <div ref={dialogBottomRef} />
-                  </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4" role="region" aria-label="Messages split view">
+            {/* Left: Conversation list */}
+            <div className="lg:col-span-1">
+              <div className="grid gap-3" role="list" aria-label="Conversations">
+                {conversations.length === 0 && (
+                  <div className="text-gray-700" role="status" aria-live="polite">You currently have no conversations.</div>
                 )}
+                {conversations.map((c, index) => {
+                  const partnerId = c.senderId === currentUserId ? c.receiverId : c.senderId;
+                  const partner = userCache[partnerId];
+                  const partnerLabel = partner?.username || partner?.email || `User #${partnerId}`;
+                  const unreadCount = unreadMap[c.id] || 0;
+                  const lastContent: string | undefined = (c as any).last_message_content;
+                  const lastTimeRaw: string | undefined = (c as any).last_message_updated_at || c.updated_at || c.created_at;
+                  const lastTime = lastTimeRaw ? new Date(lastTimeRaw).toLocaleString() : '';
+                  const preview = lastContent ? (lastContent.length > 80 ? `${lastContent.slice(0, 77)}...` : lastContent) : '';
+                  return (
+                    <button
+                      key={c.id}
+                      onClick={() => { setSelectedConversationId(c.id); setDialogOpen(true); }}
+                      className={`w-full text-left rounded border border-gray-200 p-4 hover:bg-gray-50 ${selectedConversationId === c.id ? 'bg-gray-100' : ''}`}
+                      aria-label={`Open conversation with ${partnerLabel}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div>
+                            <div className="font-semibold flex items-center gap-2">
+                              <span>{index + 1} - {partnerLabel}</span>
+                              {unreadCount > 0 && (
+                                <span
+                                  className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-2 rounded-full bg-red-600 text-white text-xs font-semibold"
+                                  aria-label={`${unreadCount} unread messages`}
+                                >
+                                  {unreadCount > 99 ? '99+' : unreadCount}
+                                </span>
+                              )}
+                            </div>
+                            {preview && (
+                              <div className="text-sm text-gray-600 mt-1" title={lastContent}>
+                                {preview}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-500">{lastTime}</div>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
+            </div>
 
-              <div className="border-t border-gray-200 p-3 flex gap-2">
-                <input
-                  type="text"
-                  className="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-300"
-                  placeholder="Type a message..."
-                  value={dialogInput}
-                  onChange={(e) => setDialogInput(e.target.value)}
-                />
-                <button onClick={sendInDialog} className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">Send</button>
+            {/* Right: Conversation panel */}
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded border border-gray-200">
+                <div className="px-4 py-3 border-b flex items-center justify-between">
+                  <div className="font-semibold">
+                    {(() => {
+                      if (!selectedConversationId) return 'Conversation';
+                      const idx = conversations.findIndex((x) => x.id === selectedConversationId);
+                      const rank = idx >= 0 ? idx + 1 : '' as any;
+                      return `${rank ? rank + ' - ' : ''}${dialogPartnerLabel || 'Conversation'}`;
+                    })()}
+                  </div>
+                  <button
+                    onClick={() => { setDialogOpen(false); setSelectedConversationId(null); setDialogMessages([]); setDialogInput(''); }}
+                    className="text-sm text-gray-600 hover:text-gray-900"
+                    aria-label="Clear selected conversation"
+                  >
+                    Clear
+                  </button>
+                </div>
+
+                <div className="p-4 h-[60vh] overflow-y-auto">
+                  {!selectedConversationId && (
+                    <div className="text-gray-600" role="status" aria-live="polite">Select a conversation to view messages.</div>
+                  )}
+                  {selectedConversationId && (
+                    <>
+                      {dialogLoading && <div className="text-gray-500">Loading...</div>}
+                      {dialogError && <div className="text-red-600">{dialogError}</div>}
+                      {!dialogLoading && !dialogError && (
+                        <div>
+                          {dialogMessages.map((m) => {
+                            const outgoing = m.senderId === currentUserId;
+                            return (
+                              <div key={m.id} className={`flex mb-2 ${outgoing ? 'justify-end' : 'justify-start'}`}>
+                                <div className={`px-3 py-2 rounded max-w-[70%] ${outgoing ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-900'}`}>
+                                  <div className="text-sm whitespace-pre-wrap">{m.content}</div>
+                                  <div className="text-[10px] opacity-70 mt-1">{m.updated_at ? new Date(m.updated_at).toLocaleString() : ''}</div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                          <div ref={dialogBottomRef} />
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                <div className="border-t border-gray-200 p-3 flex gap-2">
+                  <input
+                    type="text"
+                    className="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-300"
+                    placeholder="Type a message..."
+                    value={dialogInput}
+                    onChange={(e) => setDialogInput(e.target.value)}
+                    disabled={!selectedConversationId}
+                  />
+                  <button onClick={sendInDialog} className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700" disabled={!selectedConversationId || dialogLoading}>Send</button>
+                </div>
               </div>
             </div>
           </div>
