@@ -113,8 +113,20 @@ exports.getConversationsByUser = async (req, res) => {
             return res.status(400).json({ success: false, error: 'User does not exist' });
         }
 
-        // Get all conversations for the user
-        const conversations = await db.query('SELECT * FROM conversations WHERE "senderId" = $1 OR "receiverId" = $1', [userId]);
+        // Get all conversations for the user with last message preview and ordering by most recent activity
+        const conversations = await db.query(`
+            SELECT c.*, lm.content AS last_message_content, lm."updated_at" AS last_message_updated_at
+            FROM conversations c
+            LEFT JOIN LATERAL (
+                SELECT m.content, m."updated_at"
+                FROM messages m
+                WHERE m."conversationId" = c.id
+                ORDER BY m."updated_at" DESC NULLS LAST
+                LIMIT 1
+            ) lm ON true
+            WHERE c."senderId" = $1 OR c."receiverId" = $1
+            ORDER BY COALESCE(lm."updated_at", c."updated_at", c."created_at") DESC
+        `, [userId]);
 
         if (!conversations.rows.length) {
             return res.status(404).json({ success: false, error: 'No conversations found' });
@@ -326,6 +338,26 @@ exports.markConversationRead = async (req, res) => {
     } catch (error) {
         req.logger && req.logger.error && req.logger.error('Error marking conversation read:', error.message);
         console.error('Error marking conversation read:', error.message);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+};
+
+exports.markAllMessagesRead = async (req, res) => {
+    try {
+        const userId = req.user && req.user.id;
+        if (!userId) {
+            return res.status(401).json({ success: false, error: 'Unauthorized' });
+        }
+        const updated = await db.query(
+            'UPDATE messages SET "is_read" = TRUE, "updated_at" = NOW() WHERE "recipientId" = $1 AND "is_read" = FALSE',
+            [userId]
+        );
+        const updatedCount = updated.rowCount || 0;
+        req.logger && req.logger.info && req.logger.info(`Marked ${updatedCount} messages as read for user ${userId}`);
+        return res.status(200).json({ success: true, updated: updatedCount });
+    } catch (error) {
+        req.logger && req.logger.error && req.logger.error('Error marking all messages read:', error.message);
+        console.error('Error marking all messages read:', error.message);
         return res.status(500).json({ success: false, error: 'Internal server error' });
     }
 };

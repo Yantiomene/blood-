@@ -100,12 +100,37 @@ const MessagesListInner: React.FC = () => {
 
   const title = useMemo(() => 'Messages', []);
 
+  const handleMarkAllRead = async () => {
+    try {
+      const { markAllMessagesAsRead } = await import('@/app/api/messages');
+      const res = await markAllMessagesAsRead();
+      // Trigger global refresh for header and list badges
+      window.dispatchEvent(new Event('unreadChanged'));
+      // Refresh local per-conversation map
+      const map = await getUnreadCountsByConversation();
+      setUnreadMap(map);
+    } catch (e) {
+      console.error('Failed to mark all messages as read:', e);
+    }
+  };
+
   return (
     <>
       <Header isLoggedin={auth} />
       <main className="container mx-auto py-8 min-h-screen">
-        <h1 className="text-3xl font-bold mb-2">{title}</h1>
-        <p className="text-gray-600 mb-6">View and continue your conversations.</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">{title}</h1>
+            <p className="text-gray-600 mb-6">View and continue your conversations.</p>
+          </div>
+          <button
+            onClick={handleMarkAllRead}
+            className="h-9 px-3 rounded bg-gray-800 text-white text-sm hover:bg-gray-700"
+            aria-label="Mark all messages as read"
+          >
+            Mark all as read
+          </button>
+        </div>
         {loading && <div className="text-gray-500">Loading...</div>}
         {error && <div className="text-red-600">{error}</div>}
         {!loading && !error && (
@@ -118,24 +143,35 @@ const MessagesListInner: React.FC = () => {
               const partner = userCache[partnerId];
               const partnerLabel = partner?.username || partner?.email || `User #${partnerId}`;
               const unreadCount = unreadMap[c.id] || 0;
+              const lastContent: string | undefined = (c as any).last_message_content;
+              const lastTimeRaw: string | undefined = (c as any).last_message_updated_at || c.updated_at || c.created_at;
+              const lastTime = lastTimeRaw ? new Date(lastTimeRaw).toLocaleString() : '';
+              const preview = lastContent ? (lastContent.length > 80 ? `${lastContent.slice(0, 77)}...` : lastContent) : '';
               return (
                 <Link key={c.id} href={`/dashboard/messages/${c.id}`} className="block rounded border border-gray-200 p-4 hover:bg-gray-50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div>
-                        <div className="font-semibold">Conversation: {partnerLabel}</div>
-                        <div className="text-sm text-gray-600">Conversation ID: {c.id}</div>
+                        <div className="font-semibold flex items-center gap-2">
+                          <span>Conversation: {partnerLabel}</span>
+                          {unreadCount > 0 && (
+                            <span
+                              className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-2 rounded-full bg-red-600 text-white text-xs font-semibold"
+                              aria-label={`${unreadCount} unread messages`}
+                            >
+                              {unreadCount > 99 ? '99+' : unreadCount}
+                            </span>
+                          )}
+                        </div>
+                        {preview && (
+                          <div className="text-sm text-gray-600 mt-1" title={lastContent}>
+                            {preview}
+                          </div>
+                        )}
+                        <div className="text-xs text-gray-500 mt-0.5">Conversation ID: {c.id}</div>
                       </div>
-                      {unreadCount > 0 && (
-                        <span
-                          className="ml-2 inline-flex items-center justify-center min-w-[18px] h-[18px] px-2 rounded-full bg-red-600 text-white text-xs font-semibold"
-                          aria-label={`${unreadCount} unread messages`}
-                        >
-                          {unreadCount > 99 ? '99+' : unreadCount}
-                        </span>
-                      )}
                     </div>
-                    <div className="text-xs text-gray-500">{c.updated_at ? new Date(c.updated_at).toLocaleString() : ''}</div>
+                    <div className="text-xs text-gray-500">{lastTime}</div>
                   </div>
                 </Link>
               );

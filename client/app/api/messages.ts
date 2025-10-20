@@ -31,7 +31,12 @@ export async function getMessagesByConversation(conversationId: number | string)
   try {
     const response = await axios.get(`${apiUrl}/messages/${conversationId}`, { withCredentials: true });
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
+    const status = error?.response?.status;
+    if (status === 404 || status === 401) {
+      // Gracefully degrade to empty messages array for not found/unauthorized
+      return [];
+    }
     console.error('Failed to get messages by conversation:', error);
     throw error;
   }
@@ -117,5 +122,15 @@ export async function getUnreadCountsByConversation(): Promise<Record<number, nu
   } catch (error) {
     console.error('Failed to get unread counts by conversation:', error);
     return {};
+  }
+}
+
+export async function markAllMessagesAsRead(): Promise<{ success: boolean; updated: number }> {
+  try {
+    const response = await axios.put(`${apiUrl}/messages/mark-all-read`, {}, { withCredentials: true });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to mark all messages as read:', error);
+    throw error;
   }
 }
