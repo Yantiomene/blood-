@@ -99,3 +99,23 @@ export async function markConversationAsRead(conversationId: number | string): P
     throw error;
   }
 }
+
+export async function getUnreadCountsByConversation(): Promise<Record<number, number>> {
+  try {
+    const response = await axios.get(`${apiUrl}/conversations/unread-counts`, { withCredentials: true });
+    const data = response.data || {};
+    const rows = Array.isArray(data.unreadCounts) ? data.unreadCounts : [];
+    const map: Record<number, number> = {};
+    for (const row of rows) {
+      const cid = Number(row.conversationId ?? row.conversation_id ?? row.id);
+      const count = Number(row.count ?? 0);
+      if (Number.isFinite(cid) && count > 0) {
+        map[cid] = count;
+      }
+    }
+    return map;
+  } catch (error) {
+    console.error('Failed to get unread counts by conversation:', error);
+    return {};
+  }
+}

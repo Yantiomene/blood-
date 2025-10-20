@@ -9,6 +9,7 @@ const {
     deleteMessage,
     getUnreadCount,
     markConversationRead,
+    getUnreadCountsByConversation,
  } = require('../controllers/messages');
 const { userAuth } = require('../middlewares/auth-middleware');
 
@@ -19,6 +20,7 @@ router.get('/messages/:conversationId', userAuth, getMessagesByConversation);
 router.get('/conversations/:userId', userAuth, getConversationsByUser);
 router.get('/messages/user/:userId', userAuth, getMessagesByUser);
 router.get('/messages/unread-count', userAuth, getUnreadCount);
+router.get('/conversations/unread-counts', userAuth, getUnreadCountsByConversation);
 router.put('/conversations/:id/read', userAuth, markConversationRead);
 router.put('/updateMessage/:messageId', userAuth, updateMessage);
 router.delete('/deleteMessage/:messageId', userAuth, deleteMessage); 

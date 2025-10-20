@@ -26,11 +26,20 @@ const Header: React.FC<{ isLoggedin: boolean }> = ({ isLoggedin }) => {
                 setUnreadCount(0);
             }
         };
+        const handleUnreadChanged = () => { loadCount(); };
+        if (typeof window !== 'undefined') {
+            window.addEventListener('unreadChanged', handleUnreadChanged);
+        }
         loadCount();
         if (isLoggedin) {
             timer = setInterval(loadCount, 60000); // refresh every 60s
         }
-        return () => { if (timer) clearInterval(timer); };
+        return () => {
+            if (timer) clearInterval(timer);
+            if (typeof window !== 'undefined') {
+                window.removeEventListener('unreadChanged', handleUnreadChanged);
+            }
+        };
     }, [isLoggedin, pathname]);
 
     return (

@@ -259,17 +259,36 @@ exports.getUnreadCount = async (req, res) => {
         if (!userId) {
             return res.status(401).json({ success: false, error: 'Unauthorized' });
         }
-
         const result = await db.query(
             'SELECT COUNT(*)::int AS count FROM messages WHERE "recipientId" = $1 AND "is_read" = FALSE',
             [userId]
         );
         const count = (result.rows && result.rows[0] && (result.rows[0].count ?? 0)) || 0;
-        req.logger && req.logger.info && req.logger.info(`Unread count for user ${userId}: ${count}`);
         return res.status(200).json({ success: true, count });
     } catch (error) {
         req.logger && req.logger.error && req.logger.error('Error getting unread count:', error.message);
         console.error('Error getting unread count:', error.message);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+};
+
+exports.getUnreadCountsByConversation = async (req, res) => {
+    try {
+        const userId = req.user && req.user.id;
+        if (!userId) {
+            return res.status(401).json({ success: false, error: 'Unauthorized' });
+        }
+        const result = await db.query(`
+            SELECT "conversationId", COUNT(*)::int AS count
+            FROM messages
+            WHERE "recipientId" = $1 AND "is_read" = FALSE
+            GROUP BY "conversationId"
+        `, [userId]);
+        const rows = result.rows || [];
+        return res.status(200).json({ success: true, unreadCounts: rows });
+    } catch (error) {
+        req.logger && req.logger.error && req.logger.error('Error getting unread counts by conversation:', error.message);
+        console.error('Error getting unread counts by conversation:', error.message);
         return res.status(500).json({ success: false, error: 'Internal server error' });
     }
 };

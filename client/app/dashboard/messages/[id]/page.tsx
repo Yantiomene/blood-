@@ -7,7 +7,7 @@ import withAuth from '@/app/components/authHOC';
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import store from '@/app/redux/store';
 import { fetchCurrentUser } from '@/app/redux/userSlice';
-import { createMessage, getConversationsByUser, getMessagesByConversation } from '@/app/api/messages';
+import { createMessage, getConversationsByUser, getMessagesByConversation, markConversationAsRead } from '@/app/api/messages';
 import { getUserById } from '@/app/api/user';
 
 interface MessageItem { id: number; conversationId: number; senderId: number; recipientId: number; content: string; messageType?: string; updated_at?: string; created_at?: string; }
@@ -80,6 +80,17 @@ const ConversationInner: React.FC = () => {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages.length]);
+
+  useEffect(() => {
+    if (!conversationId || !currentUserId) return;
+    const hasInbound = messages.some((m) => m.recipientId === currentUserId);
+    if (!hasInbound) return;
+    markConversationAsRead(conversationId)
+      .then(() => {
+        try { window.dispatchEvent(new Event('unreadChanged')); } catch {}
+      })
+      .catch((err) => console.error('Failed to mark conversation as read:', err));
+  }, [conversationId, currentUserId, messages]);
 
   const title = useMemo(() => partnerLabel ? `Conversation with ${partnerLabel}` : 'Conversation', [partnerLabel]);
 
