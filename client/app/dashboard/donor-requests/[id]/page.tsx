@@ -9,6 +9,7 @@ import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { getUserById } from '../../../api/user';
 import { fetchCurrentUser } from '../../../redux/userSlice';
+import { createMessage, getConversationsByUser } from '../../../api/messages';
 
 interface RequestDetail {
   id: number;
@@ -38,6 +39,8 @@ const RequestDetailPage: React.FC = () => {
   const [editBloodType, setEditBloodType] = useState<string>('');
   const [editMessage, setEditMessage] = useState<string>('');
   const [accepted, setAccepted] = useState(false);
+  const [conversationId, setConversationId] = useState<number | null>(null);
+  const [contacting, setContacting] = useState(false);
   const currentUser = useSelector((state: any) => state.user?.data || {});
   const dispatch = useDispatch();
   const router = useRouter();
@@ -89,6 +92,40 @@ const RequestDetailPage: React.FC = () => {
     }
   };
 
+  const contactRequestor = async () => {
+    if (!detail) return;
+    setContacting(true);
+    try {
+      const myId = Number(currentUser?.id || 0);
+      let cid: number | null = null;
+      try {
+        if (myId) {
+          const convRes = await getConversationsByUser(myId);
+          const list: any[] = Array.isArray(convRes?.conversations) ? convRes.conversations : (Array.isArray(convRes) ? convRes : []);
+          const existing = list.find((c: any) => {
+            const otherId = c.senderId === myId ? c.receiverId : c.senderId;
+            return otherId === detail.userId;
+          });
+          if (existing?.id) cid = Number(existing.id);
+        }
+      } catch {}
+      if (!cid) {
+        const msgRes = await createMessage({ receiverId: detail.userId, content: 'Hi — I accepted your request. Let’s coordinate.', messageType: 'text' });
+        cid = Number((msgRes && (msgRes.conversationId || (msgRes.message && msgRes.message.conversationId))) || 0) || null;
+      }
+      if (cid) {
+        setConversationId(cid);
+        router.push(`/dashboard/messages/${cid}`);
+        return;
+      }
+      alert('Unable to open chat. Please try again later.');
+    } catch (err: any) {
+      alert(err?.response?.data?.error || err?.message || 'Failed to contact requestor.');
+    } finally {
+      setContacting(false);
+    }
+  };
+
     useEffect(() => {
       // Ensure current user profile is loaded for permission checks
       if (!currentUser?.id) {
@@ -134,8 +171,10 @@ const RequestDetailPage: React.FC = () => {
       setActionLoading(true);
       try {
         if (decision === 'accept') {
-          await acceptRequest(detail.id);
+          const res = await acceptRequest(detail.id);
           setAccepted(true);
+          const cid = (res && (res.conversationId || (res.data && res.data.conversationId))) || null;
+          if (cid) setConversationId(Number(cid));
         } else if (decision === 'deny') {
           await denyRequest(detail.id, message);
         }
@@ -237,7 +276,15 @@ const RequestDetailPage: React.FC = () => {
               </div>
             </div>
             {accepted && (
-              <p className="mb-2"><span className="px-2 py-1 text-xs rounded bg-green-200 text-green-800">accepted by you</span></p>
+              <>
+                <p className="mb-2"><span className="px-2 py-1 text-xs rounded bg-green-200 text-green-800">accepted by you</span></p>
+                {!isOwn && (
+                  <div className="mt-2">
+                    <button onClick={contactRequestor} disabled={contacting} className="px-3 py-2 rounded bg-blue-600 text-white disabled:opacity-60">Contact Requestor</button>
+                    <p className="text-xs text-gray-600 mt-1">Opens chat and creates conversation if needed.</p>
+                  </div>
+                )}
+              </>
             )}
             <p className="text-sm text-gray-600">Blood Type: <span className="font-semibold">{detail.bloodType}</span></p>
             <p className="text-sm text-gray-600">Quantity: <span className="font-semibold">{detail.quantity} ml</span></p>
@@ -325,5 +372,40 @@ const RequestDetailPage: React.FC = () => {
       </div>
     );
   };
+
+  const contactRequestor = async () => {
+    if (!detail) return;
+    setContacting(true);
+    try {
+      const myId = Number(currentUser?.id || 0);
+      let cid: number | null = null;
+      try {
+        if (myId) {
+          const convRes = await getConversationsByUser(myId);
+          const list: any[] = Array.isArray(convRes?.conversations) ? convRes.conversations : (Array.isArray(convRes) ? convRes : []);
+          const existing = list.find((c: any) => {
+            const otherId = c.senderId === myId ? c.receiverId : c.senderId;
+            return otherId === detail.userId;
+          });
+          if (existing?.id) cid = Number(existing.id);
+        }
+      } catch {}
+      if (!cid) {
+        const msgRes = await createMessage({ receiverId: detail.userId, content: 'Hi — I accepted your request. Let’s coordinate.', messageType: 'text' });
+        cid = Number((msgRes && (msgRes.conversationId || (msgRes.message && msgRes.message.conversationId))) || 0) || null;
+      }
+      if (cid) {
+        setConversationId(cid);
+        router.push(`/dashboard/messages/${cid}`);
+        return;
+      }
+      alert('Unable to open chat. Please try again later.');
+    } catch (err: any) {
+      alert(err?.response?.data?.error || err?.message || 'Failed to contact requestor.');
+    } finally {
+      setContacting(false);
+    }
+  };
+
 
   export default withAuth(RequestDetailPage);

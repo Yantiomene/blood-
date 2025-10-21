@@ -9,6 +9,7 @@ import store from '@/app/redux/store';
 import { fetchCurrentUser } from '@/app/redux/userSlice';
 import { getConversationsByUser, getUnreadCountsByConversation, getMessagesByConversation, createMessage, markConversationAsRead } from '@/app/api/messages';
 import { getUserById } from '@/app/api/user';
+import { useSearchParams } from 'next/navigation';
 
 interface ConversationItem { id: number; senderId: number; receiverId: number; updated_at?: string; created_at?: string; }
 interface MessageItem { id: number; conversationId: number; senderId: number; recipientId: number; content: string; messageType?: string; updated_at?: string; created_at?: string; }
@@ -18,6 +19,7 @@ const MessagesListInner: React.FC = () => {
   const dispatch = useDispatch();
   const auth = useSelector((state: any) => state.auth.isAuth);
   const currentUserId = useSelector((state: any) => state.user?.data?.id);
+  const searchParams = useSearchParams();
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
