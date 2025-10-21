@@ -151,7 +151,7 @@ if (process.env.NODE_ENV !== 'test') {
     logger.error('WebSocket Server error:', error);
   });
   
-  wss.on('connection', (ws) => {
+  wss.on('connection', (ws, req) => {
       logger.info('WebSocket Client connected');
       
       ws.on('error', (error) => {
@@ -159,7 +159,7 @@ if (process.env.NODE_ENV !== 'test') {
       });
 
       // Handle WebSocket messages
-      handleWebSocketMessages(ws);
+      handleWebSocketMessages(ws, req);
   });
 }
 

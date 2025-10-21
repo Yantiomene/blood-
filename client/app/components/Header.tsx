@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import NavItem from './NavItem';
 import UserProfileIcon from "./UserIcon";
 import { getUnreadMessageCount } from '../api/messages';
+import { subscribeToUnreadUpdates, UnreadUpdate } from '../utils/websocket';
 
 const Header: React.FC<{ isLoggedin: boolean }> = ({ isLoggedin }) => {
     const pathname = usePathname();
@@ -17,6 +18,8 @@ const Header: React.FC<{ isLoggedin: boolean }> = ({ isLoggedin }) => {
 
     useEffect(() => {
         let timer: ReturnType<typeof setInterval> | null = null;
+        let unsubscribeWebSocket: (() => void) | null = null;
+        
         const loadCount = async () => {
             if (!isLoggedin) { setUnreadCount(0); return; }
             try {
@@ -26,16 +29,36 @@ const Header: React.FC<{ isLoggedin: boolean }> = ({ isLoggedin }) => {
                 setUnreadCount(0);
             }
         };
+        
         const handleUnreadChanged = () => { loadCount(); };
+        
+        // WebSocket subscription for real-time updates
+        const handleWebSocketUpdate = (update: UnreadUpdate) => {
+            console.log('Header received unread update:', update);
+            if (update.allRead) {
+                setUnreadCount(0);
+            } else {
+                setUnreadCount(update.totalUnread || 0);
+            }
+        };
+        
         if (typeof window !== 'undefined') {
             window.addEventListener('unreadChanged', handleUnreadChanged);
         }
+        
         loadCount();
+        
         if (isLoggedin) {
-            timer = setInterval(loadCount, 60000); // refresh every 60s
+            // Set up WebSocket subscription for real-time updates
+            unsubscribeWebSocket = subscribeToUnreadUpdates(handleWebSocketUpdate);
+            
+            // Keep the polling as fallback, but reduce frequency since we have real-time updates
+            timer = setInterval(loadCount, 300000); // refresh every 5 minutes as fallback
         }
+        
         return () => {
             if (timer) clearInterval(timer);
+            if (unsubscribeWebSocket) unsubscribeWebSocket();
             if (typeof window !== 'undefined') {
                 window.removeEventListener('unreadChanged', handleUnreadChanged);
             }

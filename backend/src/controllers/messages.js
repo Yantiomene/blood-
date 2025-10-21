@@ -1,4 +1,5 @@
 const db = require('../db');
+const { broadcastUnreadUpdate } = require('./websocketHandlers');
 
 // function to create a new message
 exports.createMessage = async (req, res) => {
@@ -334,6 +335,38 @@ exports.markConversationRead = async (req, res) => {
         );
         const updatedCount = updated.rowCount || 0;
         req.logger && req.logger.info && req.logger.info(`Marked ${updatedCount} messages as read in conversation ${conversationId} for user ${userId}`);
+        
+        // Broadcast unread count update if messages were marked as read
+        if (updatedCount > 0) {
+            try {
+                // Get updated unread counts by conversation
+                const unreadResult = await db.query(`
+                    SELECT "conversationId", COUNT(*)::int AS count
+                    FROM messages
+                    WHERE "recipientId" = $1 AND "is_read" = FALSE
+                    GROUP BY "conversationId"
+                `, [userId]);
+                
+                // Get total unread count
+                const totalResult = await db.query(`
+                    SELECT COUNT(*)::int AS total
+                    FROM messages
+                    WHERE "recipientId" = $1 AND "is_read" = FALSE
+                `, [userId]);
+                
+                const unreadCounts = unreadResult.rows || [];
+                const totalUnread = totalResult.rows[0]?.total || 0;
+                
+                broadcastUnreadUpdate(userId, {
+                    totalUnread,
+                    unreadCounts,
+                    conversationId: parseInt(conversationId)
+                });
+            } catch (broadcastError) {
+                req.logger && req.logger.error && req.logger.error('Error broadcasting unread update:', broadcastError.message);
+            }
+        }
+        
         return res.status(200).json({ success: true, updated: updatedCount });
     } catch (error) {
         req.logger && req.logger.error && req.logger.error('Error marking conversation read:', error.message);
@@ -354,6 +387,20 @@ exports.markAllMessagesRead = async (req, res) => {
         );
         const updatedCount = updated.rowCount || 0;
         req.logger && req.logger.info && req.logger.info(`Marked ${updatedCount} messages as read for user ${userId}`);
+        
+        // Broadcast unread count update if messages were marked as read
+        if (updatedCount > 0) {
+            try {
+                broadcastUnreadUpdate(userId, {
+                    totalUnread: 0,
+                    unreadCounts: [],
+                    allRead: true
+                });
+            } catch (broadcastError) {
+                req.logger && req.logger.error && req.logger.error('Error broadcasting unread update:', broadcastError.message);
+            }
+        }
+        
         return res.status(200).json({ success: true, updated: updatedCount });
     } catch (error) {
         req.logger && req.logger.error && req.logger.error('Error marking all messages read:', error.message);

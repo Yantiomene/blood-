@@ -10,6 +10,7 @@ import { fetchCurrentUser } from '@/app/redux/userSlice';
 import { getConversationsByUser, getUnreadCountsByConversation, getMessagesByConversation, createMessage, markConversationAsRead } from '@/app/api/messages';
 import { getUserById } from '@/app/api/user';
 import { useSearchParams } from 'next/navigation';
+import { subscribeToUnreadUpdates, UnreadUpdate } from '@/app/utils/websocket';
 
 interface ConversationItem { id: number; senderId: number; receiverId: number; updated_at?: string; created_at?: string; }
 interface MessageItem { id: number; conversationId: number; senderId: number; recipientId: number; content: string; messageType?: string; updated_at?: string; created_at?: string; }
@@ -123,6 +124,39 @@ const MessagesListInner: React.FC = () => {
       window.removeEventListener('unreadChanged', refreshCounts as EventListener);
     };
   }, []);
+
+  // Subscribe to real-time unread count updates via WebSocket
+  useEffect(() => {
+    if (!currentUserId) return;
+
+    const handleUnreadUpdate = (update: UnreadUpdate) => {
+      console.log('Received unread update:', update);
+      
+      // Update local unread map
+      if (update.allRead) {
+        // All messages marked as read
+        setUnreadMap({});
+      } else {
+        // Convert array to map format
+        const newMap: Record<number, number> = {};
+        update.unreadCounts.forEach(({ conversationId, count }) => {
+          if (count > 0) {
+            newMap[conversationId] = count;
+          }
+        });
+        setUnreadMap(newMap);
+      }
+      
+      // Also trigger the global unreadChanged event for other components (like header)
+      window.dispatchEvent(new Event('unreadChanged'));
+    };
+
+    const unsubscribe = subscribeToUnreadUpdates(handleUnreadUpdate);
+    
+    return () => {
+      unsubscribe();
+    };
+  }, [currentUserId]);
 
   const title = useMemo(() => 'Messages', []);
   // Add requestId from query for contextual header link
