@@ -188,6 +188,24 @@ exports.updateMessage = async (req, res) => {
             return res.status(404).json({ success: false, error: 'Message not found' });
         }
 
+        // Enforce authentication and sender-only edit policy
+        const userId = req.user && req.user.id;
+        if (!userId) {
+            return res.status(401).json({ success: false, error: 'Unauthorized' });
+        }
+        const row = message.rows[0];
+        if (Number(row.senderId) !== Number(userId)) {
+            return res.status(403).json({ success: false, error: 'Only the sender can edit this message' });
+        }
+        // Enforce 5-minute edit window from creation time
+        const createdOrUpdated = row.created_at || row.updated_at || row.createdAt || row.updatedAt;
+        const createdTime = createdOrUpdated ? new Date(createdOrUpdated).getTime() : Date.now();
+        const nowMs = Date.now();
+        const FIVE_MINUTES_MS = 5 * 60 * 1000;
+        if (nowMs - createdTime > FIVE_MINUTES_MS) {
+            return res.status(403).json({ success: false, error: 'Edit window has expired (5 minutes)' });
+        }
+
         const updateFields = [];
         const updateValues = [];
 
@@ -223,6 +241,10 @@ exports.updateMessage = async (req, res) => {
             });
         }
 
+        // Optionally touch updated_at if present in schema
+        updateFields.push('updated_at');
+        updateValues.push(new Date());
+
         updateValues.push(messageId);
 
         // Update the message using parameterized placeholders
@@ -251,6 +273,24 @@ exports.deleteMessage = async (req, res) => {
         const message = await db.query('SELECT * FROM messages WHERE id = $1', [messageId]);
         if (!message.rows.length) {
             return res.status(404).json({ success: false, error: 'Message not found' });
+        }
+
+        // Enforce authentication and sender-only delete policy
+        const userId = req.user && req.user.id;
+        if (!userId) {
+            return res.status(401).json({ success: false, error: 'Unauthorized' });
+        }
+        const row = message.rows[0];
+        if (Number(row.senderId) !== Number(userId)) {
+            return res.status(403).json({ success: false, error: 'Only the sender can delete this message' });
+        }
+        // Enforce 5-minute delete window from creation time
+        const createdOrUpdated = row.created_at || row.updated_at || row.createdAt || row.updatedAt;
+        const createdTime = createdOrUpdated ? new Date(createdOrUpdated).getTime() : Date.now();
+        const nowMs = Date.now();
+        const FIVE_MINUTES_MS = 5 * 60 * 1000;
+        if (nowMs - createdTime > FIVE_MINUTES_MS) {
+            return res.status(403).json({ success: false, error: 'Delete window has expired (5 minutes)' });
         }
 
         // Delete the message

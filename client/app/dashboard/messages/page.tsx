@@ -12,6 +12,8 @@ import { getUserById } from '@/app/api/user';
 import { useSearchParams } from 'next/navigation';
 import { subscribeToUnreadUpdates, UnreadUpdate } from '@/app/utils/websocket';
 
+import { updateMessage, deleteMessage } from '@/app/api/messages';
+
 interface ConversationItem { id: number; senderId: number; receiverId: number; updated_at?: string; created_at?: string; }
 interface MessageItem { id: number; conversationId: number; senderId: number; recipientId: number; content: string; messageType?: string; updated_at?: string; created_at?: string; }
 interface UserInfo { id: number; username?: string; email?: string; }
@@ -35,7 +37,69 @@ const MessagesListInner: React.FC = () => {
   const [dialogPartnerId, setDialogPartnerId] = useState<number | null>(null);
   const [dialogPartnerLabel, setDialogPartnerLabel] = useState<string>('');
   const [dialogInput, setDialogInput] = useState<string>('');
+  // Editing state for message modifications (sender-only within 5 minutes)
+  const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
+  const [editText, setEditText] = useState<string>('');
   const dialogBottomRef = useRef<HTMLDivElement | null>(null);
+
+  // Helper: check if a message can be modified by current user within 5 minutes
+  const canModifyMessage = (m: MessageItem): boolean => {
+    if (!currentUserId) return false;
+    if (m.senderId !== currentUserId) return false;
+    const tsRaw: any = (m as any).created_at || (m as any).updated_at || null;
+    if (!tsRaw) return false;
+    const ts = new Date(tsRaw).getTime();
+    const now = Date.now();
+    return now - ts <= 5 * 60 * 1000; // 5 minutes
+  };
+
+  const startEditMessage = (m: MessageItem) => {
+    if (!canModifyMessage(m)) return;
+    setEditingMessageId(m.id);
+    setEditText(m.content || '');
+  };
+
+  const cancelEditMessage = () => {
+    setEditingMessageId(null);
+    setEditText('');
+  };
+
+  const saveEditMessage = async () => {
+    if (!editingMessageId) return;
+    const mid = editingMessageId;
+    const current = dialogMessages.find((x) => x.id === mid);
+    if (!current || !canModifyMessage(current)) {
+      alert('Edit window expired. You can only edit within 5 minutes.');
+      cancelEditMessage();
+      return;
+    }
+    const text = editText.trim();
+    if (!text) {
+      alert('Message content cannot be empty');
+      return;
+    }
+    try {
+      const res = await updateMessage(mid, { content: text });
+      const updated = (res as any)?.message || null;
+      setDialogMessages((prev) => prev.map((x) => (x.id === mid ? { ...x, content: text, updated_at: (updated && updated.updated_at) || new Date().toISOString() } : x)));
+      cancelEditMessage();
+    } catch (err: any) {
+      alert(err?.response?.data?.error || 'Failed to edit message');
+    }
+  };
+
+  const deleteMessageInDialog = async (m: MessageItem) => {
+    if (!canModifyMessage(m)) {
+      alert('Delete window expired. You can only delete within 5 minutes.');
+      return;
+    }
+    try {
+      await deleteMessage(m.id);
+      setDialogMessages((prev) => prev.filter((x) => x.id !== m.id));
+    } catch (err: any) {
+      alert(err?.response?.data?.error || 'Failed to delete message');
+    }
+  };
 
   useEffect(() => {
     dispatch(fetchCurrentUser() as any);
@@ -405,11 +469,55 @@ const MessagesListInner: React.FC = () => {
                         <div>
                           {dialogMessages.map((m) => {
                             const outgoing = m.senderId === currentUserId;
+                            const canModify = canModifyMessage(m);
+                            const isEditing = editingMessageId === m.id;
                             return (
                               <div key={m.id} className={`flex mb-2 ${outgoing ? 'justify-end' : 'justify-start'}`}>
                                 <div className={`px-3 py-2 rounded max-w-[70%] ${outgoing ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-900'}`}>
-                                  <div className="text-sm whitespace-pre-wrap">{m.content}</div>
-                                  <div className="text-[10px] opacity-70 mt-1">{m.updated_at ? new Date(m.updated_at).toLocaleString() : ''}</div>
+                                  {!isEditing && (
+                                    <>
+                                      <div className="text-sm whitespace-pre-wrap">{m.content}</div>
+                                      <div className="text-[10px] opacity-70 mt-1 flex items-center gap-2">
+                                        <span>{m.updated_at ? new Date(m.updated_at).toLocaleString() : ''}</span>
+                                        {outgoing && canModify && (
+                                          <span className="inline-flex items-center gap-2">
+                                            <button
+                                              className="text-[10px] underline"
+                                              onClick={() => startEditMessage(m)}
+                                              aria-label="Edit message"
+                                            >Edit</button>
+                                            <button
+                                              className="text-[10px] underline"
+                                              onClick={() => deleteMessageInDialog(m)}
+                                              aria-label="Delete message"
+                                            >Delete</button>
+                                          </span>
+                                        )}
+                                      </div>
+                                    </>
+                                  )}
+                                  {isEditing && (
+                                    <div className="space-y-2">
+                                      <input
+                                        type="text"
+                                        className="w-full border border-gray-300 rounded px-2 py-1 text-black"
+                                        value={editText}
+                                        onChange={(e) => setEditText(e.target.value)}
+                                      />
+                                      <div className="flex items-center gap-2">
+                                        <button
+                                          className="h-7 px-2 rounded bg-white text-black border"
+                                          onClick={saveEditMessage}
+                                          aria-label="Save edit"
+                                        >Save</button>
+                                        <button
+                                          className="h-7 px-2 rounded bg-white text-black border"
+                                          onClick={cancelEditMessage}
+                                          aria-label="Cancel edit"
+                                        >Cancel</button>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             );
