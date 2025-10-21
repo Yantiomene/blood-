@@ -115,7 +115,7 @@ const RequestDetailPage: React.FC = () => {
       }
       if (cid) {
         setConversationId(cid);
-        router.push(`/dashboard/messages/${cid}`);
+        router.push(`/dashboard/messages?conversationId=${cid}`);
         return;
       }
       alert('Unable to open chat. Please try again later.');
@@ -396,7 +396,7 @@ const RequestDetailPage: React.FC = () => {
       }
       if (cid) {
         setConversationId(cid);
-        router.push(`/dashboard/messages/${cid}`);
+        router.push(`/dashboard/messages?conversationId=${cid}`);
         return;
       }
       alert('Unable to open chat. Please try again later.');

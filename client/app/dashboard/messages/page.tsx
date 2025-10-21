@@ -99,6 +99,15 @@ const MessagesListInner: React.FC = () => {
     return () => { mounted = false; };
   }, [currentUserId]);
 
+  useEffect(() => {
+    const cidParam = searchParams?.get('conversationId');
+    const cid = cidParam ? Number(cidParam) : null;
+    if (cid && !selectedConversationId) {
+      setSelectedConversationId(cid);
+      setDialogOpen(true);
+    }
+  }, [searchParams, selectedConversationId]);
+
   // Refresh unread counts when other parts of the app mark messages read
   useEffect(() => {
     const refreshCounts = async () => {
