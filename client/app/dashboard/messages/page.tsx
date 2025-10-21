@@ -125,6 +125,12 @@ const MessagesListInner: React.FC = () => {
   }, []);
 
   const title = useMemo(() => 'Messages', []);
+  // Add requestId from query for contextual header link
+  const requestIdFromQuery = useMemo(() => {
+    const ridParam = searchParams?.get('requestId');
+    const rid = ridParam ? Number(ridParam) : null;
+    return rid && Number.isFinite(rid) ? rid : null;
+  }, [searchParams]);
 
   const handleMarkAllRead = async () => {
     try {
@@ -208,6 +214,19 @@ const MessagesListInner: React.FC = () => {
       })
       .catch((err) => console.error('Failed to mark conversation as read:', err));
   }, [dialogOpen, selectedConversationId, currentUserId, dialogMessages]);
+
+  // Also mark-as-read when dialog opens if there are unread counts
+  useEffect(() => {
+    if (!dialogOpen || !selectedConversationId) return;
+    const unread = unreadMap[selectedConversationId] || 0;
+    if (unread <= 0) return;
+    markConversationAsRead(selectedConversationId)
+      .then(() => {
+        setUnreadMap((prev) => ({ ...prev, [selectedConversationId]: 0 }));
+        try { window.dispatchEvent(new Event('unreadChanged')); } catch {}
+      })
+      .catch((err) => console.error('Failed to mark conversation as read on open:', err));
+  }, [dialogOpen, selectedConversationId, unreadMap]);
 
   const sendInDialog = async () => {
     if (!dialogInput.trim() || !dialogPartnerId || !currentUserId || !selectedConversationId) return;
@@ -312,13 +331,24 @@ const MessagesListInner: React.FC = () => {
             <div className="lg:col-span-2">
               <div className="bg-white rounded border border-gray-200">
                 <div className="px-4 py-3 border-b flex items-center justify-between">
-                  <div className="font-semibold">
-                    {(() => {
+                  <div className="font-semibold flex items-center gap-2">
+                    <span>{(() => {
                       if (!selectedConversationId) return 'Conversation';
                       const idx = conversations.findIndex((x) => x.id === selectedConversationId);
                       const rank = idx >= 0 ? idx + 1 : '' as any;
                       return `${rank ? rank + ' - ' : ''}${dialogPartnerLabel || 'Conversation'}`;
-                    })()}
+                    })()}</span>
+                    {requestIdFromQuery && (
+                      <a
+                        href={`/dashboard/donor-requests/${requestIdFromQuery}`}
+                        className="text-xs text-blue-600 hover:underline"
+                        target="_self"
+                        rel="noopener"
+                        aria-label="View original donation request"
+                      >
+                        View request
+                      </a>
+                    )}
                   </div>
                   <button
                     onClick={() => { setDialogOpen(false); setSelectedConversationId(null); setDialogMessages([]); setDialogInput(''); }}

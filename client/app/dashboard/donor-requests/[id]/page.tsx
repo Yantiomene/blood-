@@ -115,7 +115,7 @@ const RequestDetailPage: React.FC = () => {
       }
       if (cid) {
         setConversationId(cid);
-        router.push(`/dashboard/messages?conversationId=${cid}`);
+        router.push(`/dashboard/messages?conversationId=${cid}&requestId=${detail.id}`);
         return;
       }
       alert('Unable to open chat. Please try again later.');
@@ -372,40 +372,5 @@ const RequestDetailPage: React.FC = () => {
       </div>
     );
   };
-
-  const contactRequestor = async () => {
-    if (!detail) return;
-    setContacting(true);
-    try {
-      const myId = Number(currentUser?.id || 0);
-      let cid: number | null = null;
-      try {
-        if (myId) {
-          const convRes = await getConversationsByUser(myId);
-          const list: any[] = Array.isArray(convRes?.conversations) ? convRes.conversations : (Array.isArray(convRes) ? convRes : []);
-          const existing = list.find((c: any) => {
-            const otherId = c.senderId === myId ? c.receiverId : c.senderId;
-            return otherId === detail.userId;
-          });
-          if (existing?.id) cid = Number(existing.id);
-        }
-      } catch {}
-      if (!cid) {
-        const msgRes = await createMessage({ receiverId: detail.userId, content: 'Hi — I accepted your request. Let’s coordinate.', messageType: 'text' });
-        cid = Number((msgRes && (msgRes.conversationId || (msgRes.message && msgRes.message.conversationId))) || 0) || null;
-      }
-      if (cid) {
-        setConversationId(cid);
-        router.push(`/dashboard/messages?conversationId=${cid}`);
-        return;
-      }
-      alert('Unable to open chat. Please try again later.');
-    } catch (err: any) {
-      alert(err?.response?.data?.error || err?.message || 'Failed to contact requestor.');
-    } finally {
-      setContacting(false);
-    }
-  };
-
 
   export default withAuth(RequestDetailPage);
