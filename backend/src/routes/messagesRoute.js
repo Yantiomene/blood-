@@ -11,6 +11,8 @@ const {
     markConversationRead,
     getUnreadCountsByConversation,
     markAllMessagesRead,
+    reactToMessage,
+    uploadMessageFile,
  } = require('../controllers/messages');
 const { userAuth } = require('../middlewares/auth-middleware');
 
@@ -25,6 +27,12 @@ router.get('/conversations/unread-counts', userAuth, getUnreadCountsByConversati
 router.put('/messages/mark-all-read', userAuth, markAllMessagesRead);
 router.put('/conversations/:id/read', userAuth, markConversationRead);
 router.put('/updateMessage/:messageId', userAuth, updateMessage);
-router.delete('/deleteMessage/:messageId', userAuth, deleteMessage); 
+router.delete('/deleteMessage/:messageId', userAuth, deleteMessage);
+
+// Emoji reactions
+router.post('/messages/:messageId/reactions', userAuth, reactToMessage);
+
+// Base64 file upload for message attachments
+router.post('/messages/upload', userAuth, uploadMessageFile);
 
 module.exports = router;

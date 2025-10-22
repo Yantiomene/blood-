@@ -54,11 +54,20 @@ app.use(helmet());
 app.use(passport.initialize());
 
 // Serve uploaded files statically
-const uploadsRoot = path.resolve(__dirname, '..', 'uploads');
-if (!fs.existsSync(uploadsRoot)) {
-  try { fs.mkdirSync(uploadsRoot, { recursive: true }); } catch {}
-}
-app.use('/uploads', express.static(uploadsRoot));
+// Ensure uploads/messages directory exists for message file sharing
+(function ensureUploadsDir() {
+  try {
+    const uploadsRoot = path.resolve(__dirname, '..', 'uploads');
+    const msgDir = path.join(uploadsRoot, 'messages');
+    if (!fs.existsSync(uploadsRoot)) fs.mkdirSync(uploadsRoot, { recursive: true });
+    if (!fs.existsSync(msgDir)) fs.mkdirSync(msgDir, { recursive: true });
+  } catch (e) {
+    console.warn('Failed to ensure uploads directories for messages:', e.message);
+  }
+})();
+
+// Static serving for uploads already configured; ensure messages subdir works
+app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
 
 // initialize routes
 app.use('/api', authRoutes);

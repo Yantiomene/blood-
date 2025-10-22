@@ -134,3 +134,23 @@ export async function markAllMessagesAsRead(): Promise<{ success: boolean; updat
     throw error;
   }
 }
+
+export async function reactToMessage(messageId: number | string, emoji: string, action?: 'add' | 'remove'): Promise<any> {
+  try {
+    const response = await axios.post(`${apiUrl}/messages/${messageId}/reactions`, { emoji, action }, { withCredentials: true });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to react to message:', error);
+    throw error;
+  }
+}
+
+export async function uploadMessageFileBase64(fileBase64: string, filename: string): Promise<{ success: boolean; url: string; filename: string }> {
+  try {
+    const response = await axios.post(`${apiUrl}/messages/upload`, { fileBase64, filename }, { withCredentials: true });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to upload message file:', error);
+    throw error;
+  }
+}

@@ -1,5 +1,7 @@
 const db = require('../db');
-const { broadcastUnreadUpdate } = require('./websocketHandlers');
+const { broadcastUnreadUpdate, broadcastToUsers } = require('./websocketHandlers');
+const fs = require('fs');
+const path = require('path');
 
 // function to create a new message
 exports.createMessage = async (req, res) => {
@@ -447,4 +449,94 @@ exports.markAllMessagesRead = async (req, res) => {
         console.error('Error marking all messages read:', error.message);
         return res.status(500).json({ success: false, error: 'Internal server error' });
     }
+};
+
+// Add reaction to a message by a participant (not limited by 5-minute window)
+exports.reactToMessage = async (req, res) => {
+  const userId = req.user && req.user.id;
+  const { messageId } = req.params;
+  const { emoji, action } = req.body || {};
+
+  try {
+    if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
+    if (!messageId) return res.status(400).json({ success: false, error: 'Message ID is required' });
+    if (!emoji || typeof emoji !== 'string' || emoji.length > 8) {
+      return res.status(400).json({ success: false, error: 'Valid emoji is required' });
+    }
+
+    // Fetch message and validate participant
+    const msgRes = await db.query('SELECT id, "senderId", "recipientId", content, "metadata" FROM messages WHERE id = $1', [messageId]);
+    if (!msgRes.rows.length) return res.status(404).json({ success: false, error: 'Message not found' });
+    const msg = msgRes.rows[0];
+    const isParticipant = msg.senderId === userId || msg.recipientId === userId;
+    if (!isParticipant) return res.status(403).json({ success: false, error: 'Not a participant of this message' });
+
+    // Normalize metadata and reactions structure: { reactions: { emoji: [userId] } }
+    const metadata = msg.metadata && typeof msg.metadata === 'object' ? msg.metadata : {};
+    const reactions = metadata.reactions && typeof metadata.reactions === 'object' ? metadata.reactions : {};
+    const arr = Array.isArray(reactions[emoji]) ? reactions[emoji] : [];
+
+    const hasReacted = arr.includes(userId);
+    const doAdd = action === 'add' || (!action && !hasReacted);
+    const doRemove = action === 'remove' || (!action && hasReacted);
+
+    let newArr = arr.slice();
+    if (doAdd && !hasReacted) {
+      newArr.push(userId);
+    }
+    if (doRemove && hasReacted) {
+      newArr = newArr.filter((u) => u !== userId);
+    }
+    reactions[emoji] = newArr;
+    const newMeta = { ...metadata, reactions };
+
+    // Persist metadata change, update updated_at
+    const updRes = await db.query('UPDATE messages SET "metadata" = $1, "updated_at" = NOW() WHERE id = $2 RETURNING id, "senderId", "recipientId", "metadata"', [JSON.stringify(newMeta), messageId]);
+    const updated = updRes.rows[0];
+
+    // Broadcast reaction update to both participants
+    try {
+      broadcastToUsers([updated.senderId, updated.recipientId], 'reaction_update', {
+        messageId: updated.id,
+        metadata: updated.metadata,
+      });
+    } catch (e) {
+      req.logger && req.logger.warn && req.logger.warn('Failed broadcasting reaction update: ' + e.message);
+    }
+
+    return res.status(200).json({ success: true, messageId: updated.id, metadata: updated.metadata });
+  } catch (error) {
+    req.logger && req.logger.error && req.logger.error('Error reacting to message:', error.message);
+    console.error('Error reacting to message:', error.message);
+    return res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+};
+
+// Upload a message file (base64) and return public URL
+exports.uploadMessageFile = async (req, res) => {
+  const userId = req.user && req.user.id;
+  const { fileBase64, filename } = req.body || {};
+  try {
+    if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
+    if (!fileBase64 || !filename) return res.status(400).json({ success: false, error: 'fileBase64 and filename are required' });
+
+    // Strip data URL prefix if present
+    const base64Data = String(fileBase64).replace(/^data:[^;]+;base64,/, '');
+    const ext = path.extname(filename || '').toLowerCase();
+    const safeBase = path.basename(filename || 'file', ext).replace(/[^a-z0-9-_]+/gi, '_');
+    const finalName = `${Date.now()}_${safeBase}${ext || ''}`;
+
+    const uploadsRoot = path.resolve(__dirname, '..', '..', 'uploads');
+    const dir = path.join(uploadsRoot, 'messages');
+    try { if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true }); } catch {}
+    const filePath = path.join(dir, finalName);
+    fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
+
+    const publicUrl = `/uploads/messages/${finalName}`;
+    return res.status(200).json({ success: true, url: publicUrl, filename: finalName });
+  } catch (error) {
+    req.logger && req.logger.error && req.logger.error('Error uploading message file:', error.message);
+    console.error('Error uploading message file:', error.message);
+    return res.status(500).json({ success: false, error: 'Internal server error' });
+  }
 };

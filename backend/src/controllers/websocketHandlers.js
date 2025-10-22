@@ -41,7 +41,7 @@ const broadcastUnreadUpdate = (userId, unreadCounts) => {
     if (connections && connections.size > 0) {
         const message = JSON.stringify({
             type: 'unread_update',
-            data: unreadCounts
+            payload: unreadCounts
         });
         
         connections.forEach(ws => {
@@ -52,6 +52,39 @@ const broadcastUnreadUpdate = (userId, unreadCounts) => {
         
         logger.info(`Broadcasted unread update to user ${userId}: ${connections.size} connections`);
     }
+};
+
+// Broadcast presence update to all connected users
+const broadcastPresenceUpdate = (userId, status) => {
+    const payload = JSON.stringify({
+        type: 'presence_update',
+        payload: { userId, status }
+    });
+    let total = 0;
+    userConnections.forEach((conns) => {
+        conns.forEach((ws) => {
+            if (ws.readyState === 1) {
+                ws.send(payload);
+                total++;
+            }
+        });
+    });
+    logger.info(`Broadcasted presence ${status} for user ${userId} to ${total} sockets`);
+};
+
+// Broadcast a payload to a set of userIds
+const broadcastToUsers = (userIds, type, data) => {
+    const msg = JSON.stringify({ type, payload: data });
+    userIds.forEach((uid) => {
+        const conns = userConnections.get(uid);
+        if (conns && conns.size > 0) {
+            conns.forEach((ws) => {
+                if (ws.readyState === 1) {
+                    ws.send(msg);
+                }
+            });
+        }
+    });
 };
 
 // Function to handle WebSocket messages
@@ -83,6 +116,17 @@ exports.handleWebSocketMessages = (ws, req) => {
             userId: user.id 
         }));
 
+        // Broadcast presence online for this user
+        broadcastPresenceUpdate(user.id, 'online');
+
+        // Send snapshot of current online users to this socket
+        try {
+            const snapshot = Array.from(userConnections.keys());
+            ws.send(JSON.stringify({ type: 'presence_snapshot', payload: { onlineUserIds: snapshot } }));
+        } catch (e) {
+            logger.warn(`Failed to send presence snapshot: ${e.message}`);
+        }
+
     }).catch(error => {
         logger.error(`WebSocket authentication error: ${error.message}`);
         ws.send(JSON.stringify({ type: 'error', message: 'Authentication failed' }));
@@ -113,12 +157,13 @@ exports.handleWebSocketMessages = (ws, req) => {
                         message: 'Subscribed to unread updates' 
                     }));
                     break;
-                    
+                case 'subscribe_presence':
+                    ws.send(JSON.stringify({ type: 'subscribed', message: 'Subscribed to presence updates' }));
+                    break;
                 case 'ping':
                     // Heartbeat
                     ws.send(JSON.stringify({ type: 'pong' }));
                     break;
-                    
                 default:
                     logger.info(`Received message from client: ${data.type}`);
                     ws.send(JSON.stringify({ 
@@ -140,6 +185,8 @@ exports.handleWebSocketMessages = (ws, req) => {
                 connections.delete(ws);
                 if (connections.size === 0) {
                     userConnections.delete(authenticatedUser.id);
+                    // Broadcast offline when last connection is gone
+                    broadcastPresenceUpdate(authenticatedUser.id, 'offline');
                 }
             }
             logger.info(`WebSocket disconnected for user ${authenticatedUser.id}`);
@@ -149,5 +196,7 @@ exports.handleWebSocketMessages = (ws, req) => {
     });
 };
 
-// Export the broadcast function for use in other modules
+// Export the broadcast functions for use in other modules
 exports.broadcastUnreadUpdate = broadcastUnreadUpdate;
+exports.broadcastPresenceUpdate = broadcastPresenceUpdate;
+exports.broadcastToUsers = broadcastToUsers;
