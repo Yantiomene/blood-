@@ -8,6 +8,7 @@ export interface UnreadUpdate {
 }
 
 export type UnreadUpdateCallback = (update: UnreadUpdate) => void;
+export type PresenceCallback = (onlineUserIds: number[]) => void;
 
 // Helper function to get cookie value
 function getCookie(name: string): string | null {
@@ -24,11 +25,13 @@ function getCookie(name: string): string | null {
 class WebSocketManager {
   private ws: WebSocket | null = null;
   private callbacks: Set<UnreadUpdateCallback> = new Set();
+  private presenceCallbacks: Set<PresenceCallback> = new Set();
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
   private isConnecting = false;
   private shouldReconnect = true;
+  private onlineUserIds: Set<number> = new Set();
 
   constructor() {
     this.connect();
@@ -63,11 +66,15 @@ class WebSocketManager {
         this.send({
           type: 'subscribe_unread'
         });
+        // Subscribe to presence updates
+        this.send({ type: 'subscribe_presence' });
       };
 
       this.ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
+          const type = data?.type;
+          const payload = data?.payload;
           
           if (data.type === 'unread_update') {
             // Notify all subscribers
@@ -78,6 +85,21 @@ class WebSocketManager {
                 console.error('Error in unread update callback:', error);
               }
             });
+          }
+          if (type === 'presence_snapshot') {
+            const ids: number[] = Array.isArray(payload?.onlineUserIds)
+              ? payload.onlineUserIds.map((n: any) => Number(n)).filter(Number.isFinite)
+              : [];
+            this.onlineUserIds = new Set(ids);
+            this.emitPresence();
+          } else if (type === 'presence_update') {
+            const userId = Number(payload?.userId);
+            const status = String(payload?.status || 'offline');
+            if (Number.isFinite(userId)) {
+              if (status === 'online') this.onlineUserIds.add(userId);
+              else this.onlineUserIds.delete(userId);
+              this.emitPresence();
+            }
           }
         } catch (error) {
           console.error('Error parsing WebSocket message:', error);
@@ -126,6 +148,17 @@ class WebSocketManager {
     };
   }
 
+  private emitPresence() {
+    const list = Array.from(this.onlineUserIds.values());
+    this.presenceCallbacks.forEach(cb => { try { cb(list); } catch (e) { console.error('Presence cb error:', e); } });
+  }
+
+  public subscribePresence(callback: PresenceCallback): () => void {
+    this.presenceCallbacks.add(callback);
+    try { callback(Array.from(this.onlineUserIds)); } catch {}
+    return () => { this.presenceCallbacks.delete(callback); };
+  }
+
   public disconnect() {
     this.shouldReconnect = false;
     if (this.ws) {
@@ -133,6 +166,8 @@ class WebSocketManager {
       this.ws = null;
     }
     this.callbacks.clear();
+    this.presenceCallbacks.clear();
+    this.onlineUserIds.clear();
   }
 
   public isConnected(): boolean {
@@ -169,4 +204,14 @@ export function useUnreadUpdates(callback: UnreadUpdateCallback) {
 export function subscribeToUnreadUpdates(callback: UnreadUpdateCallback): () => void {
   const manager = getWebSocketManager();
   return manager.subscribe(callback);
+}
+
+export function usePresence(): number[] {
+  const manager = getWebSocketManager();
+  const [ids, setIds] = React.useState<number[]>([]);
+  React.useEffect(() => {
+    const unsub = manager.subscribePresence((list) => setIds(list));
+    return unsub;
+  }, [manager]);
+  return ids;
 }

@@ -13,6 +13,8 @@ import { useSearchParams } from 'next/navigation';
 import { subscribeToUnreadUpdates, UnreadUpdate } from '@/app/utils/websocket';
 
 import { updateMessage, deleteMessage } from '@/app/api/messages';
+import { reactToMessage, uploadMessageFileBase64 } from "@/app/api/messages";
+import { usePresence } from "@/app/utils/websocket";
 
 interface ConversationItem { id: number; senderId: number; receiverId: number; updated_at?: string; created_at?: string; }
 interface MessageItem { id: number; conversationId: number; senderId: number; recipientId: number; content: string; messageType?: string; updated_at?: string; created_at?: string; }
@@ -41,6 +43,74 @@ const MessagesListInner: React.FC = () => {
   const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
   const [editText, setEditText] = useState<string>('');
   const dialogBottomRef = useRef<HTMLDivElement | null>(null);
+// Inserted presence and attachment hooks
+const onlineIds = usePresence();
+const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+const toggleReaction = async (mid: number, emoji: string) => {
+  try {
+    await reactToMessage(mid, emoji);
+    setDialogMessages((prev) => prev.map((m) => {
+      if (m.id !== mid) return m;
+      const meta: any = (m as any).metadata || {};
+      const reactions: Record<string, number[]> = { ...(meta.reactions || {}) };
+      const arr = Array.isArray(reactions[emoji]) ? [...reactions[emoji]] : [];
+      const uid = Number(currentUserId);
+      const idx = arr.indexOf(uid);
+      if (idx >= 0) arr.splice(idx, 1);
+      else arr.push(uid);
+      reactions[emoji] = arr;
+      return { ...(m as any), metadata: { ...(meta), reactions } } as any;
+    }));
+  } catch (e) {
+    console.error('Failed to toggle reaction', e);
+  }
+};
+
+const onAttachClick = () => {
+  fileInputRef.current?.click();
+};
+
+const onFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file || !dialogPartnerId || !selectedConversationId) return;
+  try {
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    const { url } = await uploadMessageFileBase64(dataUrl, file.name);
+    const res = await createMessage({
+      receiverId: dialogPartnerId,
+      content: url,
+      conversationId: selectedConversationId,
+      messageType: 'file',
+    });
+    const msg = (res as any)?.message || null;
+    if (msg) setDialogMessages((prev) => [...prev, msg]);
+    // bump conversation preview
+    setConversations((prev) => {
+      const copy = [...prev];
+      const idx = copy.findIndex((c) => c.id === selectedConversationId);
+      if (idx >= 0) {
+        const conv: any = { ...copy[idx] };
+        conv.last_message_content = `[file] ${file.name}`;
+        conv.last_message_updated_at = new Date().toISOString();
+        copy[idx] = conv;
+        const [item] = copy.splice(idx, 1);
+        copy.unshift(item);
+      }
+      return copy;
+    });
+  } catch (err) {
+    console.error('Upload failed', err);
+    alert('File upload failed. Please try again');
+  } finally {
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }
+};
 
   // Helper: check if a message can be modified by current user within 5 minutes
   const canModifyMessage = (m: MessageItem): boolean => {
@@ -401,6 +471,9 @@ const MessagesListInner: React.FC = () => {
                           <div>
                             <div className="font-semibold flex items-center gap-2">
                               <span>{index + 1} - {partnerLabel}</span>
+                              {onlineIds.includes(partnerId) && (
+                                <span className="text-green-600 text-xs">online</span>
+                              )}
                               {unreadCount > 0 && (
                                 <span
                                   className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-2 rounded-full bg-red-600 text-white text-xs font-semibold"
@@ -436,6 +509,9 @@ const MessagesListInner: React.FC = () => {
                       const rank = idx >= 0 ? idx + 1 : '' as any;
                       return `${rank ? rank + ' - ' : ''}${dialogPartnerLabel || 'Conversation'}`;
                     })()}</span>
+                    {dialogPartnerId && onlineIds.includes(dialogPartnerId) && (
+                      <span className="text-green-600 text-xs">online</span>
+                    )}
                     {requestIdFromQuery && (
                       <a
                         href={`/dashboard/donor-requests/${requestIdFromQuery}`}
@@ -494,6 +570,21 @@ const MessagesListInner: React.FC = () => {
                                           </span>
                                         )}
                                       </div>
+                                      <div className="mt-1 flex items-center gap-2">
+                                        {['👍','❤️','😂','🎉'].map((emoji) => (
+                                          <button
+                                            key={emoji}
+                                            className="text-sm hover:opacity-80"
+                                            onClick={() => toggleReaction(m.id, emoji)}
+                                            aria-label={`React ${emoji}`}
+                                          >
+                                            {emoji}
+                                            {((m as any)?.metadata?.reactions?.[emoji]?.length) ? (
+                                              <span className="ml-1 text-xs">{(m as any).metadata.reactions[emoji].length}</span>
+                                            ) : null}
+                                          </button>
+                                        ))}
+                                      </div>
                                     </>
                                   )}
                                   {isEditing && (
@@ -538,6 +629,24 @@ const MessagesListInner: React.FC = () => {
                     onChange={(e) => setDialogInput(e.target.value)}
                     disabled={!selectedConversationId}
                   />
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    onChange={onFileSelected}
+                  />
+                  <button
+                    type="button"
+                    className="p-2 rounded border border-gray-300 hover:bg-gray-50 text-gray-700 flex items-center justify-center"
+                    onClick={onAttachClick}
+                    disabled={!selectedConversationId || dialogLoading}
+                    aria-label="Attach file"
+                    title="Attach file"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21.44 11.05l-8.49 8.49a5.5 5.5 0 01-7.78-7.78l9.9-9.9a3.5 3.5 0 015 5l-10.6 10.6a1.5 1.5 0 01-2.12-2.12l9.19-9.19" />
+                    </svg>
+                  </button>
                   <button onClick={sendInDialog} className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700" disabled={!selectedConversationId || dialogLoading}>Send</button>
                 </div>
               </div>
