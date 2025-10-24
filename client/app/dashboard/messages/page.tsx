@@ -51,10 +51,13 @@ const onlineIds = usePresence();
 const fileInputRef = useRef<HTMLInputElement | null>(null);
 
 // Emoji picker state and helpers
-const EMOJI_OPTIONS = ['🙂','😀','❤️','😂','😮','😢','👏','🎉','🙏','👍','👎','😡'];
+
 const [pickerMessageId, setPickerMessageId] = useState<number | null>(null);
 const [showInputEmojiPicker, setShowInputEmojiPicker] = useState<boolean>(false);
 const dialogInputRef = useRef<HTMLInputElement | null>(null);
+// Add popover refs for outside-click detection
+const reactionPickerRef = useRef<HTMLDivElement | null>(null);
+const inputEmojiPickerRef = useRef<HTMLDivElement | null>(null);
 // Track the user's selected reaction per message for display
 const [selectedReactions, setSelectedReactions] = useState<Record<number, string | null>>({});
 
@@ -94,6 +97,30 @@ const insertEmojiIntoDialogInput = (emoji: string) => {
     el.setSelectionRange(caret, caret);
   }, 0);
 };
+// Close pickers on outside click and ESC
+useEffect(() => {
+  const onDocMouseDown = (e: MouseEvent) => {
+    const target = e.target as Node;
+    if (pickerMessageId !== null && reactionPickerRef.current && !reactionPickerRef.current.contains(target)) {
+      setPickerMessageId(null);
+    }
+    if (showInputEmojiPicker && inputEmojiPickerRef.current && !inputEmojiPickerRef.current.contains(target)) {
+      setShowInputEmojiPicker(false);
+    }
+  };
+  const onDocKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setPickerMessageId(null);
+      setShowInputEmojiPicker(false);
+    }
+  };
+  document.addEventListener('mousedown', onDocMouseDown);
+  document.addEventListener('keydown', onDocKeyDown);
+  return () => {
+    document.removeEventListener('mousedown', onDocMouseDown);
+    document.removeEventListener('keydown', onDocKeyDown);
+  };
+}, [pickerMessageId, showInputEmojiPicker]);
 const toggleReaction = async (mid: number, emoji: string) => {
   try {
     await reactToMessage(mid, emoji);
@@ -641,7 +668,7 @@ const onFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
                                       </div>
                                       {pickerMessageId === m.id && (
                                         <div className="mt-1 relative">
-                                          <div className="absolute z-10 bg-white border border-gray-200 rounded shadow p-1">
+                                          <div ref={reactionPickerRef} className="absolute z-10 bg-white border border-gray-200 rounded shadow p-1 w-64 max-h-60 overflow-auto">
                                             {/* Emoji Mart Picker for reactions */}
                                             <Picker
                                               data={data}
@@ -702,7 +729,7 @@ const onFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
                   />
                   {showInputEmojiPicker && (
                     <div className="relative">
-                      <div className="absolute right-0 z-10 bg-white border border-gray-200 rounded shadow p-1">
+                      <div ref={inputEmojiPickerRef} className="absolute right-0 z-10 bg-white border border-gray-200 rounded shadow p-1 w-64 max-h-60 overflow-auto">
                         {/* Emoji Mart Picker for input insertion */}
                         <Picker
                           data={data}
