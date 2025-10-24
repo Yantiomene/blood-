@@ -15,6 +15,9 @@ import { subscribeToUnreadUpdates, UnreadUpdate } from '@/app/utils/websocket';
 import { updateMessage, deleteMessage } from '@/app/api/messages';
 import { reactToMessage, uploadMessageFileBase64 } from "@/app/api/messages";
 import { usePresence } from "@/app/utils/websocket";
+import dynamic from 'next/dynamic'
+import data from '@emoji-mart/data'
+const Picker = dynamic(() => import('@emoji-mart/react'), { ssr: false })
 
 interface ConversationItem { id: number; senderId: number; receiverId: number; updated_at?: string; created_at?: string; }
 interface MessageItem { id: number; conversationId: number; senderId: number; recipientId: number; content: string; messageType?: string; updated_at?: string; created_at?: string; }
@@ -637,15 +640,19 @@ const onFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
                                         })()}
                                       </div>
                                       {pickerMessageId === m.id && (
-                                        <div className="mt-1 flex flex-wrap gap-1">
-                                          {EMOJI_OPTIONS.map((emo) => (
-                                            <button
-                                              key={emo}
-                                              className="px-1 py-[2px] rounded hover:bg-gray-200"
-                                              onClick={() => onPickReaction(m.id, emo)}
-                                              aria-label={`React ${emo}`}
-                                            >{emo}</button>
-                                          ))}
+                                        <div className="mt-1 relative">
+                                          <div className="absolute z-10 bg-white border border-gray-200 rounded shadow p-1">
+                                            {/* Emoji Mart Picker for reactions */}
+                                            <Picker
+                                              data={data}
+                                              onEmojiSelect={(emoji: any) => onPickReaction(m.id, emoji.native)}
+                                              theme="light"
+                                              navPosition="bottom"
+                                              previewPosition="none"
+                                              perLine={8}
+                                              emojiSize={20}
+                                            />
+                                          </div>
                                         </div>
                                       )}
                                     </>
@@ -694,15 +701,19 @@ const onFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
                     ref={dialogInputRef}
                   />
                   {showInputEmojiPicker && (
-                    <div className="flex flex-wrap gap-1 border border-gray-200 rounded p-1 bg-white">
-                      {EMOJI_OPTIONS.map((emo) => (
-                        <button
-                          key={emo}
-                          className="px-1 py-[2px] rounded hover:bg-gray-100"
-                          onClick={() => insertEmojiIntoDialogInput(emo)}
-                          aria-label={`Insert ${emo}`}
-                        >{emo}</button>
-                      ))}
+                    <div className="relative">
+                      <div className="absolute right-0 z-10 bg-white border border-gray-200 rounded shadow p-1">
+                        {/* Emoji Mart Picker for input insertion */}
+                        <Picker
+                          data={data}
+                          onEmojiSelect={(emoji: any) => insertEmojiIntoDialogInput(emoji.native)}
+                          theme="light"
+                          navPosition="bottom"
+                          previewPosition="none"
+                          perLine={8}
+                          emojiSize={20}
+                        />
+                      </div>
                     </div>
                   )}
                   <button
