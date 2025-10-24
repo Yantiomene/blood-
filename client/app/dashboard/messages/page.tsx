@@ -47,6 +47,50 @@ const MessagesListInner: React.FC = () => {
 const onlineIds = usePresence();
 const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+// Emoji picker state and helpers
+const EMOJI_OPTIONS = ['🙂','😀','❤️','😂','😮','😢','👏','🎉','🙏','👍','👎','😡'];
+const [pickerMessageId, setPickerMessageId] = useState<number | null>(null);
+const [showInputEmojiPicker, setShowInputEmojiPicker] = useState<boolean>(false);
+const dialogInputRef = useRef<HTMLInputElement | null>(null);
+// Track the user's selected reaction per message for display
+const [selectedReactions, setSelectedReactions] = useState<Record<number, string | null>>({});
+
+const openMessageEmojiPicker = (mid: number) => {
+  setPickerMessageId((prev) => (prev === mid ? null : mid));
+};
+
+const onPickReaction = async (mid: number, emoji: string) => {
+  await toggleReaction(mid, emoji);
+  setPickerMessageId(null);
+  setSelectedReactions((prev) => {
+    const isSame = prev[mid] === emoji;
+    return { ...prev, [mid]: isSame ? null : emoji };
+  });
+};
+
+const toggleInputEmojiPicker = () => {
+  setShowInputEmojiPicker((v) => !v);
+};
+
+const insertEmojiIntoDialogInput = (emoji: string) => {
+  const el = dialogInputRef.current;
+  if (!el) {
+    setDialogInput((prev) => prev + emoji);
+    setShowInputEmojiPicker(false);
+    return;
+  }
+  const start = el.selectionStart ?? dialogInput.length;
+  const end = el.selectionEnd ?? start;
+  const prev = dialogInput;
+  const next = prev.slice(0, start) + emoji + prev.slice(end);
+  setDialogInput(next);
+  setShowInputEmojiPicker(false);
+  setTimeout(() => {
+    const caret = start + emoji.length;
+    el.focus();
+    el.setSelectionRange(caret, caret);
+  }, 0);
+};
 const toggleReaction = async (mid: number, emoji: string) => {
   try {
     await reactToMessage(mid, emoji);
@@ -571,20 +615,39 @@ const onFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
                                         )}
                                       </div>
                                       <div className="mt-1 flex items-center gap-2">
-                                        {['👍','❤️','😂','🎉'].map((emoji) => (
-                                          <button
-                                            key={emoji}
-                                            className="text-sm hover:opacity-80"
-                                            onClick={() => toggleReaction(m.id, emoji)}
-                                            aria-label={`React ${emoji}`}
-                                          >
-                                            {emoji}
-                                            {((m as any)?.metadata?.reactions?.[emoji]?.length) ? (
-                                              <span className="ml-1 text-xs">{(m as any).metadata.reactions[emoji].length}</span>
-                                            ) : null}
-                                          </button>
-                                        ))}
+                                        <button
+                                          type="button"
+                                          className="text-sm hover:opacity-80"
+                                          onClick={() => openMessageEmojiPicker(m.id)}
+                                          aria-label="React with emoji"
+                                          title="React"
+                                        >🙂</button>
+                                        {(() => {
+                                          const reactions: Record<string, number[]> = ((m as any)?.metadata?.reactions) || {};
+                                          const defaultChosen = Object.keys(reactions).find((emo) => Array.isArray(reactions[emo]) && reactions[emo].includes(Number(currentUserId))) || null;
+                                          const chosen = selectedReactions[m.id] ?? defaultChosen;
+                                          if (!chosen) return null;
+                                          const count = Array.isArray(reactions[chosen]) ? reactions[chosen].length : 0;
+                                          return (
+                                            <span className="text-sm inline-flex items-center">
+                                              {chosen}
+                                              <span className="ml-1 text-xs">{count}</span>
+                                            </span>
+                                          );
+                                        })()}
                                       </div>
+                                      {pickerMessageId === m.id && (
+                                        <div className="mt-1 flex flex-wrap gap-1">
+                                          {EMOJI_OPTIONS.map((emo) => (
+                                            <button
+                                              key={emo}
+                                              className="px-1 py-[2px] rounded hover:bg-gray-200"
+                                              onClick={() => onPickReaction(m.id, emo)}
+                                              aria-label={`React ${emo}`}
+                                            >{emo}</button>
+                                          ))}
+                                        </div>
+                                      )}
                                     </>
                                   )}
                                   {isEditing && (
@@ -628,7 +691,28 @@ const onFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
                     value={dialogInput}
                     onChange={(e) => setDialogInput(e.target.value)}
                     disabled={!selectedConversationId}
+                    ref={dialogInputRef}
                   />
+                  {showInputEmojiPicker && (
+                    <div className="flex flex-wrap gap-1 border border-gray-200 rounded p-1 bg-white">
+                      {EMOJI_OPTIONS.map((emo) => (
+                        <button
+                          key={emo}
+                          className="px-1 py-[2px] rounded hover:bg-gray-100"
+                          onClick={() => insertEmojiIntoDialogInput(emo)}
+                          aria-label={`Insert ${emo}`}
+                        >{emo}</button>
+                      ))}
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    className="p-2 rounded border border-gray-300 hover:bg-gray-50 text-gray-700 flex items-center justify-center"
+                    onClick={toggleInputEmojiPicker}
+                    disabled={!selectedConversationId || dialogLoading}
+                    aria-label="Insert emoji"
+                    title="Insert emoji"
+                  >😊</button>
                   <input
                     ref={fileInputRef}
                     type="file"
