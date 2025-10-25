@@ -49,12 +49,19 @@ const MessagesListInner: React.FC = () => {
 // Inserted presence and attachment hooks
 const onlineIds = usePresence();
 const fileInputRef = useRef<HTMLInputElement | null>(null);
+// Multiple file input refs for different file types
+const imageInputRef = useRef<HTMLInputElement | null>(null);
+const documentInputRef = useRef<HTMLInputElement | null>(null);
+const videoInputRef = useRef<HTMLInputElement | null>(null);
+const audioInputRef = useRef<HTMLInputElement | null>(null);
 
 // Emoji picker state and helpers
 
 const [pickerMessageId, setPickerMessageId] = useState<number | null>(null);
 const [showInputEmojiPicker, setShowInputEmojiPicker] = useState<boolean>(false);
 const dialogInputRef = useRef<HTMLInputElement | null>(null);
+// Add file type selection menu state
+const [showFileTypeMenu, setShowFileTypeMenu] = useState<boolean>(false);
 // Add popover refs for outside-click detection
 const reactionPickerRef = useRef<HTMLDivElement | null>(null);
 const inputEmojiPickerRef = useRef<HTMLDivElement | null>(null);
@@ -107,11 +114,15 @@ useEffect(() => {
     if (showInputEmojiPicker && inputEmojiPickerRef.current && !inputEmojiPickerRef.current.contains(target)) {
       setShowInputEmojiPicker(false);
     }
+    if (showFileTypeMenu && !target.closest('[data-file-menu]')) {
+      setShowFileTypeMenu(false);
+    }
   };
   const onDocKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
       setPickerMessageId(null);
       setShowInputEmojiPicker(false);
+      setShowFileTypeMenu(false);
     }
   };
   document.addEventListener('mousedown', onDocMouseDown);
@@ -142,7 +153,27 @@ const toggleReaction = async (mid: number, emoji: string) => {
 };
 
 const onAttachClick = () => {
-  fileInputRef.current?.click();
+  setShowFileTypeMenu((prev) => !prev);
+};
+
+const onFileTypeSelect = (fileType: string) => {
+  setShowFileTypeMenu(false);
+  switch (fileType) {
+    case 'image':
+      imageInputRef.current?.click();
+      break;
+    case 'document':
+      documentInputRef.current?.click();
+      break;
+    case 'video':
+      videoInputRef.current?.click();
+      break;
+    case 'audio':
+      audioInputRef.current?.click();
+      break;
+    default:
+      fileInputRef.current?.click();
+  }
 };
 
 const onFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -757,19 +788,82 @@ const onFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
                     className="hidden"
                     onChange={onFileSelected}
                   />
-                  <button
-                    type="button"
-                    className="p-2 rounded border border-gray-300 hover:bg-gray-50 text-gray-700 flex items-center justify-center"
-                    onClick={onAttachClick}
-                    disabled={!selectedConversationId || dialogLoading}
-                    aria-label="Attach file"
-                    title="Attach file"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21.44 11.05l-8.49 8.49a5.5 5.5 0 01-7.78-7.78l9.9-9.9a3.5 3.5 0 015 5l-10.6 10.6a1.5 1.5 0 01-2.12-2.12l9.19-9.19" />
-                    </svg>
-                  </button>
-                  <button onClick={sendInDialog} className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700" disabled={!selectedConversationId || dialogLoading}>Send</button>
+                  <input
+                    ref={imageInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={onFileSelected}
+                  />
+                  <input
+                    ref={documentInputRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx,.txt,.rtf"
+                    className="hidden"
+                    onChange={onFileSelected}
+                  />
+                  <input
+                    ref={videoInputRef}
+                    type="file"
+                    accept="video/*"
+                    className="hidden"
+                    onChange={onFileSelected}
+                  />
+                  <input
+                    ref={audioInputRef}
+                    type="file"
+                    accept="audio/*"
+                    className="hidden"
+                    onChange={onFileSelected}
+                  />
+                  <div className="relative" data-file-menu>
+                    <button
+                      type="button"
+                      className="p-2 rounded border border-gray-300 hover:bg-gray-50 text-gray-700 flex items-center justify-center"
+                      onClick={onAttachClick}
+                      disabled={!selectedConversationId || dialogLoading}
+                      aria-label="Attach file"
+                      title="Attach file"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21.44 11.05l-8.49 8.49a5.5 5.5 0 01-7.78-7.78l9.9-9.9a3.5 3.5 0 015 5l-10.6 10.6a1.5 1.5 0 01-2.12-2.12l9.19-9.19" />
+                      </svg>
+                    </button>
+                    {showFileTypeMenu && (
+                      <div className="absolute bottom-full mb-1 right-0 bg-white border border-gray-200 rounded shadow-lg py-1 min-w-[140px] z-10">
+                        <button
+                          className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-sm"
+                          onClick={() => onFileTypeSelect('image')}
+                        >
+                          <span>🖼️</span> Images
+                        </button>
+                        <button
+                          className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-sm"
+                          onClick={() => onFileTypeSelect('document')}
+                        >
+                          <span>📄</span> Documents
+                        </button>
+                        <button
+                          className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-sm"
+                          onClick={() => onFileTypeSelect('video')}
+                        >
+                          <span>🎥</span> Videos
+                        </button>
+                        <button
+                          className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-sm"
+                          onClick={() => onFileTypeSelect('audio')}
+                        >
+                          <span>🎵</span> Audio
+                        </button>
+                        <button
+                          className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-sm"
+                          onClick={() => onFileTypeSelect('any')}
+                        >
+                          <span>📎</span> Any File
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
