@@ -550,7 +550,7 @@ const onFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
         {!loading && !error && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4" role="region" aria-label="Messages split view">
             {/* Left: Conversation list */}
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 relative z-10">
               <div className="grid gap-3" role="list" aria-label="Conversations">
                 {conversations.length === 0 && (
                   <div className="text-gray-700" role="status" aria-live="polite">You currently have no conversations.</div>
@@ -604,7 +604,7 @@ const onFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
             </div>
 
             {/* Right: Conversation panel */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 relative z-0">
               <div className="bg-white rounded border border-gray-200">
                 <div className="px-4 py-3 border-b flex items-center justify-between">
                   <div className="font-semibold flex items-center gap-2">
@@ -755,12 +755,18 @@ const onFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
                     placeholder="Type a message..."
                     value={dialogInput}
                     onChange={(e) => setDialogInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendInDialog();
+                      }
+                    }}
                     disabled={!selectedConversationId}
                     ref={dialogInputRef}
                   />
                   {showInputEmojiPicker && (
                     <div className="relative">
-                      <div ref={inputEmojiPickerRef} className="absolute right-0 z-10 bg-white border border-gray-200 rounded shadow p-1 w-64 max-h-60 overflow-auto">
+                      <div ref={inputEmojiPickerRef} className="absolute bottom-full mb-2 right-0 z-10 bg-white border border-gray-200 rounded shadow p-1 w-64 max-h-60 overflow-auto">
                         {/* Emoji Mart Picker for input insertion */}
                         <Picker
                           data={data}
@@ -864,6 +870,18 @@ const onFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
                       </div>
                     )}
                   </div>
+                  <button
+                    type="button"
+                    className="p-2 rounded bg-red-600 hover:bg-red-700 text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={sendInDialog}
+                    disabled={!selectedConversationId || dialogLoading || !dialogInput.trim()}
+                    aria-label="Send message"
+                    title="Send message"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>
