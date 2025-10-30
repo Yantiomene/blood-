@@ -67,6 +67,8 @@ const reactionPickerRef = useRef<HTMLDivElement | null>(null);
 const inputEmojiPickerRef = useRef<HTMLDivElement | null>(null);
 // Track the user's selected reaction per message for display
 const [selectedReactions, setSelectedReactions] = useState<Record<number, string | null>>({});
+const [expandedImageIds, setExpandedImageIds] = useState<Record<number, boolean>>({});
+const toggleInlineImage = (id: number) => setExpandedImageIds(prev => ({ ...prev, [id]: !prev[id] }));
 
 const openMessageEmojiPicker = (mid: number) => {
   setPickerMessageId((prev) => (prev === mid ? null : mid));
@@ -107,7 +109,7 @@ const insertEmojiIntoDialogInput = (emoji: string) => {
 // Close pickers on outside click and ESC
 useEffect(() => {
   const onDocMouseDown = (e: MouseEvent) => {
-    const target = e.target as Node;
+    const target = e.target as Element;
     if (pickerMessageId !== null && reactionPickerRef.current && !reactionPickerRef.current.contains(target)) {
       setPickerMessageId(null);
     }
@@ -605,7 +607,7 @@ const onFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
             {/* Right: Conversation panel */}
             <div className="lg:col-span-2 relative z-0">
-              <div className="bg-white rounded border border-gray-200">
+              <div className="bg-white rounded border border-gray-200 relative">
                 <div className="px-4 py-3 border-b flex items-center justify-between">
                   <div className="font-semibold flex items-center gap-2">
                     <span>{(() => {
@@ -657,7 +659,40 @@ const onFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
                                 <div className={`px-3 py-2 rounded max-w-[70%] ${outgoing ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-900'}`}>
                                   {!isEditing && (
                                     <>
-                                      <div className="text-sm whitespace-pre-wrap">{m.content}</div>
+                                      <div className="text-sm">
+                                        {(() => {
+                                          const content = m.content || '';
+                                          const filename = content.split('/').pop() || 'file';
+                                          const baseRaw = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api';
+                                          const base = String(baseRaw).replace(/\/api\/?$/, '').replace(/\/$/, '');
+                                          const href = /^https?:\/\//i.test(content) ? content : `${base}${content.startsWith('/') ? content : '/' + content}`;
+                                          const isImage = /\.(png|jpe?g|gif|webp|svg|bmp|ico)$/i.test(content);
+                                          const isFile = (m.messageType === 'file') || isImage || /\/uploads\//.test(content);
+                                          if (!isFile) {
+                                            return <div className="whitespace-pre-wrap">{content}</div>;
+                                          }
+                                          return (
+                                            <div className="space-y-1">
+                                              {isImage && (
+                                                <img
+                                                  src={href}
+                                                  alt={filename}
+                                                  className={`rounded border cursor-pointer ${expandedImageIds[m.id] ? 'w-full sm:max-w-[360px] md:max-w-[480px] lg:max-w-[640px] max-h-[60vh] object-contain' : 'max-w-[240px]'} `}
+                                                  onClick={() => toggleInlineImage(m.id)}
+                                                />
+                                              )}
+                                              <a
+                                                href={href}
+                                                download
+                                                className={`${outgoing ? 'text-white' : 'text-blue-600'} underline`}
+                                                title={isImage ? 'Download image' : `Download ${filename}`}
+                                              >
+                                                {isImage ? 'Download image' : `Download ${filename}`}
+                                              </a>
+                                            </div>
+                                          );
+                                        })()}
+                                      </div>
                                       <div className="text-[10px] opacity-70 mt-1 flex items-center gap-2">
                                         <span>{m.updated_at ? new Date(m.updated_at).toLocaleString() : ''}</span>
                                         {outgoing && canModify && (
@@ -883,6 +918,7 @@ const onFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
                     </svg>
                   </button>
                 </div>
+
               </div>
             </div>
           </div>

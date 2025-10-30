@@ -27,6 +27,8 @@ const ConversationInner: React.FC = () => {
   const [partnerLabel, setPartnerLabel] = useState<string>('');
   const [input, setInput] = useState<string>('');
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const [expandedImageIds, setExpandedImageIds] = useState<Record<number, boolean>>({});
+  const toggleInlineImage = (id: number) => setExpandedImageIds(prev => ({ ...prev, [id]: !prev[id] }));
 
   useEffect(() => { dispatch(fetchCurrentUser() as any); }, [dispatch]);
 
@@ -92,6 +94,8 @@ const ConversationInner: React.FC = () => {
       .catch((err) => console.error('Failed to mark conversation as read:', err));
   }, [conversationId, currentUserId, messages]);
 
+
+
   const title = useMemo(() => partnerLabel ? `Conversation with ${partnerLabel}` : 'Conversation', [partnerLabel]);
 
   const send = async () => {
@@ -115,20 +119,54 @@ const ConversationInner: React.FC = () => {
         {loading && <div className="text-gray-500">加载中...</div>}
         {error && <div className="text-red-600">{error}</div>}
         {!loading && !error && (
-          <div className="bg-white rounded border border-gray-200">
+          <div className="bg-white rounded border border-gray-200 relative">
             <div className="p-4 h-[50vh] overflow-y-auto">
               {messages.map((m) => {
                 const outgoing = m.senderId === currentUserId;
                 return (
                   <div key={m.id} className={`flex mb-2 ${outgoing ? 'justify-end' : 'justify-start'}`}>
                     <div className={`px-3 py-2 rounded max-w-[70%] ${outgoing ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-900'}`}>
-                      <div className="text-sm whitespace-pre-wrap">{m.content}</div>
+                      <div className="text-sm">
+                        {(() => {
+                          const content = m.content || '';
+                          const filename = content.split('/').pop() || 'file';
+                          const baseRaw = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api';
+                          const base = String(baseRaw).replace(/\/api\/?$/, '').replace(/\/$/, '');
+                          const href = /^https?:\/\//i.test(content) ? content : `${base}${content.startsWith('/') ? content : '/' + content}`;
+                          const isImage = /\.(png|jpe?g|gif|webp|svg|bmp|ico)$/i.test(content);
+                          const isFile = (m.messageType === 'file') || isImage || /\/uploads\//.test(content);
+                          if (!isFile) {
+                            return <div className="whitespace-pre-wrap">{content}</div>;
+                          }
+                          return (
+                            <div className="space-y-1">
+                              {isImage && (
+                                <img
+                                  src={href}
+                                  alt={filename}
+                                  className={`rounded border cursor-pointer ${expandedImageIds[m.id] ? 'w-full sm:max-w-[360px] md:max-w-[480px] lg:max-w-[640px] max-h-[60vh] object-contain' : 'max-w-[240px]'} `}
+                                  onClick={() => toggleInlineImage(m.id)}
+                                />
+                              )}
+                              <a
+                                href={href}
+                                download
+                                className={`${outgoing ? 'text-white' : 'text-blue-600'} underline`}
+                                title={isImage ? 'Download image' : `Download ${filename}`}
+                              >
+                                {isImage ? 'Download image' : `Download ${filename}`}
+                              </a>
+                            </div>
+                          );
+                        })()}
+                      </div>
                       <div className="text-[10px] opacity-70 mt-1">{m.updated_at ? new Date(m.updated_at).toLocaleString() : ''}</div>
                     </div>
                   </div>
                 );
               })}
               <div ref={bottomRef} />
+
             </div>
             <div className="border-t border-gray-200 p-3 flex gap-2">
               <input
