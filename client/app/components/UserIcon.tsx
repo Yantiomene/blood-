@@ -95,6 +95,9 @@ const UserProfileIcon: React.FC = () => {
                             </Link>
                         </li>
                         <li className={dropdownItemStyles + ' text-nowrap'}>
+                            <Link href="/site/about" onClick={() => setIsDropdownOpen(false)}>About</Link>
+                        </li>
+                        <li className={dropdownItemStyles + ' text-nowrap'}>
                             <Link href="/preferences" onClick={() => setIsDropdownOpen(false)}>Preferences</Link>
                         </li>
                         {isAdmin && (

@@ -82,6 +82,8 @@ const Header: React.FC<{ isLoggedin: boolean }> = ({ isLoggedin }) => {
                         <NavItem href="/site/about" isActive={pathname === '/site/about'}>About</NavItem>
                     </ul>
                     <ul className="flex space-x-4 items-center">
+                        {/* Mobile-visible About link */}
+                        <NavItem href="/site/about" isActive={pathname === '/site/about'}>About</NavItem>
                         {isLoggedin && <NavItem href="/dashboard" isActive={pathname === '/dashboard'}>Dashboard</NavItem>}
                         {isLoggedin && (
                           <NavItem href="/dashboard/messages" isActive={pathname?.startsWith('/dashboard/messages')}>
